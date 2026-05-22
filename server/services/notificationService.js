@@ -1,0 +1,103 @@
+import { Notification, User } from "../models/index.js";
+
+/**
+ * Creates an in-app notification (websocket delivery prepared for later).
+ */
+export const createNotification = async ({
+  recipientId,
+  type,
+  title,
+  message,
+  priority = "medium",
+  relatedRescue = null,
+  data = {},
+}) => {
+  if (!recipientId) return null;
+
+  return Notification.create({
+    recipient: recipientId,
+    type,
+    title,
+    message,
+    priority,
+    relatedRescue,
+    data,
+  });
+};
+
+/**
+ * Notify operational roles about a new rescue (respects preferences).
+ */
+export const notifyNewRescue = async (rescue, creator) => {
+  const operationalUsers = await User.find({
+    role: { $in: ["ngo", "volunteer", "admin"] },
+    isActive: true,
+    "notificationPreferences.rescueAlerts": { $ne: false },
+  })
+    .select("_id role notificationPreferences")
+    .lean();
+
+  const priority =
+    rescue.severity === "critical" ? "critical" : rescue.severity === "high" ? "high" : "medium";
+
+  const notifications = operationalUsers
+    .filter((u) => u._id.toString() !== creator._id?.toString())
+    .map((user) => ({
+      recipient: user._id,
+      type: rescue.severity === "critical" ? "critical_alert" : "rescue_created",
+      title: `New ${rescue.severity} rescue: ${rescue.animalType}`,
+      message: `${rescue.address} — ${rescue.condition?.slice(0, 120) || "Emergency reported"}`,
+      priority,
+      relatedRescue: rescue._id,
+      data: { severity: rescue.severity, animalType: rescue.animalType },
+    }));
+
+  if (notifications.length === 0) return [];
+
+  return Notification.insertMany(notifications, { ordered: false });
+};
+
+export const notifyStatusChange = async (rescue, actor, newStatus) => {
+  const recipientIds = [
+    rescue.createdBy?.toString?.() || rescue.createdBy,
+    rescue.assignedNgo?.toString?.() || rescue.assignedNgo,
+    rescue.assignedVolunteer?.toString?.() || rescue.assignedVolunteer,
+  ].filter(Boolean);
+
+  const uniqueRecipients = [...new Set(recipientIds)].filter(
+    (id) => id !== actor._id?.toString()
+  );
+
+  const docs = uniqueRecipients.map((recipientId) => ({
+    recipient: recipientId,
+    type: "rescue_status",
+    title: `Rescue status: ${newStatus}`,
+    message: `${rescue.animalType} at ${rescue.address} is now ${newStatus.replace("_", " ")}`,
+    priority: "medium",
+    relatedRescue: rescue._id,
+    data: { status: newStatus },
+  }));
+
+  if (docs.length === 0) return [];
+  return Notification.insertMany(docs, { ordered: false });
+};
+
+export const getUserNotifications = async (userId, { page = 1, limit = 20, unreadOnly = false } = {}) => {
+  const skip = (page - 1) * limit;
+  const query = { recipient: userId };
+  if (unreadOnly) query.read = false;
+
+  const [items, total] = await Promise.all([
+    Notification.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
+    Notification.countDocuments(query),
+  ]);
+
+  return { items, total, page, limit };
+};
+
+export default {
+  createNotification,
+  notifyNewRescue,
+  notifyStatusChange,
+  getUserNotifications,
+};

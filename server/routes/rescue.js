@@ -1,0 +1,99 @@
+import express from "express";
+import authMiddleware from "../middleware/authMiddleware.js";
+import authorizeRoles from "../middleware/roleMiddleware.js";
+import { handleRescueUpload } from "../middleware/uploadMiddleware.js";
+import {
+  createRescueRequest,
+  getAllRescueRequests,
+  getSingleRescueRequest,
+  updateRescueStatus,
+  assignNgo,
+  assignVolunteer,
+  acceptRescueMission,
+  updateMissionStatus,
+  getAssignedRescues,
+  getMyRescueRequests,
+  getRescueStats,
+  getCriticalRescues,
+} from "../controllers/rescueController.js";
+
+const router = express.Router();
+
+// CREATE RESCUE REQUEST (multipart field: images)
+router.post("/create", authMiddleware, handleRescueUpload, createRescueRequest);
+
+// GET ALL RESCUE REQUESTS (Operational roles only)
+router.get(
+  "/all",
+  authMiddleware,
+  authorizeRoles("ngo", "volunteer", "admin"),
+  getAllRescueRequests
+);
+
+// GET CRITICAL RESCUES (Operational roles only)
+router.get(
+  "/critical/list",
+  authMiddleware,
+  authorizeRoles("ngo", "volunteer", "admin"),
+  getCriticalRescues
+);
+
+// ASSIGN NGO TO MISSION
+router.put(
+  "/assign-ngo/:id",
+  authMiddleware,
+  authorizeRoles("admin", "ngo"),
+  assignNgo
+);
+
+// ASSIGN VOLUNTEER TO MISSION
+router.put(
+  "/assign-volunteer/:id",
+  authMiddleware,
+  authorizeRoles("admin", "volunteer"),
+  assignVolunteer
+);
+
+// ACCEPT RESCUE MISSION
+router.put(
+  "/accept/:id",
+  authMiddleware,
+  authorizeRoles("admin", "ngo", "volunteer"),
+  acceptRescueMission
+);
+
+// UPDATE OPERATIONAL MISSION STATUS
+router.put(
+  "/update-mission/:id",
+  authMiddleware,
+  authorizeRoles("admin", "ngo", "volunteer"),
+  updateMissionStatus
+);
+
+// GET ASSIGNED MISSIONS
+router.get(
+  "/assigned",
+  authMiddleware,
+  authorizeRoles("admin", "ngo", "volunteer"),
+  getAssignedRescues
+);
+
+// GET RESCUE STATISTICS
+router.get("/stats/overview", getRescueStats);
+
+// GET CURRENT USER'S RESCUE REQUESTS (aliases for frontend compatibility)
+router.get("/my", authMiddleware, getMyRescueRequests);
+router.get("/my/requests", authMiddleware, getMyRescueRequests);
+
+// GET SINGLE RESCUE REQUEST
+router.get("/:id", authMiddleware, getSingleRescueRequest);
+
+// UPDATE RESCUE STATUS (Operational roles only)
+router.put(
+  "/update-status/:id",
+  authMiddleware,
+  authorizeRoles("ngo", "volunteer", "admin"),
+  updateRescueStatus
+);
+
+export default router;

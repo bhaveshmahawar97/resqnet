@@ -18,6 +18,7 @@ export default function Hero() {
 
   return (
     <section
+      id="mission"
       style={{
         position: "relative",
         width: "100%",
@@ -63,6 +64,8 @@ export default function Hero() {
           position: "relative",
           zIndex: 1,
           width: "100%",
+          maxWidth: "1240px",
+          margin: "0 auto",
           textAlign: "center",
           padding: `clamp(5rem, 12vh, 8rem) clamp(1.25rem, 5vw, 6rem) clamp(3rem, 8vh, 5rem)`,
         }}

@@ -12,7 +12,7 @@ export default function Footer() {
     Legal: ["Privacy Policy", "Terms of Use", "Cookie Policy", "DPDP Compliance"],
   };
   const gridCols = vp.mobile
-    ? "1fr 1fr"
+    ? "1fr"
     : vp.tablet
       ? "2fr 1fr 1fr 1fr"
       : "2.5fr 1fr 1fr 1fr 1fr";
@@ -26,7 +26,7 @@ export default function Footer() {
         padding: `clamp(3rem, 7vw, 5.5rem) 0 0`,
       }}
     >
-      <div style={{ width: "100%", padding: "0 clamp(1.25rem, 4vw, 3.5rem)" }}>
+      <div style={{ width: "100%", maxWidth: "1240px", margin: "0 auto", padding: "0 clamp(1.25rem, 4vw, 3.5rem)" }}>
         <div
           style={{
             display: "grid",

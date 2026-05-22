@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 import { useT } from "../../context/ThemeContext";
 import useViewport from "../../hooks/useViewport";
 import { vFadeUp } from "../../animations/variants";
@@ -53,6 +54,8 @@ export default function AIScanner() {
       <div
         style={{
           width: "100%",
+          maxWidth: "1240px",
+          margin: "0 auto",
           padding: "0 clamp(1.25rem, 4vw, 3.5rem)",
           display: "grid",
           gridTemplateColumns: vp.mobile ? "1fr" : vp.tablet ? "1fr" : "1fr 1fr",
@@ -106,7 +109,9 @@ export default function AIScanner() {
             ))}
           </div>
           <div style={{ marginTop: "2rem" }}>
-            <Button variant="primary">Try AI Scanner</Button>
+            <Link to="/scanner" style={{ display: "inline-block", textDecoration: "none" }}>
+              <Button variant="primary">Try AI Scanner</Button>
+            </Link>
           </div>
         </motion.div>
 

@@ -1,5 +1,7 @@
 import { createContext, useCallback, useContext, useMemo, useState } from "react";
 
+/* eslint-disable react-refresh/only-export-components -- THEME + useT are part of the theme module */
+
 export const THEME = {
   light: {
     // Surfaces

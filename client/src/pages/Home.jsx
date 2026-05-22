@@ -1,69 +1,64 @@
-import { useEffect } from "react";
-import { motion } from "framer-motion";
-
 import { useT } from "../context/ThemeContext";
 
-import Navbar from "../components/layout/Navbar";
-import Footer from "../components/layout/Footer";
-
+// Existing sections — kept intact
 import Hero from "../components/sections/Hero";
-import Statistics from "../components/sections/Statistics";
-import NGOShowcase from "../components/sections/NGOShowcase";
-import AdoptionShowcase from "../components/sections/AdoptionShowcase";
-import AIScanner from "../components/sections/AIScanner";
-import EmergencyCTA from "../components/sections/EmergencyCTA";
 
+// New modular home components
+import StatsSection from "../components/home/StatsSection";
+import AIScannerPreviewSection from "../components/home/AIScannerPreviewSection";
+import NGOPreviewSection from "../components/home/NGOPreviewSection";
+import AdoptionPreviewSection from "../components/home/AdoptionPreviewSection";
+import RescuePreviewSection from "../components/home/RescuePreviewSection";
+import CTASection from "../components/home/CTASection";
+
+// Existing footer CTA — kept intact
+import FooterCTA from "../components/sections/FooterCTA";
+
+/**
+ * Home page — redesigned as a live preview dashboard.
+ *
+ * Architecture:
+ *  - Hero:                 existing (preserved as-is)
+ *  - StatsSection:         live data from rescueService + adoptionService
+ *  - AIScannerPreview:     inline scanner using existing aiService APIs
+ *  - NGOPreview:           live NGOs from useNgos hook + NgoCard
+ *  - AdoptionPreview:      live pets from useAdoptions hook + PetCard
+ *  - RescuePreview:        compact form using createRescue service
+ *  - CTASection:           volunteer / NGO / emergency CTAs
+ *  - FooterCTA:            existing (preserved as-is)
+ *
+ * All data flows through existing hooks and services — no mock data,
+ * no duplicated logic. If the source pages update their APIs, this
+ * page reflects changes automatically.
+ */
 export default function Home() {
   const { T } = useT();
 
-  useEffect(() => {
-    const link = document.createElement("link");
-    link.href =
-      "https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700;9..40,800;9..40,900&display=swap";
-    link.rel = "stylesheet";
-    document.head.appendChild(link);
-    return () => {
-      if (document.head.contains(link)) document.head.removeChild(link);
-    };
-  }, []);
-
   return (
-    <motion.div
-      animate={{ background: T.bg }}
-      transition={{ duration: 0.4 }}
-      style={{
-        fontFamily: "'DM Sans','Helvetica Neue',sans-serif",
-        color: T.text,
-        width: "100%",
-        overflowX: "hidden",
-        minHeight: "100vh",
-      }}
-    >
-      <style>{`
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        html, body { width: 100%; overflow-x: hidden; }
-        body { margin: 0; }
-        img { display: block; max-width: 100%; }
-        ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-track { background: ${T.scrollbar}; }
-        ::-webkit-scrollbar-thumb { background: ${T.scrollThumb}; border-radius: 3px; }
-        @media (prefers-reduced-motion: reduce) {
-          *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
-        }
-      `}</style>
+    <main style={{ width: "100%", background: T.bg, overflowX: "hidden" }}>
+      {/* 1. Hero — full viewport mission statement */}
+      <Hero />
 
-      <Navbar />
+      {/* 2. Platform impact numbers (live + fallback) */}
+      <StatsSection />
 
-      <main style={{ width: "100%" }}>
-        <Hero />
-        <Statistics />
-        <NGOShowcase />
-        <AdoptionShowcase />
-        <AIScanner />
-        <EmergencyCTA />
-      </main>
+      {/* 3. AI Scanner — inline triage widget */}
+      <AIScannerPreviewSection />
 
-      <Footer />
-    </motion.div>
+      {/* 4. NGO network preview */}
+      <NGOPreviewSection />
+
+      {/* 5. Adoption listings preview */}
+      <AdoptionPreviewSection />
+
+      {/* 6. Emergency rescue quick-report */}
+      <RescuePreviewSection />
+
+      {/* 7. CTA — volunteer / NGO / emergency */}
+      <CTASection />
+
+      {/* 8. Footer CTA — existing preserved */}
+      <FooterCTA />
+    </main>
   );
 }
