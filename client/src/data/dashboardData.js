@@ -290,9 +290,7 @@ export const ADMIN_QUICK_ACTIONS = [
 
 export const ADMIN_SECTIONS = [
   { id: "overview", label: "Overview" },
-  { id: "ngos", label: "NGO Management" },
   { id: "rescues", label: "Rescue Operations" },
-  { id: "users", label: "User Management" },
   { id: "ai", label: "AI Monitoring" },
   { id: "analytics", label: "Analytics" },
   { id: "alerts", label: "System Alerts" },

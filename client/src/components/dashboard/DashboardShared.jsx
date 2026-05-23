@@ -546,11 +546,17 @@ export function DashboardModal({ isOpen, title, onClose, children, width = 480 }
             exit={{ opacity: 0, scale: 0.94, y: 16 }}
             transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
             className="rq-modal"
-            style={{ width: `min(${width}px, calc(100vw - 32px))` }}
+            style={{ 
+              width: `min(${width}px, calc(100vw - 32px))`,
+              maxHeight: "90vh",
+              display: "flex",
+              flexDirection: "column",
+              overflow: "hidden"
+            }}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal header */}
-            <div className="rq-modal-header">
+            <div className="rq-modal-header" style={{ flexShrink: 0 }}>
               <div style={{ fontSize: "0.95rem", fontWeight: 700, color: T.textHeading || T.text, letterSpacing: "-0.025em" }}>{title}</div>
               <button
                 onClick={onClose}
@@ -567,7 +573,7 @@ export function DashboardModal({ isOpen, title, onClose, children, width = 480 }
                 ✕
               </button>
             </div>
-            <div className="rq-modal-body">{children}</div>
+            <div className="rq-modal-body" style={{ overflowY: "auto", flex: 1, paddingBottom: 20 }}>{children}</div>
           </motion.div>
         </motion.div>
       )}

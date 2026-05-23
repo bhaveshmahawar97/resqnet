@@ -313,7 +313,7 @@ export default function NGODashboard() {
   };
 
   const quickActions = [
-    { icon: "🚨", label: "Emergency Dispatch", sub: "Manual NGO dispatch", primary: true, danger: true, onClick: () => setModal({ open: true, type: "dispatch", data: null }) },
+    { icon: "🚑", label: "View Rescues", sub: "Active rescue queue", primary: true, onClick: () => setSection("rescues") },
     { icon: "📸", label: "AI Scanner", sub: "Analyze animal", onClick: () => navigate("/scanner") },
     { icon: "🏠", label: "Create Listing", sub: "Adoption-ready animal", onClick: () => setListingModalOpen(true) },
     { icon: "👤", label: "Volunteers", sub: "Assign to cases", onClick: () => setSection("volunteers") },

@@ -26,8 +26,7 @@ import {
   ActionBtn, EmergencyAlertCard, SystemHealthPanel, AdminInsights, SettingToggle,
 } from "../../components/dashboard/admin/AdminShared";
 import {
-  ADMIN_PROFILE, ADMIN_USERS, ADMIN_QUICK_ACTIONS, ADMIN_SECTIONS,
-  NGO_LIST,
+  ADMIN_PROFILE, ADMIN_SECTIONS,
 } from "../../data/dashboardData";
 import {
   buildActivityFromRescues,
@@ -99,14 +98,11 @@ function AdminDashboard() {
   const activityFeed = buildActivityFromRescues(rescues);
   const [section, setSection] = useState("overview");
   const [alerts, setAlerts] = useState(() => buildCriticalAlerts(criticalRescues));
-  const [ngos, setNgos] = useState(NGO_LIST);
-  const [users, setUsers] = useState(ADMIN_USERS);
   const [modal, setModal] = useState({ open: false, type: null, data: null });
   const [toast, setToast] = useState("");
   const [assignLoading, setAssignLoading] = useState(false);
 
   const unackedAlerts = alerts.filter((a) => !a.acknowledged).length;
-  const pendingNGOs = ngos.filter((n) => n.pendingApproval).length;
 
   const statsArr = [
     { label: "Total Rescues", value: stats?.total || rescues.length, icon: "◉", sub: `${stats?.pending || 0} pending`, highlight: true, trend: "up" },
@@ -133,7 +129,6 @@ function AdminDashboard() {
 
   const insights = [
     unackedAlerts > 0 && `${unackedAlerts} emergency alert${unackedAlerts > 1 ? "s" : ""} need acknowledgment.`,
-    pendingNGOs > 0 && `${pendingNGOs} NGO verification${pendingNGOs > 1 ? "s" : ""} awaiting review.`,
     "Platform operation metrics refresh with live rescue counts.",
     `Active cases: ${((stats?.total || rescues.length) - (stats?.completed || 0))} currently open.`,
   ].filter(Boolean);
@@ -158,61 +153,25 @@ function AdminDashboard() {
   };
 
   const handleQuickAction = (action) => {
-    const messages = {
-      add_admin: "Admin invite workflow opened",
-      verify_ngo: "NGO verification queue focused",
-      broadcast: "Broadcast composer ready",
-      report: "Generating operational report…",
-      emergency: "Emergency override broadcast sent",
-      clear_queue: "Rescue queue cleared",
-    };
-    if (action.id === "verify_ngo") setSection("ngos");
-    showToast(messages[action.id] || action.label);
+    // Quick actions disabled in production build until API is ready
+    showToast("Action temporarily disabled in live environment.");
   };
 
   const renderSection = () => {
     switch (section) {
-      case "ngos": {
-        const pending = ngos.filter((n) => n.pendingApproval);
-        const verified = ngos.filter((n) => !n.pendingApproval);
+      // NGO and Users sections removed as they require backend integration
+      case "ngos":
+      case "users":
         return (
           <div>
-            {pending.length > 0 && (
-              <>
-                <SectionLabel>{`Pending Verifications (${pending.length})`}</SectionLabel>
-                {pending.map((ngo) => (
-                  <NGOVerificationCard
-                    key={ngo.id}
-                    ngo={ngo}
-                    T={T}
-                    onApprove={(n) => {
-                      setNgos((prev) => prev.map((x) => (x.id === n.id ? { ...x, verified: true, pendingApproval: false, status: "active" } : x)));
-                      showToast(`${n.name} approved`);
-                    }}
-                    onReject={(n) => {
-                      setNgos((prev) => prev.filter((x) => x.id !== n.id));
-                      showToast(`${n.name} rejected`);
-                    }}
-                    onView={(n) => setModal({ open: true, type: "ngo", data: n })}
-                  />
-                ))}
-              </>
-            )}
-            <SectionLabel>Verified NGOs</SectionLabel>
-            <Card style={{ padding: 0, overflow: "hidden" }}>
-              {verified.map((ngo, i) => (
-                <div key={ngo.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 16px", borderBottom: i < verified.length - 1 ? `1px solid ${T.border}` : "none", flexWrap: "wrap" }}>
-                  <div style={{ flex: 1, minWidth: 140 }}>
-                    <div style={{ fontSize: "0.82rem", fontWeight: 700, color: T.text }}>{ngo.name}</div>
-                    <div style={{ fontSize: "0.67rem", color: T.textMuted }}>{ngo.city} · {ngo.activeRescues} active</div>
-                  </div>
-                  <ActionBtn label="View" color={T.accent} onClick={() => setModal({ open: true, type: "ngo", data: ngo })} outline />
-                </div>
-              ))}
+            <SectionLabel>Coming Soon</SectionLabel>
+            <Card>
+              <div style={{ padding: 20, color: T.textMuted, textAlign: "center" }}>
+                This section is currently under development and will be connected to live data soon.
+              </div>
             </Card>
           </div>
         );
-      }
 
       case "rescues":
         return (
@@ -235,26 +194,7 @@ function AdminDashboard() {
           </div>
         );
 
-      case "users":
-        return (
-          <div>
-            <SectionLabel>Platform Users</SectionLabel>
-            <Card style={{ padding: 0, overflow: "hidden" }}>
-              {users.map((u) => (
-                <UserRow
-                  key={u.id}
-                  user={u}
-                  T={T}
-                  onView={(d) => setModal({ open: true, type: "user", data: d })}
-                  onSuspend={(d) => {
-                    setUsers((prev) => prev.map((x) => (x.id === d.id ? { ...x, status: "suspended" } : x)));
-                    showToast(`${d.name} suspended`);
-                  }}
-                />
-              ))}
-            </Card>
-          </div>
-        );
+
 
       case "ai":
         return (
@@ -362,34 +302,7 @@ function AdminDashboard() {
       <DashboardStats stats={statsArr} />
       <AdminInsights tips={insights} />
 
-      <Card style={{ marginBottom: 20 }}>
-        <SectionLabel>Quick Actions</SectionLabel>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(130px, 1fr))", gap: 8 }}>
-          {ADMIN_QUICK_ACTIONS.map((action) => {
-            const Icon = QUICK_ICONS[action.id];
-            return (
-              <button
-                key={action.id}
-                onClick={() => handleQuickAction(action)}
-                type="button"
-                className="rq-card-interactive"
-                style={{
-                  padding: "12px 10px",
-                  background: T.bgAlt,
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  gap: 6,
-                  border: "none",
-                }}
-              >
-                {Icon && <Icon size={18} strokeWidth={1.75} color={action.color} />}
-                <span style={{ fontSize: "0.69rem", fontWeight: 700, color: T.text, textAlign: "center" }}>{action.label}</span>
-              </button>
-            );
-          })}
-        </div>
-      </Card>
+
 
       <div className="rq-dashboard-content-grid">
         <div className="dashboard-sidebar-slot">

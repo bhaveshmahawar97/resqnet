@@ -78,10 +78,14 @@ export default function AdoptionModal({ animal, onClose }) {
           style={{
             maxWidth: 520,
             width: "100%",
+            maxHeight: "90vh",
+            display: "flex",
+            flexDirection: "column",
+            overflow: "hidden"
           }}
         >
           {/* Header */}
-          <div className="rq-modal-header" style={{ alignItems: "flex-start" }}>
+          <div className="rq-modal-header" style={{ alignItems: "flex-start", flexShrink: 0 }}>
             <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
               <img
                 src={animal.img}
@@ -128,7 +132,7 @@ export default function AdoptionModal({ animal, onClose }) {
             </button>
           </div>
 
-          <div className="rq-modal-body">
+          <div className="rq-modal-body" style={{ overflowY: "auto", flex: 1, paddingBottom: 10 }}>
 
           {/* Mission tag */}
           <div
@@ -245,7 +249,7 @@ export default function AdoptionModal({ animal, onClose }) {
 
           </div>
 
-          <div className="rq-modal-footer" style={{ flexDirection: "column", alignItems: "stretch", gap: "0.85rem" }}>
+          <div className="rq-modal-footer" style={{ flexDirection: "column", alignItems: "stretch", gap: "0.85rem", flexShrink: 0, borderTop: `1px solid ${T.border}`, paddingTop: 16 }}>
             <div style={{ display: "flex", gap: "0.6rem" }}>
               <Button variant="primary" size="lg" style={{ flex: 1 }} onClick={handleApply} disabled={submitting}>
                 {submitting ? "Submitting…" : `Apply to adopt ${animal.name}`}
