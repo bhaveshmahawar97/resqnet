@@ -52,7 +52,7 @@ router.put(
 router.put(
   "/assign-volunteer/:id",
   authMiddleware,
-  authorizeRoles("admin", "volunteer"),
+  authorizeRoles("admin", "ngo", "volunteer"),
   assignVolunteer
 );
 

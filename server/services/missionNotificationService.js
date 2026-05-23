@@ -53,10 +53,12 @@ export const notifyRescueAcceptedByNgo = async (rescue) => {
  * Notify when a rescue is completed.
  */
 export const notifyRescueCompleted = async (rescue) => {
+  const getUserId = (field) => field?._id ? field._id.toString() : field?.toString?.() || field;
+
   const recipients = [
-    rescue.createdBy?.toString?.() || rescue.createdBy,
-    rescue.assignedNgo?.toString?.() || rescue.assignedNgo,
-    rescue.assignedVolunteer?.toString?.() || rescue.assignedVolunteer,
+    getUserId(rescue.createdBy),
+    getUserId(rescue.assignedNgo),
+    getUserId(rescue.assignedVolunteer),
   ].filter(Boolean);
 
   const uniqueRecipients = [...new Set(recipients)];
