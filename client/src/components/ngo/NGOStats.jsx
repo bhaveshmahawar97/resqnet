@@ -1,54 +1,95 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { motion, useInView } from "framer-motion";
 import { useT } from "../../context/ThemeContext";
 import useCountUp from "../../hooks/useCountUp";
-import { vFadeUp } from "../../animations/variants";
-import Label from "../ui/Label";
 
-function StatPill({ value, suffix, label, i }) {
+const STATS = [
+  { value: 312, suffix: "", label: "Verified NGOs", desc: "Active rescue organizations" },
+  { value: 18, suffix: "", label: "States Active", desc: "Nationwide coverage" },
+  { value: 48200, suffix: "+", label: "Animals Rescued", desc: "Lives saved through the network" },
+  { value: 1240, suffix: "+", label: "Active Volunteers", desc: "Trained field responders" },
+  { value: 7400, suffix: "+", label: "Successful Adoptions", desc: "Animals found new homes" },
+];
+
+function StatCard({ stat, index, active }) {
   const { T } = useT();
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-80px" });
-  const count = useCountUp(value, inView);
-  
+  const count = useCountUp(stat.value, active);
+
   return (
-    <motion.div ref={ref} custom={i} initial="hidden" whileInView="show" viewport={{ once: true, margin: "-80px" }} variants={vFadeUp}
-      whileHover={{ y: -4, transition: { duration: 0.25 } }}
-      style={{ background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 18,
-        padding: "clamp(1.2rem, 2.5vw, 1.8rem) clamp(1.25rem, 3vw, 2.25rem)",
-        textAlign: "center", flex: "1 1 clamp(130px, 18vw, 210px)",
-        boxShadow: `0 2px 16px ${T.shadow}`, cursor: "default" }}>
-      <div style={{ fontSize: "clamp(1.9rem, 5vw, 3rem)", fontWeight: 900, color: T.text, letterSpacing: "-0.05em", lineHeight: 1 }}>
-        {count.toLocaleString()}{suffix}
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ delay: index * 0.08, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+      whileHover={{ y: -1 }}
+      style={{
+        flex: "1 1 160px",
+        minWidth: 0,
+        padding: "1.5rem 1.25rem",
+        background: T.bgCard,
+        border: `1px solid ${T.border}`,
+        borderRadius: 14,
+        boxShadow: T.shadow,
+        textAlign: "center",
+        position: "relative",
+        overflow: "hidden",
+      }}
+    >
+      {/* Left accent line */}
+      <div style={{ position: "absolute", left: 0, top: "25%", bottom: "25%", width: 3, background: T.accent, borderRadius: "0 3px 3px 0", opacity: 0.5 }} />
+
+      <div style={{ fontSize: "clamp(1.4rem, 2.5vw, 2rem)", fontWeight: 800, color: T.textHeading, letterSpacing: "-0.035em", lineHeight: 1, marginBottom: "0.35rem" }}>
+        {active ? count.toLocaleString() : stat.value.toLocaleString()}
+        <span style={{ color: T.accent, fontSize: "0.7em" }}>{stat.suffix}</span>
       </div>
-      <div style={{ fontSize: "clamp(0.72rem, 1.5vw, 0.82rem)", color: T.textSub, marginTop: "0.45rem", fontWeight: 500 }}>{label}</div>
-      <div style={{ width: 24, height: 2, background: T.accent, margin: "0.9rem auto 0", borderRadius: 2 }} />
+      <div style={{ fontSize: "0.82rem", fontWeight: 600, color: T.text, marginBottom: "0.3rem" }}>{stat.label}</div>
+      <div style={{ fontSize: "0.72rem", color: T.textMuted, lineHeight: 1.45 }}>{stat.desc}</div>
     </motion.div>
   );
 }
 
 export default function NGOStats() {
   const { T } = useT();
-  const stats = [
-    { value: 312, suffix: "", label: "Verified NGOs" },
-    { value: 18, suffix: "", label: "States Active" },
-    { value: 48200, suffix: "+", label: "Animals Rescued" },
-    { value: 1240, suffix: "+", label: "Active Volunteers" },
-    { value: 7400, suffix: "+", label: "Successful Adoptions" },
-  ];
+  const ref = useRef(null);
+  const [active, setActive] = useState(false);
 
   return (
-    <section style={{ width: "100%", padding: "clamp(3.5rem, 8vw, 6rem) 0", background: T.bgAlt, position: "relative", overflow: "hidden" }}>
-      <div style={{ width: "100%", maxWidth: "1240px", margin: "0 auto", padding: "0 clamp(1.25rem, 4vw, 3.5rem)" }}>
-        <motion.div initial="hidden" whileInView="show" viewport={{ once: true }} variants={vFadeUp}
-          style={{ textAlign: "center", marginBottom: "clamp(2rem, 5vw, 3.5rem)" }}>
-          <Label>Network Impact</Label>
-          <h2 style={{ fontSize: "clamp(1.6rem, 4vw, 2.8rem)", fontWeight: 800, letterSpacing: "-0.035em", color: T.text, margin: 0 }}>
-            Every number is<br />an animal saved.
+    <section style={{ width: "100%", padding: "clamp(3rem, 6vw, 5rem) 0", background: T.bgAlt }}>
+      <div style={{ width: "100%", maxWidth: 1200, margin: "0 auto", padding: "0 clamp(1.25rem, 4vw, 3rem)" }}>
+        {/* Section header */}
+        <motion.div
+          ref={ref}
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          onViewportEnter={() => setActive(true)}
+          transition={{ duration: 0.45 }}
+          style={{ textAlign: "center", marginBottom: "clamp(2rem, 4vw, 3rem)" }}
+        >
+          <div
+            style={{
+              display: "inline-flex", alignItems: "center", gap: "0.4rem",
+              background: T.accentSurface || T.accentPale, border: `1px solid ${T.accentGlow}`,
+              borderRadius: 9999, padding: "0.28rem 0.85rem", marginBottom: "0.85rem",
+            }}
+          >
+            <span style={{ width: 5, height: 5, borderRadius: "50%", background: T.accent, display: "inline-block" }} />
+            <span style={{ fontSize: "0.68rem", fontWeight: 700, color: T.accent, letterSpacing: "0.1em", textTransform: "uppercase" }}>
+              Network Impact
+            </span>
+          </div>
+
+          <h2 style={{ fontSize: "clamp(1.5rem, 3.5vw, 2.2rem)", fontWeight: 800, color: T.textHeading, letterSpacing: "-0.035em", lineHeight: 1.2, margin: "0 0 0.6rem" }}>
+            Every number is an animal saved
           </h2>
+          <p style={{ fontSize: "0.9rem", color: T.textSub, maxWidth: 480, margin: "0 auto", lineHeight: 1.65 }}>
+            Real-time data from the ResQNet rescue coordination network.
+          </p>
         </motion.div>
-        <div style={{ display: "flex", gap: "clamp(0.65rem, 1.5vw, 1.25rem)", flexWrap: "wrap", justifyContent: "center", alignItems: "stretch" }}>
-          {stats.map((s, i) => <StatPill key={s.label} {...s} i={i} />)}
+
+        {/* Stats grid */}
+        <div style={{ display: "flex", gap: "clamp(0.75rem, 1.5vw, 1.25rem)", flexWrap: "wrap", justifyContent: "center" }}>
+          {STATS.map((s, i) => <StatCard key={s.label} stat={s} index={i} active={active} />)}
         </div>
       </div>
     </section>

@@ -17,7 +17,7 @@ import { getImageUrl } from "../../utils/imageUrl";
 import RescueMap from "../../components/maps/RescueMap";
 import {
   DashboardHeader, DashboardStats, DashboardActivityFeed,
-  DashboardModal, DashboardNotifications, DashboardBarChart, DashboardDonutChart,
+  DashboardModal, DashboardBarChart, DashboardDonutChart,
   DashboardErrorBoundary, RescueCaseRow, SectionLabel, Card, StatusBadge, DashboardSidebar,
 } from "../../components/dashboard/DashboardShared";
 import { useRescue } from "../../context/RescueContext";
@@ -31,7 +31,6 @@ import {
 import {
   buildActivityFromRescues,
   buildCriticalAlerts,
-  buildNotificationsFromRescues,
 } from "../../utils/operationalData";
 
 const QUICK_ICONS = {
@@ -97,8 +96,6 @@ function AdminDashboard() {
   const { rescues, criticalRescues, stats, loading, error } = useRescue();
   const activityFeed = buildActivityFromRescues(rescues);
   const [section, setSection] = useState("overview");
-  const [notifOpen, setNotifOpen] = useState(false);
-  const [notifications, setNotifications] = useState(() => buildNotificationsFromRescues(rescues));
   const [alerts, setAlerts] = useState(() => buildCriticalAlerts(criticalRescues));
   const [ngos, setNgos] = useState(NGO_LIST);
   const [users, setUsers] = useState(ADMIN_USERS);
@@ -107,7 +104,6 @@ function AdminDashboard() {
 
   const unackedAlerts = alerts.filter((a) => !a.acknowledged).length;
   const pendingNGOs = ngos.filter((n) => n.pendingApproval).length;
-  const unreadCount = notifications.filter((n) => !n.read).length;
 
   const statsArr = [
     { label: "Total Rescues", value: stats?.total || rescues.length, icon: "◉", sub: `${stats?.pending || 0} pending`, highlight: true, trend: "up" },
@@ -331,20 +327,7 @@ function AdminDashboard() {
           <DashboardHeader
             role="admin"
             userName={user?.fullName || user?.name || user?.email || ADMIN_PROFILE.name.split(" ")[0]}
-            onNotifClick={() => setNotifOpen((p) => !p)}
-            notifCount={unreadCount}
           />
-          <AnimatePresence>
-          {notifOpen && (
-            <div style={{ position: "absolute", top: 0, right: 0, zIndex: 200 }}>
-              <DashboardNotifications
-                items={notifications}
-                onClose={() => setNotifOpen(false)}
-                onMarkAll={() => setNotifications((p) => p.map((n) => ({ ...n, read: true })))}
-              />
-            </div>
-          )}
-        </AnimatePresence>
       </div>
 
       {toast && (
@@ -362,39 +345,33 @@ function AdminDashboard() {
           {ADMIN_QUICK_ACTIONS.map((action) => {
             const Icon = QUICK_ICONS[action.id];
             return (
-              <motion.button
+              <button
                 key={action.id}
-                whileHover={{ y: -2 }}
-                whileTap={{ scale: 0.98 }}
                 onClick={() => handleQuickAction(action)}
                 type="button"
+                className="rq-card-interactive"
                 style={{
                   padding: "12px 10px",
-                  borderRadius: 10,
                   background: T.bgAlt,
-                  border: `1px solid ${T.border}`,
-                  cursor: "pointer",
-                  fontFamily: "inherit",
                   display: "flex",
                   flexDirection: "column",
                   alignItems: "center",
                   gap: 6,
+                  border: "none",
                 }}
               >
                 {Icon && <Icon size={18} strokeWidth={1.75} color={action.color} />}
                 <span style={{ fontSize: "0.69rem", fontWeight: 700, color: T.text, textAlign: "center" }}>{action.label}</span>
-              </motion.button>
+              </button>
             );
           })}
         </div>
       </Card>
 
-      <div className="dashboard-layout">
-        {vp.desktop && (
-          <div className="dashboard-sidebar-slot">
-            <DashboardSidebar role="admin" activeSection={section} onSection={setSection} />
-          </div>
-        )}
+      <div className="rq-dashboard-content-grid">
+        <div className="dashboard-sidebar-slot">
+          <DashboardSidebar role="admin" activeSection={section} onSection={setSection} />
+        </div>
         <div className="dashboard-main">
           {!vp.desktop && (
             <DashboardSectionTabs sections={ADMIN_SECTIONS} activeSection={section} onSection={setSection} />

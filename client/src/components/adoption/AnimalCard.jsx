@@ -31,14 +31,14 @@ export default function AnimalCard({ animal, i, onAdopt }) {
       onMouseEnter={() => setHov(true)}
       onMouseLeave={() => setHov(false)}
       style={{
-        borderRadius: 18,
+        borderRadius: 14,
         overflow: "hidden",
         border: `1px solid ${hov ? T.borderHov : T.border}`,
         background: T.bgCard,
         cursor: "pointer",
-        transform: hov ? "translateY(-7px) scale(1.01)" : "none",
-        boxShadow: hov ? `0 24px 65px ${T.shadowHov}` : `0 2px 14px ${T.shadow}`,
-        transition: "all 0.32s ease",
+        transform: hov ? "translateY(-3px)" : "none",
+        boxShadow: hov ? T.shadowHov : T.shadow,
+        transition: "all 0.25s ease",
         display: "flex",
         flexDirection: "column",
       }}

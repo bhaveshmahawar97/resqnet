@@ -12,6 +12,7 @@ import rescueRoutes from "./routes/rescue.js";
 import aiRoutes from "./routes/aiRoutes.js";
 import userRoutes from "./routes/users.js";
 import adoptionRoutes from "./routes/adoption.js";
+import notificationRoutes from "./routes/notifications.js";
 
 const envFile = fs.existsSync(path.resolve(process.cwd(), ".env.local")) ? ".env.local" : ".env";
 dotenv.config({ path: path.resolve(process.cwd(), envFile) });
@@ -80,6 +81,7 @@ app.use("/api/rescue", rescueRoutes);
 app.use("/api/ai", aiRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/adoption", adoptionRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 app.use((req, res) => {
   res.status(404).json({

@@ -60,7 +60,7 @@ export default function ScannerHistory() {
           disabled={loading}
           style={{
             padding: "0.8rem 1rem",
-            borderRadius: 14,
+            borderRadius: 10,
             border: `1px solid ${T.border}`,
             background: T.bgAlt,
             color: T.text,
@@ -81,7 +81,7 @@ export default function ScannerHistory() {
           <div
             style={{
               padding: "1.5rem",
-              borderRadius: 20,
+              borderRadius: 12,
               border: "1px solid #DC2626",
               background: "rgba(220,38,38,0.08)",
               color: "#B91C1C",
@@ -93,7 +93,7 @@ export default function ScannerHistory() {
           <div
             style={{
               padding: "1.5rem",
-              borderRadius: 20,
+              borderRadius: 12,
               border: `1px solid ${T.border}`,
               background: T.bgCard,
               color: T.textMuted,

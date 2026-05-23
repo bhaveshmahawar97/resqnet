@@ -1,57 +1,60 @@
-import { motion } from "framer-motion";
 import { useT } from "../../context/ThemeContext";
 
+/**
+ * ResQNet — Premium Button Component
+ * Variants: primary | secondary | ghost | danger | outline
+ * Sizes: sm | md | lg
+ */
 export default function Button({
   children,
   variant = "primary",
-  onClick,
-  style: s = {},
   size = "md",
+  onClick,
+  type = "button",
+  disabled = false,
+  loading = false,
+  fullWidth = false,
+  leftIcon,
+  rightIcon,
+  style: extraStyle = {},
 }) {
   const { T } = useT();
-  const pad =
-    size === "sm"
-      ? "0.42rem 1rem"
-      : size === "lg"
-        ? "0.9rem 2.2rem"
-        : "0.68rem 1.6rem";
-  const base = {
-    padding: pad,
-    borderRadius: 10,
-    fontFamily: "inherit",
-    fontSize: size === "lg" ? "0.97rem" : "0.84rem",
-    fontWeight: 700,
-    cursor: "pointer",
-    border: "none",
-    letterSpacing: "-0.01em",
-    whiteSpace: "nowrap",
-    transition: "all 0.2s",
-  };
-  const styles = {
-    primary: { ...base, background: T.accent, color: "#fff" },
-    ghost: {
-      ...base,
-      background: "transparent",
-      border: `1px solid ${T.border}`,
-      color: T.text,
-    },
-    danger: { ...base, background: "#E53935", color: "#fff" },
-    outline: {
-      ...base,
-      background: "transparent",
-      border: `1px solid ${T.accent}`,
-      color: T.accent,
-    },
-  };
+
+  const classNames = [
+    "rq-btn",
+    `rq-btn-${variant}`,
+    `rq-btn-${size}`,
+  ].join(" ");
+
   return (
-    <motion.button
+    <button
+      type={type}
       onClick={onClick}
-      whileHover={{ scale: 1.03, opacity: 0.92 }}
-      whileTap={{ scale: 0.96 }}
-      style={{ ...styles[variant], ...s }}
+      disabled={disabled || loading}
+      className={classNames}
+      style={{
+        width: fullWidth ? "100%" : "auto",
+        ...extraStyle,
+      }}
     >
+      {loading ? (
+        <svg
+          width={size === "sm" ? 12 : 14}
+          height={size === "sm" ? 12 : 14}
+          viewBox="0 0 16 16"
+          fill="none"
+          style={{ animation: "rq-spin 0.8s linear infinite", flexShrink: 0 }}
+        >
+          <circle cx="8" cy="8" r="6" stroke="rgba(255,255,255,0.35)" strokeWidth="2" />
+          <path d="M8 2a6 6 0 0 1 6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+        </svg>
+      ) : leftIcon ? (
+        <span style={{ flexShrink: 0, display: "flex", alignItems: "center" }}>{leftIcon}</span>
+      ) : null}
       {children}
-    </motion.button>
+      {!loading && rightIcon && (
+        <span style={{ flexShrink: 0, display: "flex", alignItems: "center" }}>{rightIcon}</span>
+      )}
+    </button>
   );
 }
-

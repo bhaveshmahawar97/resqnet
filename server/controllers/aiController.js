@@ -2,6 +2,7 @@ import { analyzeAnimalImage } from "../services/aiService.js";
 import { getAiModels } from "../models/registerAi.js";
 import { sendSuccess, sendError } from "../utils/apiResponse.js";
 import { parsePagination, buildPaginationMeta } from "../utils/pagination.js";
+import { createNotification } from "../services/notificationService.js";
 
 const mapAiErrorResponse = (aiError, requestId) => {
   const msg = String(aiError?.message || aiError || "AI analysis failed");
@@ -121,6 +122,18 @@ export const scanAnimal = async (req, res) => {
         analysisResult,
         requestId,
       });
+
+      if (savedScan && req.user) {
+        await createNotification({
+          recipientId: req.user._id,
+          type: "ai_scan_completed",
+          title: "AI Scan Completed",
+          message: `Scan for ${analysisResult.animal} finished. Severity: ${analysisResult.severity}.`,
+          priority: analysisResult.severity === "critical" || analysisResult.severity === "high" ? analysisResult.severity : "medium",
+          relatedEntity: null, // Scans don't have a direct model route in front-end yet
+          data: { severity: analysisResult.severity },
+        });
+      }
     } catch (dbError) {
       console.error(`[${requestId}] Failed to persist AI scan:`, dbError.message);
     }

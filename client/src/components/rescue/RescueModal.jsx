@@ -13,32 +13,20 @@ export default function RescueModal({ open, onClose, rescueId, onViewTimeline })
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
-          style={{
-            position: "fixed",
-            inset: 0,
-            background: "rgba(0,0,0,0.6)",
-            zIndex: 600,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: "1rem",
-          }}
+          className="rq-modal-overlay"
         >
           <motion.div
-            initial={{ scale: 0.85, opacity: 0, y: 30 }}
+            initial={{ scale: 0.94, opacity: 0, y: 16 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
-            exit={{ scale: 0.85, opacity: 0, y: 30 }}
-            transition={{ type: "spring", stiffness: 300, damping: 28 }}
+            exit={{ scale: 0.94, opacity: 0, y: 16 }}
+            transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
             onClick={(e) => e.stopPropagation()}
+            className="rq-modal"
             style={{
-              background: T.bgCard,
-              borderRadius: 24,
-              border: `1px solid ${T.border}`,
               padding: "2.5rem 2rem",
               maxWidth: 440,
               width: "100%",
               textAlign: "center",
-              boxShadow: `0 32px 80px ${T.shadowDeep}`,
             }}
           >
             {/* Animated checkmark */}

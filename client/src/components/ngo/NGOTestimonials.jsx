@@ -23,9 +23,9 @@ export default function NGOTestimonials() {
         <div style={{ display: "flex", gap: "clamp(0.75rem, 2vw, 1.25rem)", flexWrap: "wrap", justifyContent: "center" }}>
           {TESTIMONIALS.map((t, i) => (
             <motion.div key={t.name} custom={i} initial="hidden" whileInView="show" viewport={{ once: true }} variants={vFadeUp}
-              style={{ background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 18,
-                padding: "clamp(1.3rem, 2.5vw, 1.8rem)", flex: "1 1 clamp(260px, 28vw, 360px)",
-                boxShadow: `0 2px 18px ${T.shadow}`, position: "relative" }}>
+              style={{ background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 14,
+                padding: "clamp(1.25rem, 2.5vw, 1.6rem)", flex: "1 1 clamp(260px, 28vw, 360px)",
+                boxShadow: T.shadow, position: "relative" }}>
               {/* Quote mark */}
               <div style={{ position: "absolute", top: "1rem", right: "1.2rem", fontSize: "3rem", fontWeight: 900, color: T.accentPale, lineHeight: 1 }}>"</div>
               <div style={{ display: "flex", gap: 3, marginBottom: "1rem" }}>

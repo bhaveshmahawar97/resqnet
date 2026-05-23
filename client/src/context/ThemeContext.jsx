@@ -4,71 +4,155 @@ import { createContext, useCallback, useContext, useMemo, useState } from "react
 
 export const THEME = {
   light: {
-    // Surfaces
-    bg: "#F2F5F2",
-    bgAlt: "#E8EDE9",
+    // ── Core Surfaces ───────────────────────────────────────────────────────────
+    bg: "#F8FAFB",
+    bgAlt: "#F1F4F8",
+    bgPage: "#F8FAFB",
     bgCard: "#FFFFFF",
-    bgCardHov: "#F6FAF7",
-    bgGlass: "rgba(255,255,255,0.78)",
-    bgNav: "rgba(242,245,242,0.92)",
-    bgScanner: "#EDF2EE",
-    bgFooter: "#DDE5DE",
-    // Borders
-    border: "rgba(0,0,0,0.07)",
-    borderHov: "rgba(22,160,86,0.45)",
-    borderGlass: "rgba(0,0,0,0.06)",
-    // Text
-    text: "#0C1710",
-    textSub: "#4A6355",
-    textMuted: "#8AA898",
-    // Brand
-    accent: "#16A056",
-    accentDim: "#0F7A40",
-    accentDeep: "#0A5C30",
-    accentPale: "rgba(22,160,86,0.09)",
-    accentGlow: "rgba(22,160,86,0.18)",
-    // Effects
-    shadow: "rgba(0,40,20,0.07)",
-    shadowHov: "rgba(0,40,20,0.14)",
-    shadowDeep: "rgba(0,40,20,0.22)",
-    orb1: "rgba(22,160,86,0.10)",
-    orb2: "rgba(22,160,86,0.06)",
-    grid: "rgba(22,160,86,0.06)",
-    heroImg: 0.05,
-    scrollbar: "#C4D6C8",
-    scrollThumb: "#8AA898",
-    gradHero: "linear-gradient(160deg, #F2F5F2 0%, #E4EDE6 60%, #D8EAE0 100%)",
+    bgCardHov: "#FAFBFD",
+    bgGlass: "rgba(255,255,255,0.88)",
+    bgNav: "rgba(255,255,255,0.92)",
+    bgScanner: "#F1F6FB",
+    bgFooter: "#111827",
+    bgInput: "#FFFFFF",
+    bgMuted: "#F3F6F9",
+
+    // ── Borders ─────────────────────────────────────────────────────────────────
+    border: "#E8ECF1",
+    borderLight: "#F1F4F8",
+    borderHov: "#1D6FA4",
+    borderGlass: "rgba(0,0,0,0.04)",
+    borderInput: "#D5DCE5",
+    borderInputFocus: "#1D6FA4",
+
+    // ── Text ────────────────────────────────────────────────────────────────────
+    text: "#1A2332",
+    textHeading: "#111827",
+    textSub: "#475569",
+    textMuted: "#94A3B8",
+    textLabel: "#5A6A7E",
+    textOnAccent: "#FFFFFF",
+    textInverse: "#F8FAFC",
+
+    // ── Brand / Accent (professional medical blue) ──────────────────────────────
+    accent: "#1D6FA4",
+    accentDim: "#185E8E",
+    accentDeep: "#0D4478",
+    accentPale: "rgba(29,111,164,0.06)",
+    accentGlow: "rgba(29,111,164,0.14)",
+    accentSurface: "#EDF4FA",
+
+    // ── Semantic Colors ─────────────────────────────────────────────────────────
+    success: "#059669",
+    successPale: "rgba(5,150,105,0.07)",
+    successBorder: "rgba(5,150,105,0.2)",
+    warning: "#D97706",
+    warningPale: "rgba(217,119,6,0.07)",
+    danger: "#DC2626",
+    dangerPale: "rgba(220,38,38,0.06)",
+    dangerBorder: "rgba(220,38,38,0.18)",
+    info: "#0EA5E9",
+    infoPale: "rgba(14,165,233,0.07)",
+
+    // ── Shadows (softer, more premium) ──────────────────────────────────────────
+    shadow: "0 1px 2px rgba(15,23,42,0.04)",
+    shadowSm: "0 1px 2px rgba(15,23,42,0.03)",
+    shadowMd: "0 2px 8px rgba(15,23,42,0.06), 0 1px 2px rgba(15,23,42,0.03)",
+    shadowLg: "0 8px 24px rgba(15,23,42,0.08), 0 2px 6px rgba(15,23,42,0.04)",
+    shadowHov: "0 4px 16px rgba(15,23,42,0.07)",
+    shadowDeep: "0 16px 48px rgba(15,23,42,0.12), 0 4px 12px rgba(15,23,42,0.04)",
+    shadowCard: "0 1px 3px rgba(15,23,42,0.04), 0 0 0 1px rgba(15,23,42,0.02)",
+
+    // ── Misc ────────────────────────────────────────────────────────────────────
+    scrollbar: "#CBD5E1",
+    scrollThumb: "#94A3B8",
+    heroImg: 0.04,
+    gradHero: "linear-gradient(170deg, #F8FAFB 0%, #F1F4F8 50%, #EAF0F7 100%)",
+    gradAccent: "linear-gradient(135deg, #1D6FA4 0%, #185E8E 100%)",
+    gradSuccess: "linear-gradient(135deg, #059669 0%, #047857 100%)",
+    divider: "#E8ECF1",
+
+    // ── Legacy compatibility ────────────────────────────────────────────────────
+    orb1: "rgba(29,111,164,0.06)",
+    orb2: "rgba(29,111,164,0.03)",
+    grid: "rgba(29,111,164,0.04)",
+    borderGlassColor: "rgba(0,0,0,0.04)",
   },
+
   dark: {
-    bg: "#080F18",
-    bgAlt: "#0C1A2E",
-    bgCard: "rgba(255,255,255,0.038)",
-    bgCardHov: "#111E35",
-    bgGlass: "rgba(8,15,24,0.82)",
-    bgNav: "rgba(8,15,24,0.92)",
-    bgScanner: "#0F1D35",
-    bgFooter: "#060D16",
-    border: "rgba(255,255,255,0.07)",
-    borderHov: "rgba(46,210,130,0.40)",
-    borderGlass: "rgba(255,255,255,0.06)",
-    text: "#EDF5F0",
-    textSub: "#7A9E8E",
-    textMuted: "#425E52",
-    accent: "#2ED282",
-    accentDim: "#1FAF65",
-    accentDeep: "#157845",
-    accentPale: "rgba(46,210,130,0.10)",
-    accentGlow: "rgba(46,210,130,0.18)",
-    shadow: "rgba(0,0,0,0.28)",
-    shadowHov: "rgba(0,0,0,0.48)",
-    shadowDeep: "rgba(0,0,0,0.65)",
-    orb1: "rgba(46,210,130,0.08)",
-    orb2: "rgba(46,210,130,0.04)",
-    grid: "rgba(46,210,130,0.04)",
-    heroImg: 0.06,
-    scrollbar: "#080F18",
-    scrollThumb: "#1A2E45",
-    gradHero: "linear-gradient(160deg, #080F18 0%, #0C1A2E 55%, #0A1E38 100%)",
+    // ── Core Surfaces ───────────────────────────────────────────────────────────
+    bg: "#0B1524",
+    bgAlt: "#101D30",
+    bgPage: "#0B1524",
+    bgCard: "#13202F",
+    bgCardHov: "#182840",
+    bgGlass: "rgba(11,21,36,0.9)",
+    bgNav: "rgba(11,21,36,0.94)",
+    bgScanner: "#101D30",
+    bgFooter: "#070D18",
+    bgInput: "#0F1A2A",
+    bgMuted: "#101D30",
+
+    // ── Borders ─────────────────────────────────────────────────────────────────
+    border: "rgba(255,255,255,0.06)",
+    borderLight: "rgba(255,255,255,0.04)",
+    borderHov: "rgba(56,189,248,0.35)",
+    borderGlass: "rgba(255,255,255,0.05)",
+    borderInput: "rgba(255,255,255,0.1)",
+    borderInputFocus: "#38BDF8",
+
+    // ── Text ────────────────────────────────────────────────────────────────────
+    text: "#DCE4F0",
+    textHeading: "#EDF2FB",
+    textSub: "#7B92B2",
+    textMuted: "#4A6080",
+    textLabel: "#6B84A3",
+    textOnAccent: "#FFFFFF",
+    textInverse: "#1A2332",
+
+    // ── Brand / Accent ──────────────────────────────────────────────────────────
+    accent: "#38BDF8",
+    accentDim: "#0EA5E9",
+    accentDeep: "#0284C7",
+    accentPale: "rgba(56,189,248,0.08)",
+    accentGlow: "rgba(56,189,248,0.15)",
+    accentSurface: "#0C2640",
+
+    // ── Semantic Colors ─────────────────────────────────────────────────────────
+    success: "#10B981",
+    successPale: "rgba(16,185,129,0.1)",
+    successBorder: "rgba(16,185,129,0.25)",
+    warning: "#F59E0B",
+    warningPale: "rgba(245,158,11,0.1)",
+    danger: "#F87171",
+    dangerPale: "rgba(248,113,113,0.08)",
+    dangerBorder: "rgba(248,113,113,0.25)",
+    info: "#38BDF8",
+    infoPale: "rgba(56,189,248,0.08)",
+
+    // ── Shadows ─────────────────────────────────────────────────────────────────
+    shadow: "0 1px 2px rgba(0,0,0,0.25)",
+    shadowSm: "0 1px 2px rgba(0,0,0,0.2)",
+    shadowMd: "0 2px 8px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.15)",
+    shadowLg: "0 8px 24px rgba(0,0,0,0.35), 0 2px 6px rgba(0,0,0,0.2)",
+    shadowHov: "0 4px 16px rgba(56,189,248,0.08)",
+    shadowDeep: "0 16px 48px rgba(0,0,0,0.5), 0 4px 12px rgba(0,0,0,0.25)",
+    shadowCard: "0 1px 3px rgba(0,0,0,0.25), 0 0 0 1px rgba(255,255,255,0.04)",
+
+    // ── Misc ────────────────────────────────────────────────────────────────────
+    scrollbar: "#1A2D45",
+    scrollThumb: "#2D4060",
+    heroImg: 0.05,
+    gradHero: "linear-gradient(170deg, #0B1524 0%, #101D30 50%, #0C1D3A 100%)",
+    gradAccent: "linear-gradient(135deg, #38BDF8 0%, #0EA5E9 100%)",
+    gradSuccess: "linear-gradient(135deg, #10B981 0%, #059669 100%)",
+    divider: "rgba(255,255,255,0.06)",
+
+    // ── Legacy compatibility ────────────────────────────────────────────────────
+    orb1: "rgba(56,189,248,0.06)",
+    orb2: "rgba(56,189,248,0.03)",
+    grid: "rgba(56,189,248,0.03)",
+    borderGlassColor: "rgba(255,255,255,0.05)",
   },
 };
 

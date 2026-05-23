@@ -16,6 +16,12 @@ import {
 } from "../services/rescueService.js";
 import { recordDispatchEvent, recordMissionHistory } from "../services/dispatchService.js";
 import {
+  notifyNgoAssignment,
+  notifyVolunteerAssignment,
+  notifyRescueAcceptedByNgo,
+  notifyRescueCompleted,
+} from "../services/missionNotificationService.js";
+import {
   validateCreateRescueBody,
   validateStatusUpdate,
   extractUploadedImageUrls,
@@ -171,6 +177,8 @@ export const assignNgo = async (req, res) => {
     });
 
     const updated = await getRescueById(id);
+    await notifyNgoAssignment(updated, request.assignedNgo);
+
     return sendSuccess(res, { message: "NGO assigned successfully", data: updated });
   } catch (error) {
     console.error("ASSIGN NGO ERROR:", error);
@@ -215,6 +223,8 @@ export const assignVolunteer = async (req, res) => {
     });
 
     const updated = await getRescueById(id);
+    await notifyVolunteerAssignment(updated, request.assignedVolunteer);
+
     return sendSuccess(res, { message: "Volunteer assigned successfully", data: updated });
   } catch (error) {
     console.error("ASSIGN VOLUNTEER ERROR:", error);
@@ -262,6 +272,10 @@ export const acceptRescueMission = async (req, res) => {
       newState: snapshotRescueState(updated),
     });
 
+    if (req.user.role === "ngo") {
+      await notifyRescueAcceptedByNgo(updated);
+    }
+
     return sendSuccess(res, { message: "Mission accepted successfully", data: updated });
   } catch (error) {
     console.error("ACCEPT MISSION ERROR:", error);
@@ -300,6 +314,10 @@ export const updateMissionStatus = async (req, res) => {
       note: note || `Mission marked ${status}`,
       user: req.user,
     });
+
+    if (status === "completed") {
+      await notifyRescueCompleted(updated);
+    }
 
     return sendSuccess(res, { message: "Mission status updated", data: updated });
   } catch (error) {
@@ -400,6 +418,10 @@ export const updateRescueStatus = async (req, res) => {
       note: note || `Status updated to ${status}`,
       user: req.user,
     });
+
+    if (status === "completed") {
+      await notifyRescueCompleted(updated);
+    }
 
     return sendSuccess(res, {
       message: "Rescue status updated successfully",

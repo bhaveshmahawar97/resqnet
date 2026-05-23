@@ -132,7 +132,8 @@ export default function AIScanner({ id }) {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.7 }}
-            style={{ background: T.bgCard, borderRadius: 18, border: `1px solid ${T.border}`, padding: "1.75rem", boxShadow: `0 4px 24px ${T.shadow}` }}
+            className="rq-card-elevated"
+            style={{ padding: "1.75rem" }}
           >
             <div
               onClick={() => fileRef.current?.click()}
@@ -242,8 +243,8 @@ export default function AIScanner({ id }) {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
+                  className="rq-card-elevated"
                   style={{
-                    background: T.bgCard, borderRadius: 18, border: `1px solid ${T.border}`,
                     padding: "2rem", textAlign: "center", minHeight: 280, display: "flex",
                     flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "0.75rem",
                   }}
@@ -261,7 +262,8 @@ export default function AIScanner({ id }) {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.5 }}
-                  style={{ background: T.bgCard, borderRadius: 18, border: `1px solid ${T.border}`, padding: "1.75rem", boxShadow: `0 4px 24px ${T.shadow}` }}
+                  className="rq-card-elevated"
+                  style={{ padding: "1.75rem" }}
                 >
                   {/* Header */}
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.25rem" }}>

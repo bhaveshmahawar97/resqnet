@@ -65,7 +65,7 @@ export default function RescuePriority() {
 
   return (
     <section style={{ width: "100%", padding: "clamp(3.5rem, 8vw, 6rem) 0", background: T.bgAlt, position: "relative", overflow: "hidden" }}>
-      <div aria-hidden style={{ position: "absolute", inset: 0, backgroundImage: `linear-gradient(${T.grid} 1px, transparent 1px), linear-gradient(90deg, ${T.grid} 1px, transparent 1px)`, backgroundSize: "80px 80px", pointerEvents: "none" }} />
+
 
       <div style={{ width: "100%", maxWidth: "1240px", margin: "0 auto", padding: "0 clamp(1.25rem, 4vw, 3.5rem)", position: "relative", zIndex: 1 }}>
         <motion.div initial="hidden" whileInView="show" viewport={{ once: true }} variants={vFadeUp} style={{ textAlign: "center", marginBottom: "clamp(2rem, 5vw, 3.5rem)" }}>
@@ -105,7 +105,7 @@ export default function RescuePriority() {
                 display: "flex",
                 alignItems: "center",
                 gap: "0.4rem",
-                boxShadow: active === p.code ? `0 0 16px ${p.color}30` : "none",
+                boxShadow: "none",
               }}
             >
               {p.emoji} {p.level}
@@ -124,10 +124,10 @@ export default function RescuePriority() {
               transition={{ duration: 0.35 }}
               style={{
                 background: T.bgCard,
-                borderRadius: 20,
-                border: `2px solid ${selected.border}`,
+                borderRadius: 14,
+                border: `1px solid ${selected.border}`,
                 padding: "clamp(1.5rem, 4vw, 2.5rem)",
-                boxShadow: `0 8px 40px ${selected.color}18`,
+                boxShadow: T.shadow,
               }}
             >
               <div style={{ display: "grid", gridTemplateColumns: vp.mobile ? "1fr" : "2fr 1fr", gap: "2rem", alignItems: "center" }}>

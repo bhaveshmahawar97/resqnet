@@ -1,46 +1,21 @@
-import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 import { useT } from "../../context/ThemeContext";
-import { vFadeUp } from "../../animations/variants";
-import Label from "../ui/Label";
-import Button from "../ui/Button";
-import NgoCard from "../ngo/NgoCard";
 import useNgos from "../../hooks/useNgos";
-
-const SkeletonCard = ({ T }) => (
-  <div
-    style={{
-      height: 110,
-      background: T.bgCard,
-      borderRadius: 14,
-      border: `1px solid ${T.border}`,
-      overflow: "hidden",
-      position: "relative",
-    }}
-  >
-    <div
-      style={{
-        position: "absolute",
-        inset: 0,
-        background: `linear-gradient(90deg, transparent, ${T.bgAlt}, transparent)`,
-        animation: "shimmer 1.6s infinite",
-      }}
-    />
-  </div>
-);
+import Button from "../ui/Button";
 
 export default function NGOPreviewSection() {
   const { T } = useT();
-  const { data: ngos, loading, error } = useNgos({ limit: 6, sort: "latest" });
+  const { ngos = [], loading } = useNgos();
+  const previewNgos = ngos.slice(0, 4);
 
   return (
     <section
-      id="for-ngos"
+      id="ngo-network"
       style={{
         width: "100%",
         padding: "clamp(3.5rem, 7vw, 5.5rem) 0",
-        background: T.bg,
-        position: "relative",
+        background: T.bgAlt,
       }}
     >
       <div
@@ -53,155 +28,140 @@ export default function NGOPreviewSection() {
       >
         {/* Section header */}
         <motion.div
-          initial="hidden"
-          whileInView="show"
-          variants={vFadeUp}
+          initial={{ opacity: 0, y: 12 }}
+          whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
           style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "flex-end",
-            marginBottom: "clamp(1.5rem, 3vw, 2.25rem)",
-            flexWrap: "wrap",
-            gap: "1rem",
+            textAlign: "center",
+            maxWidth: 560,
+            margin: "0 auto clamp(2rem, 4vw, 3rem)",
           }}
         >
-          <div>
-            <Label>NGO Network</Label>
-            <h2
-              style={{
-                fontSize: "clamp(1.5rem, 3.5vw, 2.4rem)",
-                fontWeight: 800,
-                letterSpacing: "-0.035em",
-                color: T.text,
-                margin: "0.4rem 0 0.5rem",
-                lineHeight: 1.15,
-              }}
-            >
-              Verified rescue partners
-              <br />
-              <span
-                style={{
-                  background: `linear-gradient(100deg, ${T.accent}, ${T.accentDim})`,
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                  backgroundClip: "text",
-                }}
-              >
-                across India.
-              </span>
-            </h2>
-            <p
-              style={{
-                fontSize: "clamp(0.82rem, 1.6vw, 0.95rem)",
-                color: T.textSub,
-                margin: 0,
-                lineHeight: 1.65,
-                maxWidth: 420,
-              }}
-            >
-              Every listed NGO is verified by our admin team. Connect with
-              the right partner instantly.
-            </p>
+          <div
+            style={{
+              display: "inline-flex", alignItems: "center", gap: "0.4rem",
+              fontSize: "0.6875rem", fontWeight: 700, color: T.success || "#059669",
+              letterSpacing: "0.1em", textTransform: "uppercase",
+              marginBottom: "0.75rem",
+            }}
+          >
+            <span style={{ width: 6, height: 6, borderRadius: "50%", background: T.success || "#059669" }} />
+            Partner Network
           </div>
-
-          <Link to="/ngos">
-            <Button variant="outline" size="sm">
-              View All NGOs →
-            </Button>
-          </Link>
+          <h2
+            style={{
+              fontSize: "clamp(1.5rem, 3vw, 2.1rem)",
+              fontWeight: 800,
+              letterSpacing: "-0.03em",
+              color: T.textHeading,
+              margin: "0 0 0.65rem",
+              lineHeight: 1.2,
+            }}
+          >
+            Trusted NGO{" "}
+            <span style={{ color: T.success || "#059669" }}>partners</span>
+          </h2>
+          <p
+            style={{
+              fontSize: "clamp(0.82rem, 1.5vw, 0.92rem)",
+              color: T.textSub,
+              lineHeight: 1.7,
+            }}
+          >
+            A growing network of verified animal welfare organizations
+            ready to respond across India.
+          </p>
         </motion.div>
 
-        {/* NGO grid */}
-        {error ? (
-          <div
-            style={{
-              padding: "2rem",
-              textAlign: "center",
-              color: T.textMuted,
-              fontSize: "0.85rem",
-              border: `1px dashed ${T.border}`,
-              borderRadius: 14,
-            }}
-          >
-            Unable to load NGO data. Please try again later.
+        {/* NGO cards */}
+        {loading ? (
+          <div style={{ textAlign: "center", padding: "2rem 0", color: T.textMuted, fontSize: "0.85rem" }}>
+            Loading NGO partners...
           </div>
-        ) : (
-          <div
+        ) : previewNgos.length > 0 ? (
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.1 }}
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))",
-              gap: "clamp(0.65rem, 1.5vw, 1rem)",
+              gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))",
+              gap: "0.875rem",
+              marginBottom: "2rem",
             }}
           >
-            {loading
-              ? Array.from({ length: 6 }).map((_, i) => (
-                  <SkeletonCard key={i} T={T} />
-                ))
-              : ngos.map((n) => (
-                  <motion.div
-                    key={n._id || n.name}
-                    initial="hidden"
-                    whileInView="show"
-                    viewport={{ once: true, margin: "-40px" }}
-                    variants={vFadeUp}
+            {previewNgos.map((ngo) => (
+              <div
+                key={ngo._id || ngo.name}
+                style={{
+                  padding: "1.125rem",
+                  background: T.bgCard,
+                  border: `1px solid ${T.border}`,
+                  borderRadius: 14,
+                  transition: "box-shadow 0.2s ease",
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.65rem" }}>
+                  <div
+                    style={{
+                      width: 38, height: 38, borderRadius: 9,
+                      background: T.successPale || "rgba(5,150,105,0.07)",
+                      border: `1px solid ${T.successBorder || "rgba(5,150,105,0.15)"}`,
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      color: T.success || "#059669",
+                      flexShrink: 0,
+                    }}
                   >
-                    <NgoCard ngo={n} />
-                  </motion.div>
-                ))}
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: "0.85rem", fontWeight: 700, color: T.text, lineHeight: 1.2 }}>
+                      {ngo.name}
+                    </div>
+                    <div style={{ fontSize: "0.7rem", color: T.textMuted, marginTop: "0.1rem" }}>
+                      {ngo.city || ngo.location || "India"}
+                    </div>
+                  </div>
+                </div>
+                {ngo.services && (
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "0.3rem" }}>
+                    {(Array.isArray(ngo.services) ? ngo.services : [ngo.services]).slice(0, 3).map((s) => (
+                      <span
+                        key={s}
+                        style={{
+                          fontSize: "0.62rem", fontWeight: 600, color: T.textMuted,
+                          background: T.bgMuted || T.bgAlt,
+                          padding: "0.15rem 0.45rem", borderRadius: 4,
+                          textTransform: "capitalize",
+                        }}
+                      >
+                        {s}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </motion.div>
+        ) : (
+          <div style={{ textAlign: "center", padding: "2rem 0", color: T.textMuted, fontSize: "0.85rem" }}>
+            No NGO partners available yet.
           </div>
         )}
 
-        {/* Bottom CTA strip */}
-        <motion.div
-          initial="hidden"
-          whileInView="show"
-          variants={vFadeUp}
-          viewport={{ once: true }}
-          style={{
-            marginTop: "clamp(1.5rem, 3vw, 2.5rem)",
-            padding: "clamp(1.25rem, 2.5vw, 1.75rem) clamp(1.25rem, 3vw, 2rem)",
-            background: T.bgCard,
-            border: `1px solid ${T.border}`,
-            borderRadius: 18,
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            flexWrap: "wrap",
-            gap: "1rem",
-          }}
-        >
-          <div>
-            <div
-              style={{
-                fontSize: "clamp(0.95rem, 2vw, 1.1rem)",
-                fontWeight: 700,
-                color: T.text,
-                marginBottom: "0.25rem",
-              }}
-            >
-              Are you an NGO?
-            </div>
-            <div
-              style={{ fontSize: "0.82rem", color: T.textSub, lineHeight: 1.55 }}
-            >
-              Join the ResQNet network — get visibility, tools, and funding support.
-            </div>
-          </div>
-          <Link to="/register">
-            <Button variant="primary" size="sm">
-              Register Your NGO
+        {/* CTA */}
+        <div style={{ textAlign: "center" }}>
+          <Link to="/ngos">
+            <Button variant="ghost" size="md">
+              View All NGO Partners →
             </Button>
           </Link>
-        </motion.div>
+        </div>
       </div>
-
-      <style>{`
-        @keyframes shimmer {
-          0% { transform: translateX(-100%); }
-          100% { transform: translateX(100%); }
-        }
-      `}</style>
     </section>
   );
 }

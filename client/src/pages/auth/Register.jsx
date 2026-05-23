@@ -129,7 +129,7 @@ function BrandPanel({ mode }) {
           transform: "translate(-50%, -50%)",
           width: 500,
           height: 500,
-          background: "radial-gradient(circle, rgba(22,160,86,0.14) 0%, transparent 65%)",
+          background: "radial-gradient(circle, rgba(22,160,86,0.08) 0%, transparent 65%)",
           pointerEvents: "none",
         }}
       />
@@ -182,7 +182,7 @@ function BrandPanel({ mode }) {
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              boxShadow: "0 4px 18px rgba(22,160,86,0.45)",
+              boxShadow: "0 4px 14px rgba(22,160,86,0.3)",
               flexShrink: 0,
             }}
           >
@@ -222,7 +222,7 @@ function BrandPanel({ mode }) {
       >
         <p
           style={{
-            fontSize: "clamp(1.55rem, 2.6vw, 2.15rem)",
+            fontSize: "clamp(1.4rem, 2.2vw, 1.85rem)",
             fontWeight: 800,
             lineHeight: 1.22,
             color: "#fff",
@@ -338,7 +338,7 @@ function AuthInput({ label, type = "text", value, onChange, placeholder, autoCom
           boxShadow: error
             ? "0 0 0 3px rgba(220,38,38,0.08)"
             : focused
-            ? `0 0 0 3px ${T.accentPale}`
+            ? `0 0 0 2px ${T.accentPale}`
             : "none",
         }}
       />
@@ -366,7 +366,7 @@ function RoleCard({ role, selected, onSelect, T }) {
         fontFamily: "inherit",
         textAlign: "left",
         transition: "border-color 0.18s, background 0.18s, box-shadow 0.18s",
-        boxShadow: selected ? `0 0 0 3px ${T.accentPale}` : "none",
+        boxShadow: selected ? `0 0 0 2px ${T.accentPale}` : "none",
         display: "flex",
         flexDirection: "column",
         gap: "0.5rem",
@@ -608,7 +608,7 @@ export default function Register() {
             </div>
             <h1
               style={{
-                fontSize: "clamp(1.55rem, 3vw, 2rem)",
+                fontSize: "clamp(1.4rem, 2.5vw, 1.75rem)",
                 fontWeight: 800,
                 color: T.text,
                 letterSpacing: "-0.028em",
@@ -761,7 +761,7 @@ export default function Register() {
                 alignItems: "center",
                 justifyContent: "center",
                 gap: "0.5rem",
-                boxShadow: `0 4px 16px ${T.accentGlow}`,
+                boxShadow: `0 2px 10px ${T.accentGlow}`,
               }}
             >
               {loading ? (

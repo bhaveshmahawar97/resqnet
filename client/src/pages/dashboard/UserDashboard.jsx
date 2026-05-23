@@ -17,12 +17,12 @@ import { getImageUrl } from "../../utils/imageUrl";
 import {
   DashboardHeader, DashboardStats, DashboardActivityFeed,
   DashboardQuickActions, DashboardModal, DashboardTimeline,
-  DashboardNotifications, DashboardErrorBoundary, RescueCaseRow,
+  DashboardErrorBoundary, RescueCaseRow,
   SectionLabel, Card, SeverityBadge, StatusBadge, DashboardSidebar,
 } from "../../components/dashboard/DashboardShared";
 import { useRescue } from "../../context/RescueContext";
 import { useAuth } from "../../context/AuthContext";
-import { timeAgo, buildActivityFromRescues, buildNotificationsFromRescues } from "../../utils/operationalData";
+import { timeAgo, buildActivityFromRescues } from "../../utils/operationalData";
 
 // ─── SCAN CARD ────────────────────────────────────────────────────────────────
 function ScanCard({ scan, onView, T }) {
@@ -85,20 +85,13 @@ function SavedAnimalCard({ animal, onAdopt, T }) {
         <div style={{ fontSize: "0.72rem", color: T.textSub }}>
           <span style={{ fontWeight: 700, color: T.accent }}>{animal.compatibility}%</span> compatibility
         </div>
-        <motion.button
-          whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+        <button
           onClick={() => onAdopt(animal)}
-          style={{
-            padding: "5px 13px", borderRadius: 7,
-            background: animal.status === "available" ? T.accent : T.border,
-            border: "none", color: "#fff",
-            fontSize: "0.73rem", fontWeight: 700,
-            cursor: animal.status === "available" ? "pointer" : "default",
-            fontFamily: "inherit",
-          }}
+          disabled={animal.status !== "available"}
+          className={`rq-btn rq-btn-sm ${animal.status === "available" ? "rq-btn-primary" : "rq-btn-secondary"}`}
         >
           {animal.status === "available" ? "Adopt" : "Pending"}
-        </motion.button>
+        </button>
       </div>
     </Card>
   );
@@ -113,9 +106,7 @@ export default function UserDashboard() {
   const { myRescues, loading, error } = useRescue();
   const [section, setSection] = useState("overview");
   const [modal, setModal] = useState({ open: false, type: null, data: null });
-  const [notifOpen, setNotifOpen] = useState(false);
   const activityFeed = buildActivityFromRescues(myRescues);
-  const [notifications, setNotifications] = useState(() => buildNotificationsFromRescues(myRescues));
 
   const rescueStatusCounts = myRescues.reduce(
     (acc, rescue) => {
@@ -139,8 +130,6 @@ export default function UserDashboard() {
     { icon: "🏠", label: "Adopt", sub: "Browse animals", onClick: () => navigate("/adoption") },
   ];
 
-  const unreadCount = notifications.filter((n) => !n.read).length;
-
   // Timeline for the latest rescue
   const myRescueTimeline = Array.isArray(myRescues[0]?.rescueTimeline)
     ? myRescues[0].rescueTimeline.map((t, idx) => ({
@@ -152,7 +141,7 @@ export default function UserDashboard() {
     }))
     : [];
 
-  const markAllRead = () => setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+
 
   // Section rendering, now using myRescues from context
   const renderSection = () => {
@@ -252,28 +241,19 @@ export default function UserDashboard() {
   return (
     <DashboardPage>
       <DashboardErrorBoundary T={T}>
-        {/* Header with notifications */}
+        {/* Header */}
         <div style={{ position: "relative" }}>
-          <DashboardHeader role="user" userName={user?.fullName || user?.name || user?.email || "Rescuer"} onNotifClick={() => setNotifOpen((p) => !p)} notifCount={unreadCount} />
-          <AnimatePresence>
-            {notifOpen && (
-              <div style={{ position: "absolute", top: 0, right: 0, zIndex: 200 }}>
-                <DashboardNotifications items={notifications} onClose={() => setNotifOpen(false)} onMarkAll={markAllRead} />
-              </div>
-            )}
-          </AnimatePresence>
+          <DashboardHeader role="user" userName={user?.fullName || user?.name || user?.email || "Rescuer"} />
         </div>
 
         {/* Stats */}
         <DashboardStats stats={stats} />
 
         {/* Layout: sidebar + content */}
-        <div className="dashboard-layout">
-          {vp.desktop && (
-            <div className="dashboard-sidebar-slot">
-              <DashboardSidebar role="user" activeSection={section} onSection={setSection} />
-            </div>
-          )}
+        <div className="rq-dashboard-content-grid">
+          <div className="dashboard-sidebar-slot">
+            <DashboardSidebar role="user" activeSection={section} onSection={setSection} />
+          </div>
 
           <div className="dashboard-main">
             {!vp.desktop && (

@@ -4,12 +4,13 @@ import {
   AdoptionHero,
   AdoptionStats,
   AdoptionGrid,
-  AIMatching,
-  SuccessStories,
-  ResponsibleAdoption,
   AdoptionCTA,
 } from "../components/adoption";
 
+/**
+ * Adoption Page — concise 4-section layout:
+ * Hero → Stats → Grid (with modal) → CTA
+ */
 export default function Adoption() {
   const { T } = useT();
 
@@ -18,9 +19,6 @@ export default function Adoption() {
       <AdoptionHero />
       <AdoptionStats />
       <AdoptionGrid />
-      <AIMatching />
-      <SuccessStories />
-      <ResponsibleAdoption />
       <AdoptionCTA />
     </main>
   );

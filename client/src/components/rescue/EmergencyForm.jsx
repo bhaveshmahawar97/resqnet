@@ -183,20 +183,6 @@ export default function EmergencyForm({ onSuccess }) {
     }
   };
 
-  const inputStyle = (field) => ({
-    width: "100%",
-    padding: "0.72rem 1rem",
-    borderRadius: 10,
-    border: `1px solid ${errors[field] ? "#EF4444" : T.border}`,
-    background: T.bgCard,
-    color: T.text,
-    fontSize: "0.88rem",
-    fontFamily: "inherit",
-    outline: "none",
-    boxSizing: "border-box",
-    transition: "border-color 0.2s",
-  });
-
   return (
     <section
       id="emergency-form"
@@ -232,14 +218,10 @@ export default function EmergencyForm({ onSuccess }) {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7 }}
+          className="rq-form-card"
           style={{
             maxWidth: 720,
             margin: "0 auto",
-            background: T.bgCard,
-            borderRadius: 18,
-            border: `1px solid ${T.border}`,
-            padding: "clamp(1.5rem, 4vw, 2.5rem)",
-            boxShadow: `0 8px 40px ${T.shadow}`,
           }}
         >
           {/* Error message */}
@@ -284,20 +266,12 @@ export default function EmergencyForm({ onSuccess }) {
           <div style={{ marginBottom: "1.5rem" }}>
             <div
               onClick={() => !loading && fileRef.current?.click()}
+              className="rq-upload-zone"
               style={{
-                border: `2px dashed ${T.border}`,
-                borderRadius: 12,
-                padding: "1.5rem",
-                textAlign: "center",
                 cursor: loading ? "default" : "pointer",
-                transition: "border-color 0.2s, background 0.2s",
-                background: imagePreview ? "transparent" : T.bgAlt,
-                position: "relative",
-                overflow: "hidden",
+                background: imagePreview ? "transparent" : undefined,
                 opacity: loading ? 0.6 : 1,
               }}
-              onMouseEnter={(e) => !loading && (e.currentTarget.style.borderColor = T.accent)}
-              onMouseLeave={(e) => (e.currentTarget.style.borderColor = T.border)}
             >
               <input
                 ref={fileRef}
@@ -376,7 +350,8 @@ export default function EmergencyForm({ onSuccess }) {
                   setErrors((err) => ({ ...err, animalType: "" }));
                 }}
                 disabled={loading}
-                style={{ ...inputStyle("animalType"), opacity: loading ? 0.6 : 1 }}
+                className="rq-input"
+                style={{ borderColor: errors.animalType ? "#EF4444" : undefined, opacity: loading ? 0.6 : 1 }}
               >
                 <option value="">Select type…</option>
                 {ANIMAL_TYPES.map((t) => (
@@ -398,7 +373,8 @@ export default function EmergencyForm({ onSuccess }) {
                 onChange={(e) => setForm((f) => ({ ...f, breed: e.target.value }))}
                 placeholder="e.g. Labrador, Indie…"
                 disabled={loading}
-                style={{ ...inputStyle("breed"), opacity: loading ? 0.6 : 1 }}
+                className="rq-input"
+                style={{ opacity: loading ? 0.6 : 1 }}
               />
             </div>
           </div>
@@ -417,7 +393,8 @@ export default function EmergencyForm({ onSuccess }) {
               placeholder="Describe what you observe — wounds, behavior, posture…"
               rows={3}
               disabled={loading}
-              style={{ ...inputStyle("condition"), resize: "vertical", opacity: loading ? 0.6 : 1 }}
+              className="rq-textarea"
+              style={{ borderColor: errors.condition ? "#EF4444" : undefined, opacity: loading ? 0.6 : 1 }}
             />
             {errors.condition && <div style={{ color: "#EF4444", fontSize: "0.72rem", marginTop: 4 }}>{errors.condition}</div>}
           </div>
@@ -472,8 +449,8 @@ export default function EmergencyForm({ onSuccess }) {
                   setErrors((err) => ({ ...err, address: "" }));
                 }}
                 placeholder="Street, landmark, city…"
-                disabled={loading}
-                style={{ ...inputStyle("address"), opacity: loading ? 0.6 : 1 }}
+                className="rq-input"
+                style={{ borderColor: errors.address ? "#EF4444" : undefined, opacity: loading ? 0.6 : 1 }}
               />
               {errors.address && <div style={{ color: "#EF4444", fontSize: "0.72rem", marginTop: 4 }}>{errors.address}</div>}
             </div>
@@ -488,8 +465,8 @@ export default function EmergencyForm({ onSuccess }) {
                   setErrors((err) => ({ ...err, contact: "" }));
                 }}
                 placeholder="+91 XXXXX XXXXX"
-                disabled={loading}
-                style={{ ...inputStyle("contact"), opacity: loading ? 0.6 : 1 }}
+                className="rq-input"
+                style={{ borderColor: errors.contact ? "#EF4444" : undefined, opacity: loading ? 0.6 : 1 }}
               />
               {errors.contact && <div style={{ color: "#EF4444", fontSize: "0.72rem", marginTop: 4 }}>{errors.contact}</div>}
             </div>
@@ -516,7 +493,8 @@ export default function EmergencyForm({ onSuccess }) {
               placeholder="Any other details that might help the rescue team…"
               rows={2}
               disabled={loading}
-              style={{ ...inputStyle("notes"), resize: "vertical", opacity: loading ? 0.6 : 1 }}
+              className="rq-textarea"
+              style={{ opacity: loading ? 0.6 : 1 }}
             />
           </div>
 

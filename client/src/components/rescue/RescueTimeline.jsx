@@ -103,7 +103,7 @@ export default function RescueTimeline() {
                           border: `2px solid ${done ? T.accent : T.border}`,
                           display: "flex", alignItems: "center", justifyContent: "center",
                           fontSize: "1rem",
-                          boxShadow: current ? `0 0 16px ${T.accentGlow}` : "none",
+                          boxShadow: "none",
                           transition: "all 0.3s",
                         }}
                       >
@@ -135,16 +135,15 @@ export default function RescueTimeline() {
               exit={{ opacity: 0, x: -16 }}
               transition={{ duration: 0.35 }}
               style={{
-                background: T.bgCard,
-                borderRadius: 18,
+                borderRadius: 14,
                 border: `1px solid ${T.border}`,
-                padding: "2rem",
-                boxShadow: `0 4px 24px ${T.shadow}`,
+                padding: "1.75rem",
+                boxShadow: T.shadow,
                 position: "sticky",
                 top: 90,
               }}
             >
-              <div style={{ fontSize: "3rem", marginBottom: "1rem" }}>{STEPS[activeStep].icon}</div>
+              <div style={{ fontSize: "1.5rem", marginBottom: "0.75rem" }}>{STEPS[activeStep].icon}</div>
               <div style={{ fontSize: "0.68rem", fontWeight: 700, color: T.accent, letterSpacing: "0.12em", marginBottom: "0.4rem" }}>
                 STEP {activeStep + 1} OF {STEPS.length}
               </div>

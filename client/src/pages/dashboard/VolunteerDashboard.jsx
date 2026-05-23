@@ -11,6 +11,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useT } from "../../context/ThemeContext";
 import { useAuth } from "../../context/AuthContext";
+import useViewport from "../../hooks/useViewport";
 import DashboardPage from "../../components/dashboard/DashboardPage";
 import DashboardSectionTabs from "../../components/dashboard/DashboardSectionTabs";
 import { getImageUrl } from "../../utils/imageUrl";
@@ -18,11 +19,11 @@ import MissionMap from "../../components/maps/MissionMap";
 import {
   DashboardHeader, DashboardStats, DashboardActivityFeed,
   DashboardQuickActions, DashboardModal, DashboardTimeline,
-  DashboardNotifications, DashboardErrorBoundary, RescueCaseRow,
-  SectionLabel, Card, SeverityBadge,
+  DashboardErrorBoundary, RescueCaseRow,
+  SectionLabel, Card, SeverityBadge, DashboardSidebar,
 } from "../../components/dashboard/DashboardShared";
 import { useRescue } from "../../context/RescueContext";
-import { timeAgo, buildActivityFromRescues, buildNotificationsFromRescues } from "../../utils/operationalData";
+import { timeAgo, buildActivityFromRescues } from "../../utils/operationalData";
 
 // ─── MISSION CARD ─────────────────────────────────────────────────────────────
 function MissionCard({ mission, onReport, T }) {
@@ -130,30 +131,20 @@ function MissionCard({ mission, onReport, T }) {
 
       {/* Actions */}
       <div style={{ display: "flex", gap: 8 }}>
-        <motion.button
-          whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.96 }}
+        <button
           onClick={() => onReport(mission)}
-          style={{
-            flex: 1, padding: "9px", borderRadius: 9,
-            border: `1px solid ${T.accent}`, background: "transparent",
-            color: T.accent, fontSize: "0.78rem", fontWeight: 700,
-            cursor: "pointer", fontFamily: "inherit",
-          }}
+          className="rq-btn rq-btn-outline"
+          style={{ flex: 1, padding: "9px" }}
         >
           Field Report
-        </motion.button>
-        <motion.button
-          whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.96 }}
+        </button>
+        <button
           onClick={() => onReport(mission)}
-          style={{
-            flex: 1, padding: "9px", borderRadius: 9,
-            background: T.accent, border: "none",
-            color: "#fff", fontSize: "0.78rem", fontWeight: 700,
-            cursor: "pointer", fontFamily: "inherit",
-          }}
+          className="rq-btn rq-btn-primary"
+          style={{ flex: 1, padding: "9px" }}
         >
           Update Status
-        </motion.button>
+        </button>
       </div>
     </Card>
   );
@@ -182,18 +173,12 @@ function AvailableMissionRow({ rescue, onAccept, T }) {
         Score: {rescue.aiScore}
       </div>
       <div style={{ fontSize: "0.71rem", color: T.textMuted }}>ETA: {rescue.eta || "TBD"}</div>
-      <motion.button
-        whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.94 }}
+      <button
         onClick={() => onAccept(rescue)}
-        style={{
-          padding: "6px 14px", borderRadius: 7,
-          background: T.accent, border: "none", color: "#fff",
-          fontSize: "0.73rem", fontWeight: 700,
-          cursor: "pointer", fontFamily: "inherit",
-        }}
+        className="rq-btn rq-btn-primary rq-btn-sm"
       >
         Accept Mission
-      </motion.button>
+      </button>
     </motion.div>
   );
 }
@@ -201,6 +186,7 @@ function AvailableMissionRow({ rescue, onAccept, T }) {
 // ─── MAIN DASHBOARD ───────────────────────────────────────────────────────────
 export default function VolunteerDashboard() {
   const { T } = useT();
+  const vp = useViewport();
   const navigate = useNavigate();
   const { user } = useAuth();
   const { myRescues, assignedRescues, loading, error, updateRescueStatus, acceptMission } = useRescue();
@@ -208,12 +194,9 @@ export default function VolunteerDashboard() {
   const activityFeed = buildActivityFromRescues(missionList);
   const [section, setSection] = useState("overview");
   const [modal, setModal] = useState({ open: false, type: null, data: null });
-  const [notifOpen, setNotifOpen] = useState(false);
-  const [notifications, setNotifications] = useState(() => buildNotificationsFromRescues(missionList));
   const [reportText, setReportText] = useState("");
   const [statusUpdateLoading, setStatusUpdateLoading] = useState(false);
 
-  const unreadCount = notifications.filter((n) => !n.read).length;
   const missions = myRescues.filter((r) => r.status !== "completed" && r.status !== "cancelled");
   const pendingAssignments = myRescues.filter((r) => r.status === "pending");
   const completedCount = myRescues.filter((r) => r.status === "completed").length;
@@ -378,25 +361,26 @@ export default function VolunteerDashboard() {
     <DashboardPage>
       <DashboardErrorBoundary T={T}>
         <div style={{ position: "relative" }}>
-          <DashboardHeader role="volunteer" userName={user?.fullName || user?.name || user?.email || "Volunteer"} onNotifClick={() => setNotifOpen((p) => !p)} notifCount={unreadCount} />
-          <AnimatePresence>
-            {notifOpen && (
-              <div style={{ position: "absolute", top: 0, right: 0, zIndex: 200 }}>
-                <DashboardNotifications items={notifications} onClose={() => setNotifOpen(false)} onMarkAll={() => setNotifications((p) => p.map((n) => ({ ...n, read: true })))} />
-              </div>
-            )}
-          </AnimatePresence>
+          <DashboardHeader role="volunteer" userName={user?.fullName || user?.name || user?.email || "Volunteer"} />
         </div>
 
         <DashboardStats stats={stats} />
 
-        <DashboardSectionTabs sections={volunteerSections} activeSection={section} onSection={setSection} />
-
-        <AnimatePresence mode="wait">
-          <motion.div key={section} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.22 }}>
-            {renderSection()}
-          </motion.div>
-        </AnimatePresence>
+        <div className="rq-dashboard-content-grid">
+          <div className="dashboard-sidebar-slot">
+            <DashboardSidebar role="volunteer" activeSection={section} onSection={setSection} />
+          </div>
+          <div className="dashboard-main">
+            {!vp.desktop && (
+              <DashboardSectionTabs sections={volunteerSections} activeSection={section} onSection={setSection} />
+            )}
+            <AnimatePresence mode="wait">
+              <motion.div key={section} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.22 }}>
+                {renderSection()}
+              </motion.div>
+            </AnimatePresence>
+          </div>
+        </div>
 
       {/* Accept mission modal */}
       <DashboardModal isOpen={modal.open && modal.type === "accept"} title="Accept Mission" onClose={() => setModal({ open: false, type: null, data: null })}>
@@ -409,19 +393,23 @@ export default function VolunteerDashboard() {
               <SeverityBadge level={modal.data.severity} />
               <span style={{ fontSize: "0.75rem", color: T.textMuted, alignSelf: "center" }}>AI Score: {modal.data.aiScore}/100</span>
             </div>
-            <div style={{ display: "flex", gap: 8, marginTop: 4 }}>
-              <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.96 }}
+            <div style={{ display: "flex", gap: 12, marginTop: 4 }}>
+              <button
                 onClick={() => handleAcceptMission(modal.data)}
-                style={{ flex: 1, padding: "10px", borderRadius: 9, background: T.accent, border: "none", color: "#fff", fontSize: "0.82rem", fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>
+                className="rq-btn rq-btn-primary"
+                style={{ flex: 1, padding: "10px" }}
+              >
                 Accept Mission
-              </motion.button>
-              <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.96 }}
+              </button>
+              <button
                 onClick={() => setModal({ open: false, type: null, data: null })}
-                style={{ flex: 1, padding: "10px", borderRadius: 9, border: `1px solid ${T.border}`, background: "transparent", color: T.textSub, fontSize: "0.82rem", fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>
+                className="rq-btn rq-btn-outline"
+                style={{ flex: 1, padding: "10px" }}
+              >
                 Decline
-              </motion.button>
+              </button>
             </div>
-          </div>
+            </div>
         )}
       </DashboardModal>
 
@@ -436,19 +424,16 @@ export default function VolunteerDashboard() {
             onChange={(e) => setReportText(e.target.value)}
             placeholder="Describe current situation, animal condition, actions taken, and any issues…"
             rows={5}
-            style={{
-              width: "100%", padding: "10px 12px", borderRadius: 9,
-              border: `1px solid ${T.border}`, background: T.bgAlt,
-              color: T.text, fontSize: "0.81rem", fontFamily: "inherit",
-              resize: "vertical", outline: "none", lineHeight: 1.5,
-              boxSizing: "border-box",
-            }}
+            className="rq-textarea"
+            style={{ width: "100%", marginBottom: "12px" }}
           />
-          <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
+          <button
             onClick={submitReport}
-            style={{ padding: "10px", borderRadius: 9, background: T.accent, border: "none", color: "#fff", fontSize: "0.82rem", fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>
+            className="rq-btn rq-btn-primary"
+            style={{ width: "100%", padding: "10px" }}
+          >
             Submit Report
-          </motion.button>
+          </button>
         </div>
       </DashboardModal>
 

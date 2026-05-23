@@ -1,64 +1,54 @@
 import { useT } from "../context/ThemeContext";
 
-// Existing sections — kept intact
-import Hero from "../components/sections/Hero";
-
-// New modular home components
+// Homepage sections — modular, preview-only (no operational forms)
+import HeroSection from "../components/home/HeroSection";
 import StatsSection from "../components/home/StatsSection";
-import AIScannerPreviewSection from "../components/home/AIScannerPreviewSection";
-import NGOPreviewSection from "../components/home/NGOPreviewSection";
-import AdoptionPreviewSection from "../components/home/AdoptionPreviewSection";
 import RescuePreviewSection from "../components/home/RescuePreviewSection";
+import NGOPreviewSection from "../components/home/NGOPreviewSection";
+import AIScannerPreviewSection from "../components/home/AIScannerPreviewSection";
+import AdoptionPreviewSection from "../components/home/AdoptionPreviewSection";
 import CTASection from "../components/home/CTASection";
 
-// Existing footer CTA — kept intact
-import FooterCTA from "../components/sections/FooterCTA";
-
 /**
- * Home page — redesigned as a live preview dashboard.
+ * Home page — redesigned as a concise healthcare rescue ecosystem landing page.
  *
  * Architecture:
- *  - Hero:                 existing (preserved as-is)
- *  - StatsSection:         live data from rescueService + adoptionService
- *  - AIScannerPreview:     inline scanner using existing aiService APIs
- *  - NGOPreview:           live NGOs from useNgos hook + NgoCard
- *  - AdoptionPreview:      live pets from useAdoptions hook + PetCard
- *  - RescuePreview:        compact form using createRescue service
- *  - CTASection:           volunteer / NGO / emergency CTAs
- *  - FooterCTA:            existing (preserved as-is)
+ *  - Hero:              premium mission statement
+ *  - Stats:             live platform impact numbers
+ *  - Rescue Preview:    rescue coordination preview + CTA (no form)
+ *  - NGO Preview:       partner NGO network preview
+ *  - AI Scanner:        AI health capabilities preview (no upload)
+ *  - Adoption Preview:  adoption listings preview
+ *  - CTA:               volunteer / NGO / emergency CTAs
  *
- * All data flows through existing hooks and services — no mock data,
- * no duplicated logic. If the source pages update their APIs, this
- * page reflects changes automatically.
+ * All preview sections use the SAME real APIs and shared components
+ * as operational pages — no mock data, no duplicated logic.
  */
 export default function Home() {
   const { T } = useT();
 
   return (
     <main style={{ width: "100%", background: T.bg, overflowX: "hidden" }}>
-      {/* 1. Hero — full viewport mission statement */}
-      <Hero />
+      {/* 1. Hero — premium mission statement */}
+      <HeroSection />
 
-      {/* 2. Platform impact numbers (live + fallback) */}
+      {/* 2. Platform impact numbers */}
       <StatsSection />
 
-      {/* 3. AI Scanner — inline triage widget */}
-      <AIScannerPreviewSection />
+      {/* 3. Rescue coordination ecosystem preview */}
+      <RescuePreviewSection />
 
       {/* 4. NGO network preview */}
       <NGOPreviewSection />
 
-      {/* 5. Adoption listings preview */}
-      <AdoptionPreviewSection />
+      {/* 5. AI Health Scanner capabilities */}
+      <AIScannerPreviewSection />
 
-      {/* 6. Emergency rescue quick-report */}
-      <RescuePreviewSection />
+      {/* 6. Adoption listings preview */}
+      <AdoptionPreviewSection />
 
       {/* 7. CTA — volunteer / NGO / emergency */}
       <CTASection />
-
-      {/* 8. Footer CTA — existing preserved */}
-      <FooterCTA />
     </main>
   );
 }

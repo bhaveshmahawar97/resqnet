@@ -12,9 +12,9 @@ export default function DashboardSectionTabs({ sections, activeSection, onSectio
           onClick={() => onSection(id)}
           style={{
             padding: "6px 14px",
-            borderRadius: 8,
-            border: activeSection === id ? `1px solid ${T.accent}` : `1px solid ${T.border}`,
-            background: activeSection === id ? T.accentPale : T.bgCard,
+            borderRadius: 7,
+            border: "none",
+            background: activeSection === id ? T.bgCard : "transparent",
             color: activeSection === id ? T.accent : T.textSub,
             fontSize: "0.76rem",
             fontWeight: activeSection === id ? 700 : 500,
@@ -24,6 +24,7 @@ export default function DashboardSectionTabs({ sections, activeSection, onSectio
             transition: "all 0.15s",
             textTransform: "capitalize",
             whiteSpace: "nowrap",
+            boxShadow: activeSection === id ? T.shadow : "none",
           }}
         >
           {label}

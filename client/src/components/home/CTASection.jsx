@@ -1,37 +1,48 @@
-import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 import { useT } from "../../context/ThemeContext";
-import { vFadeUp } from "../../animations/variants";
 import Button from "../ui/Button";
 
 const CTA_CARDS = [
   {
-    icon: "🤝",
-    tag: "Volunteer",
-    title: "Join the rescue force",
-    desc: "Become a verified volunteer. Get dispatched to local rescue missions.",
-    primary: { label: "Become a Volunteer", to: "/register" },
-    secondary: { label: "Learn More", to: "/rescue" },
-    accent: "#16A056",
+    icon: (
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+      </svg>
+    ),
+    title: "Respond to an Emergency",
+    desc: "Report a rescue or respond to an active emergency in your area.",
+    to: "/rescue",
+    label: "Report Rescue",
+    variant: "primary",
+    accent: true,
   },
   {
-    icon: "🏥",
-    tag: "NGOs",
-    title: "List your organization",
-    desc: "Register your rescue NGO and receive verified rescue assignments, adoptions, and funding connections.",
-    primary: { label: "Register NGO", to: "/register" },
-    secondary: { label: "NGO Directory", to: "/ngos" },
-    accent: "#2563EB",
-    featured: true,
+    icon: (
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+        <circle cx="9" cy="7" r="4"/>
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+      </svg>
+    ),
+    title: "Become a Volunteer",
+    desc: "Join our network of field responders and make a direct difference.",
+    to: "/register",
+    label: "Join as Volunteer",
+    variant: "ghost",
   },
   {
-    icon: "🚨",
-    tag: "Emergency",
-    title: "Spot an animal in danger?",
-    desc: "Report immediately. Our system routes it to the nearest available rescue team in seconds.",
-    primary: { label: "Report Now", to: "/rescue" },
-    secondary: { label: "Try AI Scanner", to: "/scanner" },
-    accent: "#DC2626",
+    icon: (
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+    ),
+    title: "Register Your NGO",
+    desc: "Connect your organization to the platform and start coordinating missions.",
+    to: "/ngos",
+    label: "Register NGO",
+    variant: "ghost",
   },
 ];
 
@@ -43,170 +54,124 @@ export default function CTASection() {
       style={{
         width: "100%",
         padding: "clamp(3.5rem, 7vw, 5.5rem) 0",
-        background: T.bg,
-        position: "relative",
-        overflow: "hidden",
+        background: T.bgAlt,
       }}
     >
-      {/* Background texture */}
-      <div
-        aria-hidden
-        style={{
-          position: "absolute",
-          inset: 0,
-          backgroundImage: `linear-gradient(${T.grid} 1px, transparent 1px), linear-gradient(90deg, ${T.grid} 1px, transparent 1px)`,
-          backgroundSize: "60px 60px",
-          opacity: 0.5,
-          pointerEvents: "none",
-        }}
-      />
-
-      <div
-        style={{
-          width: "100%",
-          maxWidth: 1200,
-          margin: "0 auto",
-          padding: "0 clamp(1.25rem, 4vw, 3rem)",
-          position: "relative",
-          zIndex: 1,
-        }}
-      >
-        {/* Section header */}
+      <div style={{ width: "100%", maxWidth: 1200, margin: "0 auto", padding: "0 clamp(1.25rem, 4vw, 3rem)" }}>
+        {/* Header */}
         <motion.div
-          initial="hidden"
-          whileInView="show"
-          variants={vFadeUp}
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          style={{ textAlign: "center", marginBottom: "clamp(2rem, 4vw, 3rem)" }}
+          transition={{ duration: 0.45 }}
+          style={{ textAlign: "center", marginBottom: "clamp(2.5rem, 5vw, 4rem)" }}
         >
+          <div
+            style={{
+              display: "inline-flex", alignItems: "center", gap: "0.4rem",
+              background: T.accentSurface || T.accentPale,
+              border: `1px solid ${T.accentGlow}`,
+              borderRadius: 9999, padding: "0.28rem 0.85rem", marginBottom: "0.85rem",
+            }}
+          >
+            <span style={{ width: 5, height: 5, borderRadius: "50%", background: T.accent, display: "inline-block" }} />
+            <span style={{ fontSize: "0.68rem", fontWeight: 700, color: T.accent, letterSpacing: "0.1em", textTransform: "uppercase" }}>
+              Get Involved
+            </span>
+          </div>
+
           <h2
             style={{
-              fontSize: "clamp(1.5rem, 3.5vw, 2.4rem)",
-              fontWeight: 800,
-              letterSpacing: "-0.035em",
-              color: T.text,
-              margin: "0 0 0.6rem",
+              fontSize: "clamp(1.5rem, 3.5vw, 2.2rem)",
+              fontWeight: 800, color: T.textHeading || T.text,
+              letterSpacing: "-0.035em", lineHeight: 1.2,
+              margin: "0 0 0.75rem",
             }}
           >
-            Your role in the ecosystem.
+            Every action saves a life
           </h2>
-          <p
-            style={{
-              fontSize: "clamp(0.85rem, 1.7vw, 1rem)",
-              color: T.textSub,
-              maxWidth: 480,
-              margin: "0 auto",
-              lineHeight: 1.7,
-            }}
-          >
-            Whether you're a volunteer, an NGO, or someone who just spotted an
-            animal in need — ResQNet has a place for you.
+          <p style={{ fontSize: "0.9rem", color: T.textSub, maxWidth: 440, margin: "0 auto", lineHeight: 1.65 }}>
+            Whether you respond to emergencies, volunteer in the field, or manage an NGO — there's a place for you.
           </p>
         </motion.div>
 
-        {/* CTA cards */}
+        {/* CTA Cards */}
         <div
           style={{
             display: "grid",
             gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-            gap: "clamp(0.75rem, 2vw, 1.25rem)",
+            gap: "1.25rem",
           }}
         >
           {CTA_CARDS.map((card, i) => (
             <motion.div
-              key={card.tag}
-              custom={i}
-              initial="hidden"
-              whileInView="show"
-              viewport={{ once: true, margin: "-40px" }}
-              variants={vFadeUp}
+              key={card.title}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.1, duration: 0.4 }}
               style={{
-                padding: "clamp(1.5rem, 3vw, 2rem)",
-                background: card.featured ? T.bgCard : T.bgCard,
-                border: `1px solid ${card.featured ? card.accent + "44" : T.border}`,
-                borderRadius: 22,
-                position: "relative",
-                overflow: "hidden",
-                boxShadow: card.featured
-                  ? `0 8px 48px ${card.accent}18`
-                  : `0 2px 16px ${T.shadow}`,
+                background: card.accent ? T.accent : T.bgCard,
+                border: `1px solid ${card.accent ? "transparent" : T.border}`,
+                borderRadius: 14,
+                padding: "1.75rem",
+                boxShadow: card.accent ? `0 4px 20px ${T.accentGlow}` : T.shadow,
+                display: "flex",
+                flexDirection: "column",
+                gap: "1.25rem",
+                transition: "transform 0.2s, box-shadow 0.2s",
               }}
+              whileHover={{ y: -2 }}
             >
-              {/* Featured accent top line */}
-              {card.featured && (
-                <div
-                  style={{
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    height: 3,
-                    background: `linear-gradient(90deg, ${card.accent}, ${card.accent}88)`,
-                  }}
-                />
-              )}
-
-              {/* Tag */}
+              {/* Icon */}
               <div
                 style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "0.35rem",
-                  padding: "0.22rem 0.65rem",
-                  borderRadius: 20,
-                  background: card.accent + "18",
-                  border: `1px solid ${card.accent}33`,
-                  color: card.accent,
-                  fontSize: "0.65rem",
-                  fontWeight: 800,
-                  letterSpacing: "0.06em",
-                  textTransform: "uppercase",
-                  marginBottom: "1rem",
+                  width: 48, height: 48, borderRadius: 12,
+                  background: card.accent ? "rgba(255,255,255,0.15)" : T.accentSurface || T.accentPale,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  color: card.accent ? "#fff" : T.accent,
+                  flexShrink: 0,
                 }}
               >
-                <span>{card.icon}</span>
-                {card.tag}
+                {card.icon}
               </div>
 
-              <h3
-                style={{
-                  fontSize: "clamp(1.1rem, 2.2vw, 1.35rem)",
-                  fontWeight: 800,
-                  color: T.text,
-                  margin: "0 0 0.6rem",
-                  letterSpacing: "-0.02em",
-                  lineHeight: 1.2,
-                }}
-              >
-                {card.title}
-              </h3>
-              <p
-                style={{
-                  fontSize: "0.83rem",
-                  color: T.textSub,
-                  lineHeight: 1.65,
-                  margin: "0 0 1.5rem",
-                }}
-              >
-                {card.desc}
-              </p>
-
-              <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
-                <Link to={card.primary.to}>
-                  <Button
-                    variant="primary"
-                    size="sm"
-                    style={{ background: card.accent }}
-                  >
-                    {card.primary.label}
-                  </Button>
-                </Link>
-                <Link to={card.secondary.to}>
-                  <Button variant="ghost" size="sm">
-                    {card.secondary.label}
-                  </Button>
-                </Link>
+              {/* Content */}
+              <div style={{ flex: 1 }}>
+                <h3
+                  style={{
+                    fontSize: "1rem", fontWeight: 700,
+                    color: card.accent ? "#fff" : T.text,
+                    letterSpacing: "-0.02em", marginBottom: "0.4rem",
+                  }}
+                >
+                  {card.title}
+                </h3>
+                <p
+                  style={{
+                    fontSize: "0.84rem",
+                    color: card.accent ? "rgba(255,255,255,0.75)" : T.textSub,
+                    lineHeight: 1.6,
+                  }}
+                >
+                  {card.desc}
+                </p>
               </div>
+
+              {/* CTA */}
+              <Link to={card.to}>
+                <Button
+                  variant={card.accent ? "secondary" : card.variant}
+                  size="sm"
+                  fullWidth
+                  style={card.accent ? { background: "rgba(255,255,255,0.18)", color: "#fff", border: "1px solid rgba(255,255,255,0.25)" } : {}}
+                >
+                  {card.label}
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                    <path d="M1 6h10M7 2l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </Button>
+              </Link>
             </motion.div>
           ))}
         </div>

@@ -26,24 +26,17 @@ const DEMO_ACCOUNTS = [
 ];
 
 // ─── BRAND PANEL (LEFT) ───────────────────────────────────────────────────────
-function BrandPanel({ mode }) {
-  const isDark = mode === "dark";
-
+function BrandPanel() {
   const stats = [
     { value: "12,400+", label: "Animals rescued" },
     { value: "380+", label: "NGO partners" },
     { value: "94%", label: "Response rate" },
   ];
 
-  const nodes = [
-    { x: "18%", y: "22%", r: 5, d: 0 },
-    { x: "72%", y: "15%", r: 4, d: 0.4 },
-    { x: "45%", y: "38%", r: 7, d: 0.8 },
-    { x: "28%", y: "58%", r: 4, d: 0.2 },
-    { x: "65%", y: "52%", r: 6, d: 1.0 },
-    { x: "82%", y: "72%", r: 4, d: 0.6 },
-    { x: "15%", y: "78%", r: 5, d: 1.2 },
-    { x: "52%", y: "70%", r: 3, d: 0.3 },
+  const features = [
+    { text: "AI-powered health scan & triage" },
+    { text: "Real-time rescue coordination" },
+    { text: "NGO & volunteer network" },
   ];
 
   return (
@@ -52,9 +45,7 @@ function BrandPanel({ mode }) {
         position: "relative",
         width: "100%",
         height: "100%",
-        background: isDark
-          ? "linear-gradient(145deg, #050D18 0%, #0A1828 50%, #071520 100%)"
-          : "linear-gradient(145deg, #0A2218 0%, #0F3A26 50%, #082B1C 100%)",
+        background: "linear-gradient(155deg, #0B1524 0%, #101D30 55%, #0C1D3A 100%)",
         overflow: "hidden",
         display: "flex",
         flexDirection: "column",
@@ -62,102 +53,52 @@ function BrandPanel({ mode }) {
         padding: "clamp(2rem, 4vw, 3rem)",
       }}
     >
-      {/* Grid overlay */}
+      {/* Grid pattern */}
       <div
         style={{
           position: "absolute",
           inset: 0,
           backgroundImage:
-            "linear-gradient(rgba(46,210,130,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(46,210,130,0.04) 1px, transparent 1px)",
-          backgroundSize: "44px 44px",
+            "linear-gradient(rgba(56,189,248,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(56,189,248,0.03) 1px, transparent 1px)",
+          backgroundSize: "52px 52px",
           pointerEvents: "none",
         }}
       />
 
-      {/* Ambient glow */}
+      {/* Radial glow */}
       <div
         style={{
           position: "absolute",
-          top: "35%",
+          top: "30%",
           left: "50%",
           transform: "translate(-50%, -50%)",
-          width: 480,
-          height: 480,
-          background: "radial-gradient(circle, rgba(22,160,86,0.16) 0%, transparent 65%)",
+          width: 500,
+          height: 500,
+          background: "radial-gradient(circle, rgba(29,111,164,0.12) 0%, transparent 60%)",
           pointerEvents: "none",
         }}
       />
 
-      {/* Network visualization */}
-      <div style={{ position: "absolute", inset: 0, pointerEvents: "none" }}>
-        <svg
-          width="100%"
-          height="100%"
-          style={{ position: "absolute", inset: 0 }}
-          preserveAspectRatio="none"
-        >
-          <line x1="18%" y1="22%" x2="45%" y2="38%" stroke="rgba(46,210,130,0.14)" strokeWidth="1" />
-          <line x1="72%" y1="15%" x2="45%" y2="38%" stroke="rgba(46,210,130,0.10)" strokeWidth="1" />
-          <line x1="45%" y1="38%" x2="28%" y2="58%" stroke="rgba(46,210,130,0.12)" strokeWidth="1" />
-          <line x1="45%" y1="38%" x2="65%" y2="52%" stroke="rgba(46,210,130,0.10)" strokeWidth="1" />
-          <line x1="28%" y1="58%" x2="15%" y2="78%" stroke="rgba(46,210,130,0.08)" strokeWidth="1" />
-          <line x1="65%" y1="52%" x2="82%" y2="72%" stroke="rgba(46,210,130,0.08)" strokeWidth="1" />
-          <line x1="28%" y1="58%" x2="52%" y2="70%" stroke="rgba(46,210,130,0.10)" strokeWidth="1" />
-          <line x1="65%" y1="52%" x2="52%" y2="70%" stroke="rgba(46,210,130,0.08)" strokeWidth="1" />
-        </svg>
-        {nodes.map((n, i) => (
-          <div
-            key={i}
-            style={{
-              position: "absolute",
-              left: n.x,
-              top: n.y,
-              width: n.r * 2,
-              height: n.r * 2,
-              borderRadius: "50%",
-              background: "rgba(46,210,130,0.6)",
-              boxShadow: "0 0 10px rgba(46,210,130,0.35)",
-              transform: "translate(-50%, -50%)",
-              animation: `rqNodePulse 3s ease-in-out ${n.d}s infinite`,
-            }}
-          />
-        ))}
-      </div>
-
       {/* Logo */}
       <div style={{ position: "relative", zIndex: 2 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "0.65rem", marginBottom: "0.35rem" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.65rem", marginBottom: "0.4rem" }}>
           <div
             style={{
-              width: 36,
-              height: 36,
-              borderRadius: 10,
-              background: "linear-gradient(135deg, #16A056 0%, #0F7A40 100%)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              boxShadow: "0 4px 18px rgba(22,160,86,0.45)",
-              flexShrink: 0,
+              width: 36, height: 36, borderRadius: 10,
+              background: "linear-gradient(135deg, #1D6FA4 0%, #38BDF8 100%)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              boxShadow: "0 4px 16px rgba(56,189,248,0.3)",
             }}
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-              <path d="M12 2L3 7v10l9 5 9-5V7L12 2z" stroke="white" strokeWidth="1.8" strokeLinejoin="round" />
-              <circle cx="12" cy="12" r="3" fill="rgba(255,255,255,0.92)" />
+              <path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </div>
-          <span style={{ fontSize: "1.15rem", fontWeight: 700, color: "#fff", letterSpacing: "-0.015em" }}>
-            ResQNet
+          <span style={{ fontSize: "1.15rem", fontWeight: 800, color: "#fff", letterSpacing: "-0.03em" }}>
+            ResQ<span style={{ color: "#38BDF8" }}>Net</span>
           </span>
         </div>
-        <span
-          style={{
-            fontSize: "0.66rem",
-            fontWeight: 600,
-            color: "rgba(46,210,130,0.65)",
-            letterSpacing: "0.18em",
-            textTransform: "uppercase",
-          }}
-        >
+        <span style={{ fontSize: "0.66rem", fontWeight: 600, color: "rgba(56,189,248,0.55)", letterSpacing: "0.14em", textTransform: "uppercase" }}>
           Animal Rescue Intelligence
         </span>
       </div>
@@ -165,56 +106,44 @@ function BrandPanel({ mode }) {
       {/* Mission copy */}
       <div
         style={{
-          position: "relative",
-          zIndex: 2,
-          flex: 1,
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
+          position: "relative", zIndex: 2, flex: 1,
+          display: "flex", flexDirection: "column", justifyContent: "center",
           padding: "2.5rem 0",
         }}
       >
         <p
           style={{
-            fontSize: "clamp(1.55rem, 2.6vw, 2.15rem)",
-            fontWeight: 800,
-            lineHeight: 1.22,
-            color: "#fff",
-            marginBottom: "1rem",
-            letterSpacing: "-0.025em",
+            fontSize: "clamp(1.4rem, 2.2vw, 1.85rem)",
+            fontWeight: 800, lineHeight: 1.25,
+            color: "#fff", marginBottom: "0.75rem", letterSpacing: "-0.025em",
           }}
         >
-          Every second counts
-          <br />
-          <span style={{ color: "rgba(46,210,130,0.82)" }}>in a rescue.</span>
+          Every second counts<br />
+          <span style={{ color: "#38BDF8" }}>in a rescue.</span>
         </p>
         <p
           style={{
-            fontSize: "0.87rem",
-            color: "rgba(255,255,255,0.44)",
-            lineHeight: 1.72,
-            maxWidth: 310,
+            fontSize: "0.85rem", color: "rgba(255,255,255,0.42)",
+            lineHeight: 1.75, maxWidth: 310,
           }}
         >
-          Coordinating NGOs, volunteers, and AI-powered triage — built for the teams on the ground.
+          Coordinating NGOs, volunteers, and AI-powered triage — built for teams on the ground.
         </p>
 
-        {/* Feature pills */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem", marginTop: "2rem" }}>
-          {[
-            { icon: "◈", text: "AI health scan & triage" },
-            { icon: "◎", text: "Real-time rescue coordination" },
-            { icon: "◉", text: "NGO & volunteer network" },
-          ].map((f) => (
-            <div
-              key={f.text}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "0.65rem",
-              }}
-            >
-              <span style={{ fontSize: "0.75rem", color: "rgba(46,210,130,0.7)" }}>{f.icon}</span>
+        {/* Feature list */}
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.65rem", marginTop: "1.75rem" }}>
+          {features.map((f) => (
+            <div key={f.text} style={{ display: "flex", alignItems: "center", gap: "0.65rem" }}>
+              <div style={{
+                width: 20, height: 20, borderRadius: 6,
+                background: "rgba(56,189,248,0.12)",
+                border: "1px solid rgba(56,189,248,0.25)",
+                display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+              }}>
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                  <path d="M1.5 5L4 7.5 8.5 2.5" stroke="#38BDF8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
               <span style={{ fontSize: "0.8rem", color: "rgba(255,255,255,0.5)" }}>{f.text}</span>
             </div>
           ))}
@@ -222,52 +151,32 @@ function BrandPanel({ mode }) {
       </div>
 
       {/* Stats */}
-      <div
-        style={{
-          position: "relative",
-          zIndex: 2,
-          display: "grid",
-          gridTemplateColumns: "repeat(3, 1fr)",
-          gap: "0.5rem",
-        }}
-      >
+      <div style={{ position: "relative", zIndex: 2, display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "0.5rem" }}>
         {stats.map((s) => (
           <div
             key={s.label}
             style={{
-              background: "rgba(255,255,255,0.055)",
+              background: "rgba(255,255,255,0.05)",
               backdropFilter: "blur(8px)",
-              border: "1px solid rgba(255,255,255,0.09)",
+              border: "1px solid rgba(255,255,255,0.08)",
               borderRadius: 10,
-              padding: "0.7rem 0.8rem",
+              padding: "0.75rem 0.85rem",
             }}
           >
-            <div
-              style={{
-                fontSize: "1.05rem",
-                fontWeight: 800,
-                color: "#fff",
-                letterSpacing: "-0.02em",
-              }}
-            >
+            <div style={{ fontSize: "1.05rem", fontWeight: 800, color: "#fff", letterSpacing: "-0.025em" }}>
               {s.value}
             </div>
-            <div style={{ fontSize: "0.67rem", color: "rgba(255,255,255,0.38)", marginTop: 2 }}>
+            <div style={{ fontSize: "0.66rem", color: "rgba(255,255,255,0.38)", marginTop: 2 }}>
               {s.label}
             </div>
           </div>
         ))}
       </div>
-
-      <style>{`
-        @keyframes rqNodePulse {
-          0%, 100% { opacity: 0.45; transform: translate(-50%, -50%) scale(1); }
-          50% { opacity: 0.95; transform: translate(-50%, -50%) scale(1.6); }
-        }
-      `}</style>
     </div>
   );
 }
+
+
 
 // ─── AUTH INPUT ───────────────────────────────────────────────────────────────
 function AuthInput({ label, type = "text", value, onChange, placeholder, autoComplete, T }) {
@@ -297,7 +206,7 @@ function AuthInput({ label, type = "text", value, onChange, placeholder, autoCom
           outline: "none",
           boxSizing: "border-box",
           transition: "border-color 0.18s, box-shadow 0.18s",
-          boxShadow: focused ? `0 0 0 3px ${T.accentPale}` : "none",
+          boxShadow: focused ? `0 0 0 2px ${T.accentPale}` : "none",
         }}
       />
     </label>
@@ -370,7 +279,7 @@ export default function Login() {
           height: "100%",
         }}
       >
-        <BrandPanel mode={mode} />
+        <BrandPanel />
       </div>
 
       {/* ── RIGHT: Form ── */}
@@ -445,7 +354,7 @@ export default function Login() {
             </div>
             <h1
               style={{
-                fontSize: "clamp(1.65rem, 3vw, 2.05rem)",
+                fontSize: "clamp(1.5rem, 2.5vw, 1.85rem)",
                 fontWeight: 800,
                 color: T.text,
                 letterSpacing: "-0.028em",
@@ -568,7 +477,7 @@ export default function Login() {
                 alignItems: "center",
                 justifyContent: "center",
                 gap: "0.5rem",
-                boxShadow: `0 4px 16px ${T.accentGlow}`,
+                boxShadow: `0 2px 10px ${T.accentGlow}`,
               }}
             >
               {loading ? (

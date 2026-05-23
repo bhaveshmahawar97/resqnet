@@ -24,13 +24,13 @@ function StatCard({ stat, active }) {
       initial={{ opacity: 0, y: 24 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      whileHover={{ y: -4, boxShadow: `0 12px 40px ${stat.color}22` }}
+      whileHover={{ y: -2 }}
       style={{
         background: T.bgCard,
-        borderRadius: 16,
+        borderRadius: 14,
         border: `1px solid ${T.border}`,
         padding: "1.5rem",
-        boxShadow: `0 2px 12px ${T.shadow}`,
+        boxShadow: T.shadow,
         transition: "box-shadow 0.3s",
         position: "relative",
         overflow: "hidden",
@@ -56,7 +56,7 @@ function StatCard({ stat, active }) {
       </div>
 
       <div style={{ display: "flex", alignItems: "baseline", gap: "0.1rem", marginBottom: "0.25rem" }}>
-        <span style={{ fontSize: "clamp(1.8rem, 4vw, 2.4rem)", fontWeight: 900, color: stat.color, letterSpacing: "-0.04em", lineHeight: 1 }}>
+        <span style={{ fontSize: "clamp(1.4rem, 3vw, 1.9rem)", fontWeight: 800, color: stat.color, letterSpacing: "-0.04em", lineHeight: 1 }}>
           {count.toLocaleString()}
         </span>
         <span style={{ fontSize: "1.1rem", fontWeight: 800, color: stat.color }}>{stat.suffix}</span>

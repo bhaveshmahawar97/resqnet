@@ -155,19 +155,7 @@ export default function AdoptionGrid() {
           position: "relative",
         }}
       >
-        {/* Accent stripe */}
-        <div
-          style={{
-            position: "absolute",
-            left: 0,
-            top: 0,
-            width: "3px",
-            height: "100%",
-            background: `linear-gradient(to bottom, transparent, ${T.accent}, transparent)`,
-          }}
-        />
-
-        <div style={{ width: "100%", maxWidth: "1240px", margin: "0 auto", padding: "0 clamp(1.25rem, 4vw, 3.5rem)" }}>
+        <div style={{ width: "100%", maxWidth: 1200, margin: "0 auto", padding: "0 clamp(1.25rem, 4vw, 3rem)" }}>
           {/* Section header */}
           <motion.div
             initial="hidden"
@@ -179,29 +167,22 @@ export default function AdoptionGrid() {
               justifyContent: "space-between",
               alignItems: "flex-end",
               flexWrap: "wrap",
-              gap: "1.25rem",
+              gap: "1rem",
               marginBottom: "clamp(1.5rem, 4vw, 2.5rem)",
             }}
           >
             <div>
-              <Label>Adoption Hub</Label>
-              <h2
-                style={{
-                  fontSize: "clamp(1.6rem, 4vw, 2.8rem)",
-                  fontWeight: 800,
-                  letterSpacing: "-0.035em",
-                  color: T.text,
-                  margin: 0,
-                }}
-              >
-                Find your forever<br />companion.
+              <div style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem", background: T.accentSurface || T.accentPale, border: `1px solid ${T.accentGlow}`, borderRadius: 9999, padding: "0.28rem 0.85rem", marginBottom: "0.85rem" }}>
+                <span style={{ width: 5, height: 5, borderRadius: "50%", background: T.accent, display: "inline-block" }} />
+                <span style={{ fontSize: "0.68rem", fontWeight: 700, color: T.accent, letterSpacing: "0.1em", textTransform: "uppercase" }}>Adoption Hub</span>
+              </div>
+              <h2 style={{ fontSize: "clamp(1.5rem, 3.5vw, 2.2rem)", fontWeight: 800, letterSpacing: "-0.035em", color: T.textHeading, margin: 0, lineHeight: 1.2 }}>
+                Find your forever companion
               </h2>
             </div>
-            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-              <span style={{ fontSize: "0.78rem", color: T.textMuted }}>
-                {filtered.length} animal{filtered.length !== 1 ? "s" : ""} listed
-              </span>
-            </div>
+            <span style={{ fontSize: "0.76rem", color: T.textMuted }}>
+              {filtered.length} animal{filtered.length !== 1 ? "s" : ""}
+            </span>
           </motion.div>
 
           {loading && <p style={{ padding: 16, color: T.textMuted }}>Loading adoptable animals…</p>}

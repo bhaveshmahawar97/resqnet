@@ -17,7 +17,7 @@ export default function ScannerResult({ result }) {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.45 }}
         style={{
-          borderRadius: 24,
+          borderRadius: 14,
           border: `1px solid ${T.border}`,
           background: T.bgCard,
           padding: "1.5rem",
@@ -69,7 +69,7 @@ export default function ScannerResult({ result }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.45 }}
       style={{
-        borderRadius: 24,
+        borderRadius: 14,
         border: `1px solid ${T.border}`,
         background: T.bgCard,
         padding: "1.5rem",

@@ -30,7 +30,7 @@ export default function NGOOnboarding() {
         <div style={{ display: "grid", gridTemplateColumns: vp.mobile ? "1fr" : vp.tablet ? "1fr 1fr" : "repeat(4, 1fr)", gap: "clamp(0.75rem, 2vw, 1.25rem)" }}>
           {steps.map((s, i) => (
             <motion.div key={s.n} custom={i} initial="hidden" whileInView="show" viewport={{ once: true }} variants={vFadeUp}
-              style={{ background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 18, padding: "clamp(1.2rem, 2.5vw, 1.75rem)", position: "relative", overflow: "hidden", boxShadow: `0 2px 14px ${T.shadow}` }}>
+              style={{ background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 14, padding: "clamp(1.2rem, 2.5vw, 1.75rem)", position: "relative", overflow: "hidden", boxShadow: T.shadow }}>
               {/* Number watermark */}
               <div style={{ position: "absolute", top: "-0.5rem", right: "0.75rem", fontSize: "3.5rem", fontWeight: 900, color: T.accentPale, letterSpacing: "-0.06em", lineHeight: 1, userSelect: "none" }}>{s.n}</div>
               <div style={{ width: 36, height: 36, borderRadius: 10, background: T.accentPale, border: `1px solid ${T.accentGlow}`, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "1rem" }}>

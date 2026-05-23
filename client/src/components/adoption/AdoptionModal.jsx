@@ -49,12 +49,8 @@ export default function AdoptionModal({ animal, onClose }) {
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         onClick={onClose}
+        className="rq-modal-overlay"
         style={{
-          position: "fixed",
-          inset: 0,
-          zIndex: 500,
-          background: "rgba(0,0,0,0.55)",
-          backdropFilter: "blur(8px)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -68,69 +64,61 @@ export default function AdoptionModal({ animal, onClose }) {
           exit={{ opacity: 0, scale: 0.95, y: 12 }}
           transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
           onClick={(e) => e.stopPropagation()}
+          className="rq-modal"
           style={{
-            background: T.bgCard,
-            border: `1px solid ${T.border}`,
-            borderRadius: 22,
-            padding: "clamp(1.5rem, 4vw, 2.2rem)",
             maxWidth: 520,
             width: "100%",
-            maxHeight: "90vh",
-            overflowY: "auto",
-            boxShadow: `0 40px 100px ${T.shadowDeep}`,
-            position: "relative",
           }}
         >
-          {/* Close */}
-          <button
-            onClick={onClose}
-            style={{
-              position: "absolute",
-              top: "1rem",
-              right: "1rem",
-              width: 32,
-              height: 32,
-              borderRadius: 8,
-              border: `1px solid ${T.border}`,
-              background: T.bgAlt,
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              color: T.textSub,
-              fontSize: "1.1rem",
-              lineHeight: 1,
-            }}
-          >
-            ✕
-          </button>
-
-          {/* Animal header */}
-          <div style={{ display: "flex", gap: "1rem", alignItems: "center", marginBottom: "1.5rem" }}>
-            <img
-              src={animal.img}
-              alt={animal.name}
-              style={{ width: 68, height: 68, borderRadius: 14, objectFit: "cover", border: `2px solid ${T.accentGlow}`, flexShrink: 0 }}
-            />
-            <div>
-              <div style={{ fontSize: "1.2rem", fontWeight: 800, color: T.text }}>{animal.name}</div>
-              <div style={{ fontSize: "0.76rem", color: T.textSub }}>{animal.breed} · {animal.age} · {animal.city}</div>
-              <div
-                style={{
-                  marginTop: "0.35rem",
-                  display: "inline-block",
-                  fontSize: "0.6rem",
-                  fontWeight: 700,
-                  color: "#fff",
-                  background: animal.status === "Available" ? "#16A056" : animal.status === "In Foster" ? "#F59E0B" : "#3B82F6",
-                  padding: "0.15rem 0.6rem",
-                  borderRadius: 20,
-                }}
-              >
-                {animal.status}
+          {/* Header */}
+          <div className="rq-modal-header" style={{ alignItems: "flex-start" }}>
+            <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
+              <img
+                src={animal.img}
+                alt={animal.name}
+                style={{ width: 68, height: 68, borderRadius: 14, objectFit: "cover", border: `2px solid ${T.accentGlow}`, flexShrink: 0 }}
+              />
+              <div>
+                <div style={{ fontSize: "1.2rem", fontWeight: 800, color: T.text }}>{animal.name}</div>
+                <div style={{ fontSize: "0.76rem", color: T.textSub }}>{animal.breed} · {animal.age} · {animal.city}</div>
+                <div
+                  style={{
+                    marginTop: "0.35rem",
+                    display: "inline-block",
+                    fontSize: "0.6rem",
+                    fontWeight: 700,
+                    color: "#fff",
+                    background: animal.status === "Available" ? "#16A056" : animal.status === "In Foster" ? "#F59E0B" : "#3B82F6",
+                    padding: "0.15rem 0.6rem",
+                    borderRadius: 20,
+                  }}
+                >
+                  {animal.status}
+                </div>
               </div>
             </div>
+            <button
+              onClick={onClose}
+              style={{
+                width: 32,
+                height: 32,
+                borderRadius: 8,
+                border: `1px solid ${T.border}`,
+                background: T.bgAlt,
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: T.textSub,
+                fontSize: "1.1rem",
+                lineHeight: 1,
+              }}
+            >
+              ✕
+            </button>
           </div>
+
+          <div className="rq-modal-body">
 
           {/* Mission tag */}
           <div
@@ -202,22 +190,26 @@ export default function AdoptionModal({ animal, onClose }) {
             onChange={(e) => setMessage(e.target.value)}
             placeholder="Tell the NGO why you want to adopt…"
             rows={3}
-            style={{ width: "100%", marginBottom: "1rem", padding: "0.75rem", borderRadius: 10, border: `1px solid ${T.border}`, background: T.bgAlt, color: T.text, fontFamily: "inherit" }}
+            className="rq-textarea"
+            style={{ marginBottom: "1rem" }}
           />
           {feedback && <p style={{ fontSize: "0.85rem", color: T.accent, marginBottom: "0.75rem" }}>{feedback}</p>}
 
-          <div style={{ display: "flex", gap: "0.6rem" }}>
-            <Button variant="primary" size="lg" style={{ flex: 1 }} onClick={handleApply} disabled={submitting}>
-              {submitting ? "Submitting…" : `Apply to adopt ${animal.name}`}
-            </Button>
-            <Button variant="ghost" onClick={onClose}>
-              Cancel
-            </Button>
           </div>
 
-          <p style={{ marginTop: "0.85rem", fontSize: "0.65rem", color: T.textMuted, textAlign: "center", lineHeight: 1.6 }}>
-            No fees for adopters · All adoptions facilitated by verified NGOs · Post-adoption support included
-          </p>
+          <div className="rq-modal-footer" style={{ flexDirection: "column", alignItems: "stretch", gap: "0.85rem" }}>
+            <div style={{ display: "flex", gap: "0.6rem" }}>
+              <Button variant="primary" size="lg" style={{ flex: 1 }} onClick={handleApply} disabled={submitting}>
+                {submitting ? "Submitting…" : `Apply to adopt ${animal.name}`}
+              </Button>
+              <Button variant="ghost" onClick={onClose}>
+                Cancel
+              </Button>
+            </div>
+            <p style={{ fontSize: "0.65rem", color: T.textMuted, textAlign: "center", lineHeight: 1.6 }}>
+              No fees for adopters · All adoptions facilitated by verified NGOs · Post-adoption support included
+            </p>
+          </div>
         </motion.div>
       </motion.div>
     </AnimatePresence>

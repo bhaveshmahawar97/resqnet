@@ -9,7 +9,8 @@ export const createNotification = async ({
   title,
   message,
   priority = "medium",
-  relatedRescue = null,
+  relatedEntity = null,
+  relatedEntityType = "RescueRequest",
   data = {},
 }) => {
   if (!recipientId) return null;
@@ -20,7 +21,8 @@ export const createNotification = async ({
     title,
     message,
     priority,
-    relatedRescue,
+    relatedEntity,
+    relatedEntityType,
     data,
   });
 };
@@ -48,7 +50,8 @@ export const notifyNewRescue = async (rescue, creator) => {
       title: `New ${rescue.severity} rescue: ${rescue.animalType}`,
       message: `${rescue.address} — ${rescue.condition?.slice(0, 120) || "Emergency reported"}`,
       priority,
-      relatedRescue: rescue._id,
+      relatedEntity: rescue._id,
+      relatedEntityType: "RescueRequest",
       data: { severity: rescue.severity, animalType: rescue.animalType },
     }));
 
@@ -74,7 +77,8 @@ export const notifyStatusChange = async (rescue, actor, newStatus) => {
     title: `Rescue status: ${newStatus}`,
     message: `${rescue.animalType} at ${rescue.address} is now ${newStatus.replace("_", " ")}`,
     priority: "medium",
-    relatedRescue: rescue._id,
+    relatedEntity: rescue._id,
+    relatedEntityType: "RescueRequest",
     data: { status: newStatus },
   }));
 
@@ -88,11 +92,31 @@ export const getUserNotifications = async (userId, { page = 1, limit = 20, unrea
   if (unreadOnly) query.read = false;
 
   const [items, total] = await Promise.all([
-    Notification.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
+    Notification.find(query)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .populate("relatedEntity")
+      .lean(),
     Notification.countDocuments(query),
   ]);
 
   return { items, total, page, limit };
+};
+
+export const markAsRead = async (notificationId, userId) => {
+  return Notification.findOneAndUpdate(
+    { _id: notificationId, recipient: userId },
+    { read: true, readAt: new Date() },
+    { new: true }
+  ).lean();
+};
+
+export const markAllAsRead = async (userId) => {
+  return Notification.updateMany(
+    { recipient: userId, read: false },
+    { read: true, readAt: new Date() }
+  );
 };
 
 export default {
@@ -100,4 +124,6 @@ export default {
   notifyNewRescue,
   notifyStatusChange,
   getUserNotifications,
+  markAsRead,
+  markAllAsRead,
 };

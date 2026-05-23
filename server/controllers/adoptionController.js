@@ -7,6 +7,10 @@ import {
   reviewApplication,
   getAdoptionStats,
 } from "../services/adoptionService.js";
+import {
+  notifyAdoptionSubmitted,
+  notifyAdoptionStatusChange,
+} from "../services/adoptionNotificationService.js";
 import { sendSuccess, sendError } from "../utils/apiResponse.js";
 
 export const getAdoptionListings = async (req, res) => {
@@ -58,6 +62,9 @@ export const postAdoptionApplication = async (req, res) => {
       userId: req.user._id,
       message: req.body.message || "",
     });
+
+    await notifyAdoptionSubmitted(application, application.adoption);
+
     return sendSuccess(res, {
       status: 201,
       message: "Adoption application submitted",
@@ -101,6 +108,13 @@ export const putReviewAdoptionApplication = async (req, res) => {
       status,
       reviewNote,
     });
+
+    await notifyAdoptionStatusChange(
+      application,
+      status,
+      application.adoption?.animalName || application.adoption?.animalType
+    );
+
     return sendSuccess(res, {
       message: `Application ${status}`,
       data: application,

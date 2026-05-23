@@ -1,67 +1,49 @@
-import { useRef } from "react";
-import { motion, useInView } from "framer-motion";
+import { useRef, useState } from "react";
+import { motion } from "framer-motion";
 import { useT } from "../../context/ThemeContext";
-import Label from "../ui/Label";
 import useCountUp from "../../hooks/useCountUp";
-import { vFadeUp } from "../../animations/variants";
 import { useAdoption } from "../../context/AdoptionContext";
 
-function StatPill({ value, suffix, label, i }) {
+const FALLBACK = [
+  { value: 0, suffix: "", label: "Available Now", desc: "Animals ready for adoption" },
+  { value: 0, suffix: "", label: "Adopted", desc: "Successfully rehomed" },
+  { value: 0, suffix: "", label: "In Review", desc: "Applications being processed" },
+  { value: 0, suffix: "", label: "Total Listings", desc: "All-time adoption listings" },
+];
+
+function StatCard({ stat, index, active }) {
   const { T } = useT();
-  const ref    = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-80px" });
-  const count  = useCountUp(value, inView);
+  const count = useCountUp(stat.value, active);
 
   return (
     <motion.div
-      ref={ref}
-      custom={i}
-      initial="hidden"
-      whileInView="show"
-      viewport={{ once: true, margin: "-80px" }}
-      variants={vFadeUp}
-      whileHover={{ y: -4, transition: { duration: 0.25 } }}
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ delay: index * 0.08, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+      whileHover={{ y: -1 }}
       style={{
+        flex: "1 1 160px",
+        minWidth: 0,
+        padding: "1.5rem 1.25rem",
         background: T.bgCard,
         border: `1px solid ${T.border}`,
-        borderRadius: 18,
-        padding: "clamp(1.2rem, 2.5vw, 1.8rem) clamp(1.25rem, 3vw, 2.25rem)",
+        borderRadius: 14,
+        boxShadow: T.shadow,
         textAlign: "center",
-        flex: "1 1 clamp(130px, 18vw, 210px)",
-        boxShadow: `0 2px 16px ${T.shadow}`,
-        cursor: "default",
+        position: "relative",
+        overflow: "hidden",
       }}
     >
-      <div
-        style={{
-          fontSize: "clamp(1.9rem, 5vw, 3rem)",
-          fontWeight: 900,
-          color: T.text,
-          letterSpacing: "-0.05em",
-          lineHeight: 1,
-        }}
-      >
-        {count.toLocaleString()}{suffix}
+      {/* Left accent line */}
+      <div style={{ position: "absolute", left: 0, top: "25%", bottom: "25%", width: 3, background: T.accent, borderRadius: "0 3px 3px 0", opacity: 0.5 }} />
+
+      <div style={{ fontSize: "clamp(1.4rem, 2.5vw, 2rem)", fontWeight: 800, color: T.textHeading, letterSpacing: "-0.035em", lineHeight: 1, marginBottom: "0.35rem" }}>
+        {active ? count.toLocaleString() : stat.value.toLocaleString()}
+        <span style={{ color: T.accent, fontSize: "0.7em" }}>{stat.suffix}</span>
       </div>
-      <div
-        style={{
-          fontSize: "clamp(0.72rem, 1.5vw, 0.82rem)",
-          color: T.textSub,
-          marginTop: "0.45rem",
-          fontWeight: 500,
-        }}
-      >
-        {label}
-      </div>
-      <div
-        style={{
-          width: 24,
-          height: 2,
-          background: T.accent,
-          margin: "0.9rem auto 0",
-          borderRadius: 2,
-        }}
-      />
+      <div style={{ fontSize: "0.82rem", fontWeight: 600, color: T.text, marginBottom: "0.3rem" }}>{stat.label}</div>
+      <div style={{ fontSize: "0.72rem", color: T.textMuted, lineHeight: 1.45 }}>{stat.desc}</div>
     </motion.div>
   );
 }
@@ -69,61 +51,51 @@ function StatPill({ value, suffix, label, i }) {
 export default function AdoptionStats() {
   const { T } = useT();
   const { stats } = useAdoption();
+  const [active, setActive] = useState(false);
 
   const adoptionStats = [
-    { value: stats.listed || 0, suffix: "", label: "Available now", i: 0 },
-    { value: stats.adopted || 0, suffix: "", label: "Successfully adopted", i: 1 },
-    { value: stats.pendingReview || 0, suffix: "", label: "Applications in review", i: 2 },
-    { value: stats.total || 0, suffix: "", label: "Total listings", i: 3 },
+    { value: stats.listed || 0, suffix: "", label: "Available Now", desc: "Animals ready for adoption" },
+    { value: stats.adopted || 0, suffix: "", label: "Adopted", desc: "Successfully rehomed" },
+    { value: stats.pendingReview || 0, suffix: "", label: "In Review", desc: "Applications being processed" },
+    { value: stats.total || 0, suffix: "", label: "Total Listings", desc: "All-time adoption listings" },
   ];
 
   return (
-    <section
-      style={{
-        width: "100%",
-        padding: "clamp(3.5rem, 8vw, 6rem) 0",
-        background: T.bgAlt,
-        position: "relative",
-        overflow: "hidden",
-      }}
-    >
-      <div style={{ width: "100%", maxWidth: "1240px", margin: "0 auto", padding: "0 clamp(1.25rem, 4vw, 3.5rem)" }}>
+    <section style={{ width: "100%", padding: "clamp(3rem, 6vw, 5rem) 0", background: T.bgAlt }}>
+      <div style={{ width: "100%", maxWidth: 1200, margin: "0 auto", padding: "0 clamp(1.25rem, 4vw, 3rem)" }}>
+        {/* Section header */}
         <motion.div
-          initial="hidden"
-          whileInView="show"
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          variants={vFadeUp}
-          style={{
-            textAlign: "center",
-            marginBottom: "clamp(2rem, 5vw, 3.5rem)",
-          }}
+          onViewportEnter={() => setActive(true)}
+          transition={{ duration: 0.45 }}
+          style={{ textAlign: "center", marginBottom: "clamp(2rem, 4vw, 3rem)" }}
         >
-          <Label>Adoption Impact</Label>
-          <h2
+          <div
             style={{
-              fontSize: "clamp(1.6rem, 4vw, 2.8rem)",
-              fontWeight: 800,
-              letterSpacing: "-0.035em",
-              color: T.text,
-              margin: 0,
+              display: "inline-flex", alignItems: "center", gap: "0.4rem",
+              background: T.accentSurface || T.accentPale, border: `1px solid ${T.accentGlow}`,
+              borderRadius: 9999, padding: "0.28rem 0.85rem", marginBottom: "0.85rem",
             }}
           >
-            Every number is<br />a life transformed.
+            <span style={{ width: 5, height: 5, borderRadius: "50%", background: T.accent, display: "inline-block" }} />
+            <span style={{ fontSize: "0.68rem", fontWeight: 700, color: T.accent, letterSpacing: "0.1em", textTransform: "uppercase" }}>
+              Adoption Impact
+            </span>
+          </div>
+
+          <h2 style={{ fontSize: "clamp(1.5rem, 3.5vw, 2.2rem)", fontWeight: 800, color: T.textHeading, letterSpacing: "-0.035em", lineHeight: 1.2, margin: "0 0 0.6rem" }}>
+            Every number is a life transformed
           </h2>
+          <p style={{ fontSize: "0.9rem", color: T.textSub, maxWidth: 480, margin: "0 auto", lineHeight: 1.65 }}>
+            Live adoption data from verified NGO partners across India.
+          </p>
         </motion.div>
 
-        <div
-          style={{
-            display: "flex",
-            gap: "clamp(0.65rem, 1.5vw, 1.25rem)",
-            flexWrap: "wrap",
-            justifyContent: "center",
-            alignItems: "stretch",
-          }}
-        >
-          {adoptionStats.map((s) => (
-            <StatPill key={s.label} {...s} />
-          ))}
+        {/* Stats grid */}
+        <div style={{ display: "flex", gap: "clamp(0.75rem, 1.5vw, 1.25rem)", flexWrap: "wrap", justifyContent: "center" }}>
+          {adoptionStats.map((s, i) => <StatCard key={s.label} stat={s} index={i} active={active} />)}
         </div>
       </div>
     </section>

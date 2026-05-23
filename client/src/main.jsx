@@ -5,6 +5,7 @@ import { ThemeProvider } from "./context/ThemeContext.jsx";
 import { AuthProvider } from "./context/AuthContext.jsx";
 import { RescueProvider } from "./context/RescueContext.jsx";
 import { AdoptionProvider } from "./context/AdoptionContext.jsx";
+import { NotificationProvider } from "./context/NotificationContext.jsx";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import iconUrl from "leaflet/dist/images/marker-icon.png";
@@ -27,9 +28,11 @@ createRoot(document.getElementById("root")).render(
       <AuthProvider>
         <RescueProvider>
           <AdoptionProvider>
-            <BrowserRouter>
-              <App />
-            </BrowserRouter>
+            <NotificationProvider>
+              <BrowserRouter>
+                <App />
+              </BrowserRouter>
+            </NotificationProvider>
           </AdoptionProvider>
         </RescueProvider>
       </AuthProvider>

@@ -45,7 +45,7 @@ export default function NGONetworkMap() {
         </motion.div>
 
         <motion.div initial={{ opacity: 0, x: vp.mobile ? 0 : 40, y: vp.mobile ? 28 : 0 }} whileInView={{ opacity: 1, x: 0, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.85, ease: [0.22, 1, 0.36, 1] }}>
-          <div style={{ borderRadius: 22, overflow: "hidden", boxShadow: `0 40px 100px ${T.shadowDeep}`, border: `1px solid ${T.border}` }}>
+          <div style={{ borderRadius: 14, overflow: "hidden", boxShadow: T.shadowDeep, border: `1px solid ${T.border}` }}>
             <NgoMap ngos={ngos} />
           </div>
         </motion.div>
@@ -61,7 +61,7 @@ export default function NGONetworkMap() {
         {!loading && ngos.length > 0 && (
           <div style={{ display: "grid", gridTemplateColumns: vp.mobile ? "1fr" : "repeat(2, minmax(0, 1fr))", gap: "1rem" }}>
             {ngos.slice(0, 6).map((ngo) => (
-              <div key={ngo.id} style={{ background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 18, padding: "1.15rem" }}>
+              <div key={ngo.id} style={{ background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 10, padding: "1rem" }}>
                 <div style={{ fontWeight: 800, marginBottom: 6 }}>{ngo.name}</div>
                 <div style={{ color: T.textMuted, fontSize: "0.82rem", marginBottom: 10 }}>{ngo.city || "Unknown city"}</div>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>

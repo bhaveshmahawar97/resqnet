@@ -31,7 +31,7 @@ export default function ScannerUpload({
       onClick={() => fileInputRef?.current?.click()}
       style={{
         cursor: "pointer",
-        borderRadius: 24,
+        borderRadius: 14,
         border: `1px solid ${dragging ? T.accent : T.border}`,
         background: dragging ? T.accentPale : T.bgCard,
         padding: "2rem",
@@ -49,7 +49,7 @@ export default function ScannerUpload({
             style={{
               width: 44,
               height: 44,
-              borderRadius: 16,
+              borderRadius: 12,
               background: T.accentPale,
               display: "grid",
               placeItems: "center",
@@ -99,7 +99,7 @@ export default function ScannerUpload({
               flex: 1,
               minWidth: 140,
               padding: "0.95rem 1rem",
-              borderRadius: 14,
+              borderRadius: 10,
               border: "none",
               background: T.accent,
               color: "#fff",
@@ -124,7 +124,7 @@ export default function ScannerUpload({
               flex: 1,
               minWidth: 140,
               padding: "0.95rem 1rem",
-              borderRadius: 14,
+              borderRadius: 10,
               border: `1px solid ${imageFile ? T.accent : T.border}`,
               background: imageFile ? T.accent : T.bgAlt,
               color: imageFile ? "#fff" : T.textMuted,
@@ -146,7 +146,7 @@ export default function ScannerUpload({
             }}
             style={{
               padding: "0.85rem 1rem",
-              borderRadius: 14,
+              borderRadius: 10,
               border: `1px solid ${T.border}`,
               background: T.bgAlt,
               color: T.text,

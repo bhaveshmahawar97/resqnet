@@ -41,11 +41,16 @@ const notificationSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
-    relatedRescue: {
+    relatedEntity: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "RescueRequest",
+      refPath: "relatedEntityType",
       default: null,
       index: true,
+    },
+    relatedEntityType: {
+      type: String,
+      enum: ["RescueRequest", "Adoption", "User", "AdoptionApplication"],
+      default: "RescueRequest",
     },
     data: {
       type: mongoose.Schema.Types.Mixed,

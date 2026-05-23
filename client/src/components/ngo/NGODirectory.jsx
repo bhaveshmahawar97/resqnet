@@ -98,12 +98,12 @@ function NGOCard({ ngo, i }) {
       style={{
         background: hov ? T.bgCardHov : T.bgCard,
         border: `1px solid ${hov ? T.borderHov : T.border}`,
-        borderRadius: 18,
+        borderRadius: 14,
         padding: "clamp(1.1rem, 2.5vw, 1.6rem)",
         cursor: "pointer",
         transition: "all 0.3s ease",
-        transform: hov ? "translateY(-6px)" : "none",
-        boxShadow: hov ? `0 22px 58px ${T.shadowHov}` : `0 2px 14px ${T.shadow}`,
+        transform: hov ? "translateY(-3px)" : "none",
+        boxShadow: hov ? T.shadowHov : T.shadow,
         flex: "1 1 clamp(280px, 30vw, 380px)",
         display: "flex", flexDirection: "column", gap: "1rem",
       }}>
@@ -127,8 +127,7 @@ function NGOCard({ ngo, i }) {
         <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "0.35rem" }}>
           <span style={{ fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: tc.text, background: tc.bg, padding: "0.18rem 0.55rem", borderRadius: 20 }}>{type}</span>
           <div style={{ display: "flex", alignItems: "center", gap: "0.25rem" }}>
-            <motion.div animate={{ opacity: ngo.verified ? [0.5, 1, 0.5] : 1 }} transition={{ duration: 2, repeat: Infinity }}
-              style={{ width: 6, height: 6, borderRadius: "50%", background: ngo.verified ? T.accent : "#F59E0B" }} />
+            <div style={{ width: 5, height: 5, borderRadius: "50%", background: ngo.verified ? T.accent : "#F59E0B" }} />
             <span style={{ fontSize: "0.65rem", color: ngo.verified ? T.accent : "#D97706", fontWeight: 600 }}>{ngo.verified ? "Verified" : "Unverified"}</span>
           </div>
         </div>
@@ -225,20 +224,19 @@ export default function NGODirectory() {
 
   return (
     <section id="for-ngos" style={{ width: "100%", padding: "clamp(3.5rem, 8vw, 6rem) 0", background: T.bg, position: "relative" }}>
-      <div style={{ position: "absolute", left: 0, top: 0, width: "3px", height: "100%", background: `linear-gradient(to bottom, transparent, ${T.accent}, transparent)` }} />
-
-      <div style={{ width: "100%", maxWidth: "1240px", margin: "0 auto", padding: "0 clamp(1.25rem, 4vw, 3.5rem)" }}>
+      <div style={{ width: "100%", maxWidth: 1200, margin: "0 auto", padding: "0 clamp(1.25rem, 4vw, 3rem)" }}>
         <motion.div initial="hidden" whileInView="show" viewport={{ once: true }} variants={vFadeUp}
-          style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexWrap: "wrap", gap: "1.25rem", marginBottom: "clamp(1.5rem, 4vw, 2.5rem)" }}>
+          style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexWrap: "wrap", gap: "1rem", marginBottom: "clamp(1.5rem, 4vw, 2.5rem)" }}>
           <div>
-            <Label>NGO Directory</Label>
-            <h2 style={{ fontSize: "clamp(1.6rem, 4vw, 2.8rem)", fontWeight: 800, letterSpacing: "-0.035em", color: T.text, margin: 0 }}>
-              Verified organizations.<br />Real-world impact.
+            <div style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem", background: T.accentSurface || T.accentPale, border: `1px solid ${T.accentGlow}`, borderRadius: 9999, padding: "0.28rem 0.85rem", marginBottom: "0.85rem" }}>
+              <span style={{ width: 5, height: 5, borderRadius: "50%", background: T.accent, display: "inline-block" }} />
+              <span style={{ fontSize: "0.68rem", fontWeight: 700, color: T.accent, letterSpacing: "0.1em", textTransform: "uppercase" }}>NGO Directory</span>
+            </div>
+            <h2 style={{ fontSize: "clamp(1.5rem, 3.5vw, 2.2rem)", fontWeight: 800, letterSpacing: "-0.035em", color: T.textHeading, margin: 0, lineHeight: 1.2 }}>
+              Verified organizations, real-world impact
             </h2>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-            <span style={{ fontSize: "0.78rem", color: T.textMuted }}>{filtered.length} results</span>
-          </div>
+          <span style={{ fontSize: "0.76rem", color: T.textMuted }}>{filtered.length} results</span>
         </motion.div>
 
         <FilterBar
@@ -256,7 +254,7 @@ export default function NGODirectory() {
                   key={i}
                   style={{
                     width: "clamp(280px, 30vw, 380px)", height: 240,
-                    borderRadius: 18, background: T.bgCard,
+                    borderRadius: 14, background: T.bgCard,
                     border: `1px solid ${T.border}`,
                     boxShadow: `0 2px 14px ${T.shadow}`,
                   }}

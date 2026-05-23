@@ -2,11 +2,12 @@ import { useT } from "../context/ThemeContext";
 import NGOHero from "../components/ngo/NGOHero";
 import NGOStats from "../components/ngo/NGOStats";
 import NGODirectory from "../components/ngo/NGODirectory";
-import NGONetworkMap from "../components/ngo/NGONetworkMap";
-import NGOOnboarding from "../components/ngo/NGOOnboarding";
-import NGOTestimonials from "../components/ngo/NGOTestimonials";
 import NGOPageCTA from "../components/ngo/NGOPageCTA";
 
+/**
+ * NGO Page — concise 4-section layout:
+ * Hero → Stats → Directory → CTA
+ */
 export default function NGOs() {
   const { T } = useT();
 
@@ -15,9 +16,6 @@ export default function NGOs() {
       <NGOHero />
       <NGOStats />
       <NGODirectory />
-      <NGONetworkMap />
-      <NGOOnboarding />
-      <NGOTestimonials />
       <NGOPageCTA />
     </main>
   );

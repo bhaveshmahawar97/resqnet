@@ -24,7 +24,7 @@ export default function ScannerHistoryCard({ scan, onImageError }) {
       style={{
         display: "grid",
         gap: "1rem",
-        borderRadius: 22,
+        borderRadius: 14,
         border: `1px solid ${T.border}`,
         background: T.bgCard,
         overflow: "hidden",

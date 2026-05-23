@@ -4,29 +4,18 @@ import { useT } from "../../../context/ThemeContext";
 import { SEVERITY_COLOR } from "../../../constants/ui";
 import { SYSTEM_HEALTH } from "../../../data/dashboardData";
 import { SectionLabel, Card } from "../DashboardShared";
+import Button from "../../ui/Button";
 
 export function ActionBtn({ label, color, onClick, outline = false }) {
   return (
-    <motion.button
-      whileHover={{ scale: 1.03 }}
-      whileTap={{ scale: 0.97 }}
+    <Button
+      variant={outline ? "outline" : "primary"}
+      size="sm"
       onClick={onClick}
-      type="button"
-      style={{
-        padding: "5px 13px",
-        borderRadius: 7,
-        background: outline ? "transparent" : color,
-        border: `1px solid ${color}${outline ? "60" : ""}`,
-        color: outline ? color : "#fff",
-        fontSize: "0.72rem",
-        fontWeight: 700,
-        cursor: "pointer",
-        fontFamily: "inherit",
-        letterSpacing: "-0.01em",
-      }}
+      style={!outline ? { background: color } : { color, borderColor: color }}
     >
       {label}
-    </motion.button>
+    </Button>
   );
 }
 

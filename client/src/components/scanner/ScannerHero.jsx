@@ -1,31 +1,151 @@
 import { motion, useReducedMotion } from "framer-motion";
 import { useT } from "../../context/ThemeContext";
 import useViewport from "../../hooks/useViewport";
-import Label from "../ui/Label";
 import Button from "../ui/Button";
-import BackgroundOrbs from "../ui/BackgroundOrbs";
-import { vFadeUp, vFade } from "../../animations/variants";
 
-const SYSTEM_BADGES = [ { icon: "🧬", label: "Computer Vision v4" }, { icon: "📡", label: "Live NGO Network" }, { icon: "⚡", label: "Sub-5s Analysis" } ];
+const TRUST_STATS = [
+  { value: "CV v4", label: "Vision Model" },
+  { value: "<5s", label: "Analysis Time" },
+  { value: "312", label: "NGOs Linked" },
+  { value: "94%", label: "Accuracy" },
+];
 
 export default function ScannerHero({ onStartScan }) {
   const { T } = useT();
   const vp = useViewport();
   const reduce = useReducedMotion();
 
+  const fadeUp = {
+    initial: reduce ? {} : { opacity: 0, y: 16 },
+    animate: { opacity: 1, y: 0 },
+  };
+
   return (
-    <section style={{ position: "relative", width: "100%", minHeight: vp.mobile ? "80svh" : "92svh", display: "flex", alignItems: "center", overflow: "hidden", background: T.gradHero, paddingTop: vp.mobile ? 58 : 68 }}>
-      <BackgroundOrbs />
-      {!reduce && (<motion.div animate={{ top: ["0%","100%","0%"] }} transition={{ duration: 6, repeat: Infinity, ease: "linear" }} style={{ position: "absolute", left: 0, right: 0, height: 1, background: `linear-gradient(90deg, transparent 0%, ${T.accent}55 30%, ${T.accent}88 50%, ${T.accent}55 70%, transparent 100%)`, pointerEvents: "none", zIndex: 1 }} />)}
-      <div style={{ position: "relative", zIndex: 2, width: "100%", maxWidth: 1240, margin: "0 auto", padding: `clamp(3rem,10vh,6rem) clamp(1.25rem,5vw,6rem)` }}>
-        <motion.div initial="hidden" animate="show" variants={vFade}><Label>AI Diagnostic Intelligence Terminal</Label></motion.div>
-        <motion.h1 initial="hidden" animate="show" variants={vFadeUp} custom={1} style={{ fontSize: "clamp(2.4rem, 5vw, 5rem)", fontWeight: 900, letterSpacing: "-0.04em", color: T.text, margin: "0 0 1.25rem", lineHeight: 1.04, maxWidth: 740 }}>See What the Animal <span style={{ background: `linear-gradient(100deg, ${T.accent} 0%, ${T.accentDim} 100%)`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>Can't Tell You</span></motion.h1>
-        <motion.p initial="hidden" animate="show" variants={vFadeUp} custom={2} style={{ fontSize: "clamp(0.9rem, 2vw, 1.05rem)", color: T.textSub, maxWidth: 520, lineHeight: 1.75, marginBottom: "2rem" }}>Upload a photo. Our neural vision model detects species, breed, injuries, and urgency — then coordinates the nearest rescue team automatically.</motion.p>
+    <section
+      style={{
+        position: "relative",
+        width: "100%",
+        display: "flex",
+        alignItems: "center",
+        overflow: "hidden",
+        background: T.gradHero,
+      }}
+    >
+      {/* Subtle radial accent */}
+      <div
+        aria-hidden
+        style={{
+          position: "absolute",
+          inset: 0,
+          background: `radial-gradient(ellipse 70% 50% at 50% 38%, ${T.accentPale} 0%, transparent 65%)`,
+          pointerEvents: "none",
+        }}
+      />
 
-        <motion.div initial="hidden" animate="show" variants={vFade} custom={3} style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", marginBottom: "2.5rem" }}>{SYSTEM_BADGES.map((b) => (<span key={b.label} style={{ display: "inline-flex", alignItems: "center", gap: "0.35rem", padding: "0.3rem 0.8rem", borderRadius: 30, border: `1px solid ${T.border}`, background: T.bgGlass, backdropFilter: "blur(14px)", fontSize: "0.72rem", fontWeight: 600, color: T.textSub, letterSpacing: "0.03em" }}><span>{b.icon}</span>{b.label}</span>))}</motion.div>
+      {/* Content */}
+      <div
+        style={{
+          position: "relative",
+          zIndex: 1,
+          width: "100%",
+          maxWidth: 1200,
+          margin: "0 auto",
+          padding: `clamp(4rem, 10vh, 6rem) clamp(1.25rem, 5vw, 5rem) clamp(3rem, 6vh, 4rem)`,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "flex-start",
+        }}
+      >
+        {/* Eyebrow badge */}
+        <motion.div
+          {...fadeUp}
+          transition={{ duration: 0.5, delay: 0.1 }}
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "0.4rem",
+            padding: "0.3rem 0.85rem",
+            borderRadius: 9999,
+            border: `1px solid ${T.border}`,
+            background: T.bgCard,
+            marginBottom: "1.25rem",
+            boxShadow: T.shadowSm,
+          }}
+        >
+          <span
+            style={{
+              width: 5, height: 5, borderRadius: "50%",
+              background: T.success || "#059669", flexShrink: 0,
+            }}
+          />
+          <span style={{
+            fontSize: "0.6875rem", fontWeight: 600, color: T.textSub,
+            letterSpacing: "0.04em",
+          }}>
+            AI Diagnostic Intelligence
+          </span>
+        </motion.div>
 
-        <motion.div initial="hidden" animate="show" variants={vFadeUp} custom={4} style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
-          <Button variant="primary" size="lg" onClick={onStartScan}>🔬 Start AI Scan</Button>
+        {/* Headline */}
+        <motion.h1
+          {...fadeUp}
+          transition={{ duration: 0.6, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+          style={{
+            fontSize: "clamp(2rem, 5vw, 3.5rem)",
+            fontWeight: 800,
+            lineHeight: 1.1,
+            letterSpacing: "-0.04em",
+            color: T.textHeading,
+            margin: "0 0 1rem",
+            maxWidth: 640,
+          }}
+        >
+          See What the Animal{" "}
+          <span style={{ color: T.accent }}>Can't Tell You.</span>
+        </motion.h1>
+
+        {/* Sub-headline */}
+        <motion.p
+          {...fadeUp}
+          transition={{ duration: 0.5, delay: 0.3 }}
+          style={{
+            fontSize: "clamp(0.9rem, 2vw, 1.05rem)",
+            color: T.textSub,
+            margin: "0 0 2rem",
+            maxWidth: 520,
+            lineHeight: 1.7,
+            fontWeight: 400,
+          }}
+        >
+          Upload a photo. Our neural vision model detects species, breed, injuries, and urgency — then coordinates the nearest rescue team.
+        </motion.p>
+
+        {/* CTA + stats row */}
+        <motion.div
+          {...fadeUp}
+          transition={{ duration: 0.5, delay: 0.4 }}
+          style={{
+            display: "flex",
+            gap: "1.5rem",
+            alignItems: "center",
+            flexWrap: "wrap",
+          }}
+        >
+          <Button variant="primary" size="lg" onClick={onStartScan}>Start AI Scan</Button>
+
+          <div style={{ display: "flex", gap: "1.5rem", flexWrap: "wrap" }}>
+            {TRUST_STATS.map((s, i) => (
+              <div key={s.label} style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+                {i > 0 && (
+                  <div style={{ width: 1, height: 20, background: T.border, opacity: 0.5 }} />
+                )}
+                <div>
+                  <div style={{ fontSize: "0.85rem", fontWeight: 800, color: T.textHeading, letterSpacing: "-0.02em", lineHeight: 1 }}>{s.value}</div>
+                  <div style={{ fontSize: "0.58rem", color: T.textMuted, marginTop: 2, fontWeight: 500, letterSpacing: "0.03em", textTransform: "uppercase" }}>{s.label}</div>
+                </div>
+              </div>
+            ))}
+          </div>
         </motion.div>
       </div>
     </section>

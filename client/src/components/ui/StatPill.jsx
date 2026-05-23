@@ -17,22 +17,22 @@ export default function StatPill({ value, suffix, label, i }) {
       whileInView="show"
       viewport={{ once: true, margin: "-80px" }}
       variants={vFadeUp}
-      whileHover={{ y: -4, transition: { duration: 0.25 } }}
+      whileHover={{ y: -2, transition: { duration: 0.2 } }}
       style={{
         background: T.bgCard,
         border: `1px solid ${T.border}`,
-        borderRadius: 18,
+        borderRadius: 14,
         padding: "clamp(1.2rem, 2.5vw, 1.8rem) clamp(1.25rem, 3vw, 2.25rem)",
         textAlign: "center",
         flex: "1 1 clamp(130px, 18vw, 210px)",
-        boxShadow: `0 2px 16px ${T.shadow}`,
+        boxShadow: T.shadow,
         cursor: "default",
       }}
     >
       <div
         style={{
-          fontSize: "clamp(1.9rem, 5vw, 3rem)",
-          fontWeight: 900,
+          fontSize: "clamp(1.6rem, 4vw, 2.25rem)",
+          fontWeight: 800,
           color: T.text,
           letterSpacing: "-0.05em",
           lineHeight: 1,

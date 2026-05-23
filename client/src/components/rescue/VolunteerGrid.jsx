@@ -38,7 +38,7 @@ export default function VolunteerGrid() {
 
   return (
     <section style={{ width: "100%", padding: "clamp(3.5rem, 8vw, 6rem) 0", background: T.bgAlt, position: "relative", overflow: "hidden" }}>
-      <div aria-hidden style={{ position: "absolute", inset: 0, backgroundImage: `linear-gradient(${T.grid} 1px, transparent 1px), linear-gradient(90deg, ${T.grid} 1px, transparent 1px)`, backgroundSize: "80px 80px", pointerEvents: "none" }} />
+
 
       <div style={{ width: "100%", maxWidth: "1240px", margin: "0 auto", padding: "0 clamp(1.25rem, 4vw, 3.5rem)", position: "relative", zIndex: 1 }}>
         <motion.div initial="hidden" whileInView="show" viewport={{ once: true }} variants={vFadeUp} style={{ textAlign: "center", marginBottom: "clamp(2rem, 5vw, 3.5rem)" }}>
@@ -92,10 +92,10 @@ export default function VolunteerGrid() {
                   transition={{ delay: i * 0.07 }}
                   style={{
                     background: T.bgCard,
-                    borderRadius: 16,
-                    border: `1.5px solid ${isAssigned ? T.accent : T.border}`,
+                    borderRadius: 14,
+                    border: `1px solid ${isAssigned ? T.accent : T.border}`,
                     padding: "1.25rem",
-                    boxShadow: isAssigned ? `0 0 20px ${T.accentGlow}` : `0 2px 12px ${T.shadow}`,
+                    boxShadow: T.shadow,
                     transition: "all 0.25s",
                   }}
                 >
@@ -155,24 +155,24 @@ export default function VolunteerGrid() {
         </div>
       </div>
 
-      {/* Profile Modal */}
-      <AnimatePresence>
-        {profileModal && (
+         {profileModal && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setProfileModal(null)}
-            style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.55)", zIndex: 500, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }}
+            className="rq-modal-overlay"
           >
             <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
+              initial={{ scale: 0.94, opacity: 0, y: 16 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.94, opacity: 0, y: 16 }}
+              transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
               onClick={(e) => e.stopPropagation()}
-              style={{ background: T.bgCard, borderRadius: 20, border: `1px solid ${T.border}`, padding: "2rem", maxWidth: 400, width: "100%", boxShadow: `0 24px 80px ${T.shadowDeep}` }}
+              className="rq-modal"
+              style={{ maxWidth: 440, width: "100%" }}
             >
-              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "1.25rem" }}>
+              <div className="rq-modal-header" style={{ borderBottom: "none", paddingBottom: 0 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
                   <div style={{ fontSize: "2.5rem" }}>{profileModal.avatar}</div>
                   <div>
@@ -181,12 +181,26 @@ export default function VolunteerGrid() {
                     <div style={{ fontSize: "0.72rem", color: "#F59E0B", marginTop: 2 }}>⭐ {profileModal.rating} rating • {profileModal.cases} rescues</div>
                   </div>
                 </div>
-                <button onClick={() => setProfileModal(null)} style={{ background: "transparent", border: "none", cursor: "pointer", fontSize: "1.2rem", color: T.textMuted }}>✕</button>
+                <button
+                  onClick={() => setProfileModal(null)}
+                  style={{
+                    width: 32, height: 32, borderRadius: 8,
+                    border: `1px solid ${T.border}`, background: T.bgAlt,
+                    cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+                    color: T.textSub, fontSize: "1.1rem", lineHeight: 1,
+                  }}
+                >
+                  ✕
+                </button>
               </div>
-              <div style={{ fontSize: "0.85rem", color: T.textSub, lineHeight: 1.7, marginBottom: "1.25rem" }}>
-                Certified animal rescue specialist with {profileModal.cases}+ successful rescue operations. Available for emergency dispatch across the region.
+              
+              <div className="rq-modal-body">
+                <div style={{ fontSize: "0.85rem", color: T.textSub, lineHeight: 1.7 }}>
+                  Certified animal rescue specialist with {profileModal.cases}+ successful rescue operations. Available for emergency dispatch across the region.
+                </div>
               </div>
-              <div style={{ display: "flex", gap: "0.75rem" }}>
+              
+              <div className="rq-modal-footer">
                 <Button variant="primary" onClick={() => { setAssigned((s) => new Set([...s, profileModal.id])); setProfileModal(null); }} style={{ flex: 1 }}>
                   Assign Volunteer
                 </Button>

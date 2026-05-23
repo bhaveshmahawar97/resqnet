@@ -1,85 +1,189 @@
-import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { useT } from "../../context/ThemeContext";
 import useViewport from "../../hooks/useViewport";
-import { vFade } from "../../animations/variants";
-import Btn from "../ui/Button";
-import Orbs from "../ui/BackgroundOrbs";
+import Button from "../ui/Button";
+
+const TRUST_STATS = [
+  { value: "312", label: "Verified NGOs" },
+  { value: "18", label: "States Active" },
+  { value: "94%", label: "Response Rate" },
+  { value: "48k+", label: "Animals Rescued" },
+];
 
 export default function NGOHero() {
   const { T } = useT();
   const vp = useViewport();
   const reduce = useReducedMotion();
-  const { scrollY } = useScroll();
-  const parallaxY = useTransform(scrollY, [0, 600], [0, reduce ? 0 : vp.mobile ? 30 : 90]);
-  const heroOp = useTransform(scrollY, [0, 420], [1, 0]);
-  const badges = ["312 Active NGOs", "18 States", "Verified Partners"];
+
+  const fadeUp = {
+    initial: reduce ? {} : { opacity: 0, y: 16 },
+    animate: { opacity: 1, y: 0 },
+  };
 
   return (
-    <section style={{ position: "relative", width: "100%", minHeight: "100svh", display: "flex", alignItems: "center", overflow: "hidden", background: T.gradHero }}>
-      <div style={{ position: "absolute", inset: 0, zIndex: 0 }}>
-        <img
-          src="https://images.unsplash.com/photo-1601758124510-52d02ddb7cbd?w=2000&q=75"
-          alt=""
-          aria-hidden
-          style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center 40%", opacity: T.heroImg, filter: "grayscale(20%) contrast(1.1)" }}
-        />
-        <div style={{ position: "absolute", inset: 0, background: `radial-gradient(ellipse 70% 80% at 50% 50%, transparent 30%, ${T.bg} 100%)` }} />
-      </div>
+    <section
+      style={{
+        position: "relative",
+        width: "100%",
+        minHeight: "100svh",
+        display: "flex",
+        alignItems: "center",
+        overflow: "hidden",
+        background: T.gradHero,
+      }}
+    >
+      {/* Subtle radial accent */}
+      <div
+        aria-hidden
+        style={{
+          position: "absolute",
+          inset: 0,
+          background: `radial-gradient(ellipse 70% 50% at 50% 38%, ${T.accentPale} 0%, transparent 65%)`,
+          pointerEvents: "none",
+        }}
+      />
 
-      <Orbs />
-
-      <motion.div style={{ y: parallaxY, opacity: heroOp, position: "relative", zIndex: 1, width: "100%", maxWidth: "1240px", margin: "0 auto", textAlign: "center", padding: `clamp(5rem, 12vh, 8rem) clamp(1.25rem, 5vw, 6rem) clamp(3rem, 8vh, 5rem)` }}>
-        <motion.div initial="hidden" animate="show" variants={vFade} style={{ display: "flex", gap: "0.45rem", justifyContent: "center", flexWrap: "wrap", marginBottom: "1.75rem" }}>
-          {badges.map((b, i) => (
-            <motion.span key={b} custom={i} variants={vFade}
-              style={{ padding: "0.3rem 0.85rem", borderRadius: 30, border: `1px solid ${T.border}`, background: T.bgGlass, backdropFilter: "blur(14px)", fontSize: "0.7rem", fontWeight: 600, color: T.textSub, letterSpacing: "0.04em" }}>
-              {b}
-            </motion.span>
-          ))}
+      {/* Content */}
+      <div
+        style={{
+          position: "relative",
+          zIndex: 1,
+          width: "100%",
+          maxWidth: 1200,
+          margin: "0 auto",
+          padding: `clamp(6rem, 16vh, 10rem) clamp(1.25rem, 5vw, 5rem) clamp(4rem, 10vh, 6rem)`,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          textAlign: "center",
+        }}
+      >
+        {/* Eyebrow badge */}
+        <motion.div
+          {...fadeUp}
+          transition={{ duration: 0.5, delay: 0.1 }}
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "0.4rem",
+            padding: "0.3rem 0.85rem",
+            borderRadius: 9999,
+            border: `1px solid ${T.border}`,
+            background: T.bgCard,
+            marginBottom: "1.75rem",
+            boxShadow: T.shadowSm,
+          }}
+        >
+          <span
+            style={{
+              width: 5, height: 5, borderRadius: "50%",
+              background: T.success || "#059669", flexShrink: 0,
+            }}
+          />
+          <span style={{
+            fontSize: "0.6875rem", fontWeight: 600, color: T.textSub,
+            letterSpacing: "0.04em",
+          }}>
+            Verified Animal Rescue Network
+          </span>
         </motion.div>
 
+        {/* Headline */}
         <motion.h1
-          initial={{ opacity: 0, y: 55 }} animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.95, delay: 0.18, ease: [0.22, 1, 0.36, 1] }}
-          style={{ fontSize: "clamp(2.6rem, 9vw, 7rem)", fontWeight: 900, lineHeight: 1.04, letterSpacing: "-0.045em", margin: "0 0 1.25rem", color: T.text }}>
+          {...fadeUp}
+          transition={{ duration: 0.6, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+          style={{
+            fontSize: "clamp(2.2rem, 7vw, 4.5rem)",
+            fontWeight: 800,
+            lineHeight: 1.08,
+            letterSpacing: "-0.04em",
+            color: T.textHeading,
+            margin: "0 0 1.25rem",
+            maxWidth: "16ch",
+          }}
+        >
           The Network Behind{" "}
-          <br />
-          <span style={{ background: `linear-gradient(100deg, ${T.accent} 0%, ${T.accentDim} 55%, ${T.accent} 100%)`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
-            Every Rescue.
-          </span>
+          <span style={{ color: T.accent }}>Every Rescue.</span>
         </motion.h1>
 
+        {/* Sub-headline */}
         <motion.p
-          initial={{ opacity: 0, y: 28 }} animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.38 }}
-          style={{ fontSize: "clamp(0.95rem, 2.2vw, 1.2rem)", color: T.textSub, margin: "0 auto 2.5rem", lineHeight: 1.75 }}>
-          Discover, connect with, and support the NGOs that form the backbone of animal rescue across India — all verified, all on ResQNet.
+          {...fadeUp}
+          transition={{ duration: 0.5, delay: 0.3 }}
+          style={{
+            fontSize: "clamp(0.9rem, 2vw, 1.1rem)",
+            color: T.textSub,
+            margin: "0 auto 2.5rem",
+            maxWidth: 520,
+            lineHeight: 1.7,
+            fontWeight: 400,
+          }}
+        >
+          Discover and connect with verified NGOs across India — the backbone of coordinated animal rescue on ResQNet.
         </motion.p>
 
-        <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.55 }}
-          style={{ display: "flex", gap: "0.8rem", justifyContent: "center", flexWrap: "wrap" }}>
-          <Btn variant="primary" size="lg">Register Your NGO</Btn>
-          <Btn variant="ghost" size="lg">Browse All Partners</Btn>
+        {/* CTA buttons */}
+        <motion.div
+          {...fadeUp}
+          transition={{ duration: 0.5, delay: 0.4 }}
+          style={{
+            display: "flex",
+            gap: "0.65rem",
+            justifyContent: "center",
+            flexWrap: "wrap",
+            marginBottom: "clamp(3rem, 7vh, 5rem)",
+          }}
+        >
+          <Button variant="primary" size="lg">Register Your NGO</Button>
+          <Button variant="ghost" size="lg">Browse All Partners</Button>
         </motion.div>
 
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.2 }}
-          style={{ marginTop: "clamp(2.5rem, 6vh, 4.5rem)", display: "flex", alignItems: "center", justifyContent: "center", gap: "clamp(1.5rem, 4vw, 3rem)", flexWrap: "wrap" }}>
-          {[["312", "Verified NGOs"], ["18", "States Covered"], ["94%", "Response Rate"]].map(([v, l]) => (
-            <div key={l} style={{ textAlign: "center" }}>
-              <div style={{ fontSize: "clamp(1.2rem, 3vw, 1.65rem)", fontWeight: 800, color: T.text, letterSpacing: "-0.03em" }}>{v}</div>
-              <div style={{ fontSize: "0.72rem", color: T.textMuted, marginTop: 2, letterSpacing: "0.04em" }}>{l}</div>
+        {/* Trust stats */}
+        <motion.div
+          {...fadeUp}
+          transition={{ delay: 0.6, duration: 0.5 }}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: vp.mobile ? "1.25rem" : "2.5rem",
+            flexWrap: "wrap",
+          }}
+        >
+          {TRUST_STATS.map((s, i) => (
+            <div key={s.label} style={{ display: "flex", alignItems: "center", gap: "1.5rem" }}>
+              {i > 0 && !vp.mobile && (
+                <div style={{ width: 1, height: 28, background: T.border, opacity: 0.7 }} />
+              )}
+              <div style={{ textAlign: "center" }}>
+                <div
+                  style={{
+                    fontSize: "clamp(1.2rem, 2.5vw, 1.6rem)",
+                    fontWeight: 800,
+                    color: T.textHeading,
+                    letterSpacing: "-0.035em",
+                    lineHeight: 1,
+                  }}
+                >
+                  {s.value}
+                </div>
+                <div
+                  style={{
+                    fontSize: "0.65rem",
+                    color: T.textMuted,
+                    marginTop: "0.3rem",
+                    fontWeight: 500,
+                    letterSpacing: "0.04em",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  {s.label}
+                </div>
+              </div>
             </div>
           ))}
         </motion.div>
-
-        {!vp.mobile && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.8 }}
-            style={{ position: "absolute", bottom: "2rem", left: "50%", transform: "translateX(-50%)", display: "flex", flexDirection: "column", alignItems: "center", gap: 5 }}>
-            <motion.div animate={reduce ? {} : { y: [0, 7, 0] }} transition={{ duration: 1.8, repeat: Infinity }}
-              style={{ width: 1, height: 34, background: `linear-gradient(to bottom, ${T.textMuted}, transparent)` }} />
-          </motion.div>
-        )}
-      </motion.div>
+      </div>
     </section>
   );
 }

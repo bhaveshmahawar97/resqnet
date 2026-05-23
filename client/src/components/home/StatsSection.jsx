@@ -1,202 +1,226 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useT } from "../../context/ThemeContext";
-import { vFadeUp } from "../../animations/variants";
-import Label from "../ui/Label";
-import StatPill from "../ui/StatPill";
 import { getRescueStats } from "../../services/rescueService";
 import { fetchAdoptionStats } from "../../services/adoptionService";
 
-// Fallback static stats — shown while loading or on API error
 const FALLBACK_STATS = [
-  { value: 48200, suffix: "+", label: "Animals Rescued" },
-  { value: 312, suffix: "", label: "Partner NGOs" },
-  { value: 94, suffix: "%", label: "Recovery Rate" },
-  { value: 18, suffix: "m", label: "Avg Response" },
-  { value: 7400, suffix: "+", label: "Adoptions" },
+  { value: 48200, suffix: "+", label: "Animals Rescued", description: "Lives saved through our network" },
+  { value: 312, suffix: "", label: "Partner NGOs", description: "Verified rescue organizations" },
+  { value: 94, suffix: "%", label: "Recovery Rate", description: "Successful case outcomes" },
+  { value: 18, suffix: "m", label: "Avg Response", description: "Emergency response time" },
+  { value: 7400, suffix: "+", label: "Adoptions", description: "Animals found new homes" },
 ];
+
+function useCountUp(target, duration = 1800, active = false) {
+  const [count, setCount] = useState(0);
+  useEffect(() => {
+    if (!active) return;
+    let start = 0;
+    const step = target / (duration / 16);
+    const timer = setInterval(() => {
+      start = Math.min(start + step, target);
+      setCount(Math.floor(start));
+      if (start >= target) clearInterval(timer);
+    }, 16);
+    return () => clearInterval(timer);
+  }, [target, duration, active]);
+  return count;
+}
+
+function StatCard({ stat, index, active }) {
+  const { T } = useT();
+  const count = useCountUp(stat.value, 1600, active);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ delay: index * 0.08, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+      style={{
+        flex: "1 1 160px",
+        minWidth: 0,
+        padding: "1.5rem 1.25rem",
+        background: T.bgCard,
+        border: `1px solid ${T.border}`,
+        borderRadius: 14,
+        boxShadow: T.shadow,
+        textAlign: "center",
+        transition: "box-shadow 0.2s ease",
+        position: "relative",
+        overflow: "hidden",
+      }}
+      whileHover={{ y: -1 }}
+    >
+      {/* Left accent line */}
+      <div
+        style={{
+          position: "absolute",
+          left: 0, top: "25%", bottom: "25%",
+          width: 3,
+          background: T.accent,
+          borderRadius: "0 3px 3px 0",
+          opacity: 0.5,
+        }}
+      />
+
+      <div
+        style={{
+          fontSize: "clamp(1.4rem, 2.5vw, 2rem)",
+          fontWeight: 800,
+          color: T.textHeading || T.text,
+          letterSpacing: "-0.035em",
+          lineHeight: 1,
+          marginBottom: "0.35rem",
+          fontFamily: "'Plus Jakarta Sans', sans-serif",
+        }}
+      >
+        {active ? count.toLocaleString() : stat.value.toLocaleString()}
+        <span style={{ color: T.accent, fontSize: "0.7em" }}>{stat.suffix}</span>
+      </div>
+
+      <div
+        style={{
+          fontSize: "0.82rem",
+          fontWeight: 600,
+          color: T.text,
+          marginBottom: "0.3rem",
+        }}
+      >
+        {stat.label}
+      </div>
+
+      <div style={{ fontSize: "0.72rem", color: T.textMuted, lineHeight: 1.45 }}>
+        {stat.description}
+      </div>
+    </motion.div>
+  );
+}
 
 export default function StatsSection() {
   const { T } = useT();
   const [stats, setStats] = useState(FALLBACK_STATS);
   const [loaded, setLoaded] = useState(false);
+  const [inView, setInView] = useState(false);
 
   useEffect(() => {
     let mounted = true;
-
     async function fetchStats() {
       try {
         const [rescueRes, adoptionRes] = await Promise.allSettled([
           getRescueStats(),
           fetchAdoptionStats(),
         ]);
-
         if (!mounted) return;
-
-        const rescue = rescueRes.status === "fulfilled" && rescueRes.value?.success
-          ? rescueRes.value.data
-          : null;
-        const adoption = adoptionRes.status === "fulfilled" && adoptionRes.value?.success
-          ? adoptionRes.value.data
-          : null;
-
-        // Merge live data with fallbacks
+        const rescue = rescueRes.status === "fulfilled" && rescueRes.value?.success ? rescueRes.value.data : null;
+        const adoption = adoptionRes.status === "fulfilled" && adoptionRes.value?.success ? adoptionRes.value.data : null;
         if (rescue || adoption) {
           setStats([
-            {
-              value: rescue?.total ?? FALLBACK_STATS[0].value,
-              suffix: "+",
-              label: "Animals Rescued",
-            },
-            {
-              value: FALLBACK_STATS[1].value,
-              suffix: "",
-              label: "Partner NGOs",
-            },
-            {
-              value: rescue?.completionRate
-                ? Math.round(rescue.completionRate)
-                : FALLBACK_STATS[2].value,
-              suffix: "%",
-              label: "Recovery Rate",
-            },
-            {
-              value: rescue?.avgResponseMinutes ?? FALLBACK_STATS[3].value,
-              suffix: "m",
-              label: "Avg Response",
-            },
-            {
-              value: adoption?.adopted ?? FALLBACK_STATS[4].value,
-              suffix: "+",
-              label: "Adoptions",
-            },
+            { value: rescue?.total ?? FALLBACK_STATS[0].value, suffix: "+", label: "Animals Rescued", description: "Lives saved through our network" },
+            { value: FALLBACK_STATS[1].value, suffix: "", label: "Partner NGOs", description: "Verified rescue organizations" },
+            { value: rescue?.completionRate ? Math.round(rescue.completionRate) : FALLBACK_STATS[2].value, suffix: "%", label: "Recovery Rate", description: "Successful case outcomes" },
+            { value: rescue?.avgResponseMinutes ?? FALLBACK_STATS[3].value, suffix: "m", label: "Avg Response", description: "Emergency response time" },
+            { value: adoption?.adopted ?? FALLBACK_STATS[4].value, suffix: "+", label: "Adoptions", description: "Animals found new homes" },
           ]);
         }
       } catch {
-        // silently fall back to static stats
+        // keep fallback
       } finally {
         if (mounted) setLoaded(true);
       }
     }
-
     fetchStats();
     return () => { mounted = false; };
   }, []);
 
   return (
-    <section
-      style={{
-        width: "100%",
-        padding: "clamp(3.5rem, 8vw, 6rem) 0",
-        background: T.bgAlt,
-        position: "relative",
-        overflow: "hidden",
-      }}
-    >
-      {/* Subtle divider top */}
+    <section style={{ width: "100%", padding: "clamp(3rem, 6vw, 5rem) 0", background: T.bgAlt }}>
       <div
         style={{
-          position: "absolute",
-          top: 0,
-          left: "50%",
-          transform: "translateX(-50%)",
-          width: "min(640px, 80%)",
-          height: 1,
-          background: `linear-gradient(90deg, transparent, ${T.accent}55, transparent)`,
-        }}
-      />
-
-      <div
-        style={{
-          width: "100%",
-          maxWidth: "1240px",
+          width: "100%", maxWidth: 1200,
           margin: "0 auto",
-          padding: "0 clamp(1.25rem, 4vw, 3.5rem)",
+          padding: "0 clamp(1.25rem, 4vw, 3rem)",
         }}
       >
+        {/* Section header */}
         <motion.div
-          initial="hidden"
-          whileInView="show"
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          variants={vFadeUp}
-          style={{ textAlign: "center", marginBottom: "clamp(2rem, 5vw, 3.5rem)" }}
+          onViewportEnter={() => setInView(true)}
+          transition={{ duration: 0.45 }}
+          style={{ textAlign: "center", marginBottom: "clamp(2rem, 4vw, 3rem)" }}
         >
-          <Label>Platform Impact</Label>
+          <div
+            style={{
+              display: "inline-flex", alignItems: "center", gap: "0.4rem",
+              background: T.accentSurface || T.accentPale,
+              border: `1px solid ${T.accentGlow}`,
+              borderRadius: 9999,
+              padding: "0.28rem 0.85rem",
+              marginBottom: "0.85rem",
+            }}
+          >
+            <span style={{ width: 5, height: 5, borderRadius: "50%", background: T.accent, display: "inline-block" }} />
+            <span style={{ fontSize: "0.68rem", fontWeight: 700, color: T.accent, letterSpacing: "0.1em", textTransform: "uppercase" }}>
+              Platform Impact
+            </span>
+          </div>
+
           <h2
             style={{
-              fontSize: "clamp(1.6rem, 4vw, 2.8rem)",
+              fontSize: "clamp(1.5rem, 3.5vw, 2.2rem)",
               fontWeight: 800,
+              color: T.textHeading || T.text,
               letterSpacing: "-0.035em",
-              color: T.text,
-              margin: 0,
+              lineHeight: 1.2,
+              margin: "0 0 0.6rem",
             }}
           >
-            Measurable outcomes,
-            <br />
-            <span
-              style={{
-                background: `linear-gradient(100deg, ${T.accent}, ${T.accentDim})`,
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                backgroundClip: "text",
-              }}
-            >
-              real-world impact.
-            </span>
+            Measurable outcomes, real-world impact
           </h2>
-          <p
-            style={{
-              fontSize: "clamp(0.85rem, 1.8vw, 1rem)",
-              color: T.textSub,
-              marginTop: "0.75rem",
-              lineHeight: 1.65,
-            }}
-          >
-            Every number represents an animal given a second chance.
+
+          <p style={{ fontSize: "0.9rem", color: T.textSub, maxWidth: 480, margin: "0 auto", lineHeight: 1.65 }}>
+            Every number represents an animal given a second chance at life.
           </p>
         </motion.div>
 
+        {/* Stats grid */}
         <div
           style={{
             display: "flex",
-            gap: "clamp(0.65rem, 1.5vw, 1.25rem)",
+            gap: "clamp(0.75rem, 1.5vw, 1.25rem)",
             flexWrap: "wrap",
             justifyContent: "center",
-            alignItems: "stretch",
           }}
         >
           {stats.map((s, i) => (
-            <StatPill key={s.label} {...s} i={i} />
+            <StatCard key={s.label} stat={s} index={i} active={inView} />
           ))}
         </div>
 
-        {/* Live data indicator */}
+        {/* Live indicator */}
         {loaded && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
             style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "0.4rem",
-              marginTop: "2rem",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              gap: "0.4rem", marginTop: "1.75rem",
             }}
           >
             <span
               style={{
-                width: 6,
-                height: 6,
-                borderRadius: "50%",
-                background: T.accent,
+                width: 6, height: 6, borderRadius: "50%",
+                background: T.success || "#059669",
                 display: "inline-block",
-                animation: "pulse 2s infinite",
+                animation: "rq-pulse-dot 2.5s ease-in-out infinite",
               }}
             />
-            <span
-              style={{ fontSize: "0.65rem", color: T.textMuted, fontWeight: 500 }}
-            >
-              Live platform data
+            <span style={{ fontSize: "0.68rem", color: T.textMuted, fontWeight: 500 }}>
+              Live platform data — updated in real time
             </span>
           </motion.div>
         )}

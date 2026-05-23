@@ -44,15 +44,15 @@ export default function RescueCTA() {
           variants={vFadeUp}
           style={{ textAlign: "center", marginBottom: "clamp(2.5rem, 6vw, 4rem)" }}
         >
-          <div style={{ fontSize: "2.5rem", marginBottom: "1rem" }}>🐾</div>
+
           <h2
             style={{
-              fontSize: "clamp(1.8rem, 5vw, 3.2rem)",
-              fontWeight: 900,
-              letterSpacing: "-0.045em",
-              color: T.text,
+              fontSize: "clamp(1.5rem, 3.5vw, 2.2rem)",
+              fontWeight: 800,
+              letterSpacing: "-0.035em",
+              color: T.textHeading,
               margin: "0 0 1rem",
-              lineHeight: 1.1,
+              lineHeight: 1.2,
             }}
           >
             Be Part of the{" "}
@@ -81,20 +81,25 @@ export default function RescueCTA() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.1, duration: 0.6 }}
-              whileHover={{ y: -6, boxShadow: `0 20px 60px ${opt.color}22` }}
+              whileHover={{ y: -3 }}
               style={{
                 background: T.bgCard,
-                borderRadius: 20,
+                borderRadius: 14,
                 border: `1px solid ${T.border}`,
                 padding: "2rem",
                 textAlign: "center",
-                boxShadow: `0 4px 20px ${T.shadow}`,
+                boxShadow: T.shadow,
                 transition: "box-shadow 0.3s",
                 cursor: "pointer",
               }}
               onClick={() => setActiveModal(opt.id)}
             >
-              <div style={{ fontSize: "2.5rem", marginBottom: "0.75rem" }}>{opt.icon}</div>
+              <div style={{
+                width: 44, height: 44, borderRadius: 11,
+                background: `${opt.color}12`, border: `1px solid ${opt.color}25`,
+                display: "flex", alignItems: "center", justifyContent: "center",
+                color: opt.color, margin: "0 auto 0.875rem", fontSize: "1.25rem",
+              }}>{opt.icon}</div>
               <div style={{ fontSize: "1.05rem", fontWeight: 800, color: T.text, marginBottom: "0.6rem", letterSpacing: "-0.02em" }}>{opt.title}</div>
               <p style={{ fontSize: "0.85rem", color: T.textSub, lineHeight: 1.7, marginBottom: "1.25rem" }}>{opt.desc}</p>
               <motion.button
