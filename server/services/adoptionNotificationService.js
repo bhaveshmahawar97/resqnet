@@ -21,12 +21,28 @@ export const notifyAdoptionSubmitted = async (adoptionApplication, adoptionListi
  * Notify User about application status change (approved/rejected).
  */
 export const notifyAdoptionStatusChange = async (adoptionApplication, status, animalName) => {
-  const isApproved = status === "approved";
+  let type = "adoption_status";
+  let title = `Adoption Application ${status}`;
+  
+  if (status === "approved") {
+    type = "adoption_approved";
+    title = "Adoption Application Approved";
+  } else if (status === "rejected") {
+    type = "adoption_rejected";
+    title = "Adoption Application Rejected";
+  } else if (status === "interview_scheduled") {
+    type = "adoption_interview";
+    title = "Adoption Interview Scheduled";
+  } else if (status === "completed") {
+    type = "adoption_completed";
+    title = "Adoption Completed!";
+  }
+
   return createNotification({
     recipientId: adoptionApplication.applicant,
-    type: isApproved ? "adoption_approved" : "adoption_rejected",
-    title: `Adoption Application ${status}`,
-    message: `Your application for ${animalName || "the animal"} has been ${status}.`,
+    type,
+    title,
+    message: `Your application for ${animalName || "the animal"} has been ${status.replace("_", " ")}.`,
     priority: "medium",
     relatedEntity: adoptionApplication._id,
     relatedEntityType: "AdoptionApplication",

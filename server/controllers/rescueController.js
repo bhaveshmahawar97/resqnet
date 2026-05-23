@@ -13,6 +13,7 @@ import {
   SEVERITY_LEVELS,
   parsePagination,
   snapshotRescueState,
+  findNearestNgo,
 } from "../services/rescueService.js";
 import { recordDispatchEvent, recordMissionHistory } from "../services/dispatchService.js";
 import {
@@ -186,6 +187,113 @@ export const assignNgo = async (req, res) => {
   }
 };
 
+export const autoAssignNgo = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const request = await RescueRequest.findById(id);
+    
+    if (!request) return sendError(res, { status: 404, message: "Rescue request not found" });
+
+    // Only allow if not completed/cancelled
+    if (["completed", "cancelled"].includes(request.status)) {
+      return sendError(res, { status: 400, message: "Cannot assign NGO to completed or cancelled rescue" });
+    }
+
+    const nearestNgo = await findNearestNgo(request);
+    
+    if (!nearestNgo) {
+      return sendError(res, { status: 404, message: "No available NGOs found nearby" });
+    }
+
+    const previousState = snapshotRescueState(request);
+
+    request.assignedNgo = nearestNgo._id;
+    request.status = "assigned";
+    request.dispatchStatus = "assigned";
+    
+    const entry = buildTimelineEntry("assigned", req.user, "System auto-assigned NGO");
+    request.rescueTimeline.push(entry);
+    request.statusHistory.push(entry);
+    await request.save();
+
+    await recordDispatchEvent({
+      rescueRequestId: id,
+      eventType: "assignment_change",
+      actor: req.user,
+      previousState,
+      newState: snapshotRescueState(request),
+      note: "NGO auto-assigned",
+    });
+
+    const updated = await getRescueById(id);
+    await notifyNgoAssignment(updated, request.assignedNgo);
+
+    return sendSuccess(res, { message: "NGO auto-assigned successfully", data: updated });
+  } catch (error) {
+    console.error("AUTO ASSIGN NGO ERROR:", error);
+    return sendError(res, { status: 500, message: error.message || "Unable to auto-assign NGO", error });
+  }
+};
+
+export const rejectRescueMission = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const request = await RescueRequest.findById(id);
+
+    if (!request) return sendError(res, { status: 404, message: "Rescue request not found" });
+
+    // Only the assigned NGO can reject
+    if (req.user.role === "ngo" && (!request.assignedNgo || !request.assignedNgo.equals(req.user._id))) {
+      return sendError(res, { status: 403, message: "Not authorized to reject this mission" });
+    }
+
+    const previousState = snapshotRescueState(request);
+
+    request.rejectedBy.push(req.user._id);
+    request.assignedNgo = null;
+    request.status = "pending";
+    request.dispatchStatus = "unassigned";
+
+    const entry = buildTimelineEntry("rejected", req.user, "NGO rejected mission");
+    request.rescueTimeline.push(entry);
+    request.statusHistory.push(entry);
+    await request.save();
+
+    await recordDispatchEvent({
+      rescueRequestId: id,
+      eventType: "assignment_change",
+      actor: req.user,
+      previousState,
+      newState: snapshotRescueState(request),
+      note: "Mission rejected by NGO",
+    });
+
+    // Try to auto assign next NGO
+    const nearestNgo = await findNearestNgo(request);
+    
+    if (nearestNgo) {
+      request.assignedNgo = nearestNgo._id;
+      request.status = "assigned";
+      request.dispatchStatus = "assigned";
+      
+      const nextEntry = buildTimelineEntry("assigned", req.user, "System auto-assigned next NGO");
+      request.rescueTimeline.push(nextEntry);
+      request.statusHistory.push(nextEntry);
+      await request.save();
+      
+      const updated = await getRescueById(id);
+      await notifyNgoAssignment(updated, request.assignedNgo);
+      return sendSuccess(res, { message: "Mission rejected. Re-assigned to next nearby NGO", data: updated });
+    }
+
+    const updated = await getRescueById(id);
+    return sendSuccess(res, { message: "Mission rejected. No other NGOs available nearby", data: updated });
+  } catch (error) {
+    console.error("REJECT MISSION ERROR:", error);
+    return sendError(res, { status: 500, message: error.message || "Unable to reject mission", error });
+  }
+};
+
 export const assignVolunteer = async (req, res) => {
   try {
     const { id } = req.params;
@@ -197,6 +305,11 @@ export const assignVolunteer = async (req, res) => {
 
     if (req.user.role === "volunteer") {
       request.assignedVolunteer = req.user._id;
+    } else if (req.user.role === "ngo" && request.assignedNgo && request.assignedNgo.equals(req.user._id)) {
+      if (!volunteerId || !mongoose.Types.ObjectId.isValid(volunteerId)) {
+        return sendError(res, { status: 400, message: "Valid volunteerId must be provided" });
+      }
+      request.assignedVolunteer = volunteerId;
     } else if (req.user.role === "admin") {
       if (!volunteerId || !mongoose.Types.ObjectId.isValid(volunteerId)) {
         return sendError(res, { status: 400, message: "Valid volunteerId must be provided" });
@@ -206,9 +319,9 @@ export const assignVolunteer = async (req, res) => {
       return sendError(res, { status: 403, message: "Not authorized to assign volunteer" });
     }
 
-    request.dispatchStatus =
-      request.dispatchStatus === "accepted" ? "accepted" : "assigned";
-    const entry = buildTimelineEntry("accepted", req.user, "Volunteer assigned to mission");
+    request.status = "volunteer_assigned";
+    request.dispatchStatus = "volunteer_assigned";
+    const entry = buildTimelineEntry("volunteer_assigned", req.user, "Volunteer assigned to mission");
     request.rescueTimeline.push(entry);
     request.statusHistory.push(entry);
     await request.save();

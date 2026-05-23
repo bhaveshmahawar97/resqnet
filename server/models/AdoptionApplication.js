@@ -26,6 +26,26 @@ const adoptionApplicationSchema = new mongoose.Schema(
       trim: true,
       default: "",
     },
+    experience: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+    livingEnvironment: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+    contactInfo: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+    address: {
+      type: String,
+      trim: true,
+      default: "",
+    },
     status: {
       type: String,
       enum: ADOPTION_APPLICATION_STATUSES,

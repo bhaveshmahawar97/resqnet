@@ -111,6 +111,15 @@ export const assignNgo = async (rescueId, ngoId) => {
   }
 };
 
+export const autoAssignNgo = async (rescueId) => {
+  try {
+    const { data } = await api.put(`${RESCUE_API}/auto-assign/${rescueId}`);
+    return { success: true, data: data.data };
+  } catch (error) {
+    return rescueFail(error, "Failed to auto-assign NGO", "AUTO ASSIGN NGO");
+  }
+};
+
 export const assignVolunteer = async (rescueId, volunteerId) => {
   try {
     const { data } = await api.put(`${RESCUE_API}/assign-volunteer/${rescueId}`, {
@@ -128,6 +137,15 @@ export const acceptMission = async (rescueId) => {
     return { success: true, data: data.data };
   } catch (error) {
     return rescueFail(error, "Failed to accept mission", "ACCEPT MISSION");
+  }
+};
+
+export const rejectMission = async (rescueId) => {
+  try {
+    const { data } = await api.put(`${RESCUE_API}/reject/${rescueId}`);
+    return { success: true, data: data.data };
+  } catch (error) {
+    return rescueFail(error, "Failed to reject mission", "REJECT MISSION");
   }
 };
 

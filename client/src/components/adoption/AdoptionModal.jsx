@@ -19,9 +19,19 @@ export default function AdoptionModal({ animal, onClose }) {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { submitApplication } = useAdoption();
-  const [message, setMessage] = useState("");
+  const [formData, setFormData] = useState({
+    message: "",
+    experience: "",
+    livingEnvironment: "",
+    contactInfo: user?.phone || "",
+    address: user?.location || "",
+  });
   const [submitting, setSubmitting] = useState(false);
   const [feedback, setFeedback] = useState("");
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
   const handleApply = async () => {
     if (!user) {
@@ -30,7 +40,7 @@ export default function AdoptionModal({ animal, onClose }) {
     }
     setSubmitting(true);
     setFeedback("");
-    const result = await submitApplication(animal.id, message);
+    const result = await submitApplication(animal.id, formData);
     setSubmitting(false);
     if (result.success) {
       setFeedback("Application submitted! The NGO will review your request.");
@@ -185,14 +195,52 @@ export default function AdoptionModal({ animal, onClose }) {
             ))}
           </div>
 
-          <textarea
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            placeholder="Tell the NGO why you want to adopt…"
-            rows={3}
-            className="rq-textarea"
-            style={{ marginBottom: "1rem" }}
-          />
+          <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "0.85rem", marginBottom: "1rem" }}>
+            <textarea
+              name="message"
+              value={formData.message}
+              onChange={handleChange}
+              placeholder="Tell the NGO why you want to adopt…"
+              rows={2}
+              className="rq-textarea"
+            />
+            <textarea
+              name="experience"
+              value={formData.experience}
+              onChange={handleChange}
+              placeholder="Your experience with animals (e.g., have you owned pets before?)"
+              rows={2}
+              className="rq-textarea"
+            />
+            <input
+              type="text"
+              name="livingEnvironment"
+              value={formData.livingEnvironment}
+              onChange={handleChange}
+              placeholder="Living Environment (e.g., Apartment, House with yard)"
+              className="rq-input"
+            />
+            <div style={{ display: "flex", gap: "0.85rem" }}>
+              <input
+                type="text"
+                name="contactInfo"
+                value={formData.contactInfo}
+                onChange={handleChange}
+                placeholder="Phone Number"
+                className="rq-input"
+                style={{ flex: 1 }}
+              />
+              <input
+                type="text"
+                name="address"
+                value={formData.address}
+                onChange={handleChange}
+                placeholder="City, State / Address"
+                className="rq-input"
+                style={{ flex: 1 }}
+              />
+            </div>
+          </div>
           {feedback && <p style={{ fontSize: "0.85rem", color: T.accent, marginBottom: "0.75rem" }}>{feedback}</p>}
 
           </div>

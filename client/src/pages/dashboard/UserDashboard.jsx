@@ -22,6 +22,7 @@ import {
 } from "../../components/dashboard/DashboardShared";
 import { useRescue } from "../../context/RescueContext";
 import { useAuth } from "../../context/AuthContext";
+import { useAdoption } from "../../context/AdoptionContext";
 import { timeAgo, buildActivityFromRescues } from "../../utils/operationalData";
 
 // ─── SCAN CARD ────────────────────────────────────────────────────────────────
@@ -104,6 +105,7 @@ export default function UserDashboard() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { myRescues, loading, error } = useRescue();
+  const { myApplications, loading: adoptionsLoading } = useAdoption();
   const [section, setSection] = useState("overview");
   const [modal, setModal] = useState({ open: false, type: null, data: null });
   const activityFeed = buildActivityFromRescues(myRescues);
@@ -113,12 +115,12 @@ export default function UserDashboard() {
       acc[rescue.status] = (acc[rescue.status] || 0) + 1;
       return acc;
     },
-    { pending: 0, accepted: 0, in_progress: 0, rescued: 0, completed: 0, cancelled: 0 }
+    { pending: 0, assigned: 0, accepted: 0, rejected: 0, volunteer_assigned: 0, in_progress: 0, rescued: 0, completed: 0, cancelled: 0 }
   );
 
   const stats = [
     { label: "Rescue Reports", value: myRescues.length, icon: "🚑", sub: `${rescueStatusCounts.pending} pending`, trend: "up", highlight: true },
-    { label: "Active Operations", value: rescueStatusCounts.accepted + rescueStatusCounts.in_progress + rescueStatusCounts.rescued, icon: "🌀", sub: "Live response" },
+    { label: "Active Operations", value: rescueStatusCounts.assigned + rescueStatusCounts.accepted + rescueStatusCounts.volunteer_assigned + rescueStatusCounts.in_progress + rescueStatusCounts.rescued, icon: "🌀", sub: "Live response" },
     { label: "Completed", value: rescueStatusCounts.completed, icon: "✅", sub: "Finished missions" },
     { label: "Cancelled", value: rescueStatusCounts.cancelled, icon: "🚫", sub: "Cancelled reports" },
   ];
@@ -165,11 +167,28 @@ export default function UserDashboard() {
       case "adoptions":
         return (
           <div>
-            <SectionLabel action="Browse all" onAction={() => navigate("/adoption")}>Saved & Tracked Animals</SectionLabel>
+            <SectionLabel action="Browse all" onAction={() => navigate("/adoption")}>My Adoption Applications</SectionLabel>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 12 }}>
-              <motion.div style={{ padding: 16, color: T.textMuted, fontSize: "0.85rem" }}>
-                Adoption listings will load from the core database when the adoption workflow is enabled.
-              </motion.div>
+              {adoptionsLoading && <div style={{ padding: 16, color: T.textMuted }}>Loading applications…</div>}
+              {!adoptionsLoading && myApplications.length === 0 && (
+                <div style={{ padding: 16, color: T.textMuted }}>No adoption applications yet.</div>
+              )}
+              {!adoptionsLoading && myApplications.map(app => (
+                <Card key={app._id || app.id} style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                    <div>
+                      <div style={{ fontSize: "0.9rem", fontWeight: 750, color: T.text, letterSpacing: "-0.03em" }}>{app.adoption?.animalName || app.adoption?.animalType || "Animal"}</div>
+                      <div style={{ fontSize: "0.72rem", color: T.textMuted, marginTop: 1 }}>{app.adoption?.location || "Unknown"}</div>
+                    </div>
+                    <StatusBadge status={app.status} />
+                  </div>
+                  {app.status === "interview_scheduled" && (
+                    <div style={{ padding: "8px", borderRadius: 8, background: T.accentPale, border: `1px solid ${T.accent}`, fontSize: "0.75rem", color: T.accent, fontWeight: 600 }}>
+                      The NGO has scheduled an interview. Check your email or notifications.
+                    </div>
+                  )}
+                </Card>
+              ))}
             </div>
           </div>
         );

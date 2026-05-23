@@ -137,6 +137,11 @@ const rescueRequestSchema = new mongoose.Schema(
       ref: "User",
       default: null,
     },
+    rejectedBy: {
+      type: [mongoose.Schema.Types.ObjectId],
+      ref: "User",
+      default: [],
+    },
     acceptedAt: {
       type: Date,
       default: null,

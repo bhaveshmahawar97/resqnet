@@ -21,6 +21,7 @@ import {
   DashboardErrorBoundary, RescueCaseRow, SectionLabel, Card, StatusBadge, DashboardSidebar,
 } from "../../components/dashboard/DashboardShared";
 import { useRescue } from "../../context/RescueContext";
+import { useAdoption } from "../../context/AdoptionContext";
 import {
   ActionBtn, EmergencyAlertCard, SystemHealthPanel, AdminInsights, SettingToggle,
 } from "../../components/dashboard/admin/AdminShared";
@@ -93,7 +94,8 @@ function AdminDashboard() {
   const { T } = useT();
   const vp = useViewport();
   const { user } = useAuth();
-  const { rescues, criticalRescues, stats, loading, error } = useRescue();
+  const { rescues, criticalRescues, stats, loading, error, autoAssignNgo } = useRescue();
+  const { stats: adoptionStats } = useAdoption();
   const activityFeed = buildActivityFromRescues(rescues);
   const [section, setSection] = useState("overview");
   const [alerts, setAlerts] = useState(() => buildCriticalAlerts(criticalRescues));
@@ -101,6 +103,7 @@ function AdminDashboard() {
   const [users, setUsers] = useState(ADMIN_USERS);
   const [modal, setModal] = useState({ open: false, type: null, data: null });
   const [toast, setToast] = useState("");
+  const [assignLoading, setAssignLoading] = useState(false);
 
   const unackedAlerts = alerts.filter((a) => !a.acknowledged).length;
   const pendingNGOs = ngos.filter((n) => n.pendingApproval).length;
@@ -141,6 +144,18 @@ function AdminDashboard() {
   };
 
   const ackAlert = (id) => setAlerts((prev) => prev.map((a) => (a.id === id ? { ...a, acknowledged: true } : a)));
+
+  const handleAutoAssign = async (rescueId) => {
+    setAssignLoading(true);
+    const result = await autoAssignNgo(rescueId);
+    setAssignLoading(false);
+    if (result.success) {
+      showToast("Auto-assigned successfully");
+      setModal(m => ({ ...m, data: result.data }));
+    } else {
+      showToast(result.message || "Failed to auto-assign");
+    }
+  };
 
   const handleQuickAction = (action) => {
     const messages = {
@@ -269,6 +284,14 @@ function AdminDashboard() {
                 <div style={{ display: "flex", justifyContent: "space-between", color: T.textMuted }}><span>Pending</span><strong>{stats?.pending || 0}</strong></div>
                 <div style={{ display: "flex", justifyContent: "space-between", color: T.textMuted }}><span>Completed</span><strong>{stats?.completed || 0}</strong></div>
                 <div style={{ display: "flex", justifyContent: "space-between", color: T.textMuted }}><span>Critical</span><strong>{stats?.critical || 0}</strong></div>
+              </div>
+            </Card>
+            <Card>
+              <SectionLabel>Adoption Overview</SectionLabel>
+              <div style={{ display: "grid", gap: 10, marginTop: 12 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", color: T.textMuted }}><span>Available Animals</span><strong>{adoptionStats?.available || 0}</strong></div>
+                <div style={{ display: "flex", justifyContent: "space-between", color: T.textMuted }}><span>Pending Review</span><strong>{adoptionStats?.pendingReview || 0}</strong></div>
+                <div style={{ display: "flex", justifyContent: "space-between", color: T.textMuted }}><span>Adopted</span><strong style={{ color: T.accent }}>{adoptionStats?.adopted || 0}</strong></div>
               </div>
             </Card>
           </div>
@@ -411,6 +434,24 @@ function AdminDashboard() {
                 <div style={{ fontSize: "0.78rem", fontWeight: 700, color: T.text, marginTop: 2 }}>{v}</div>
               </div>
             ))}
+            {modal.data.rejectedBy?.length > 0 && (
+              <div style={{ gridColumn: "1 / -1", background: T.bgAlt, borderRadius: 8, padding: "9px 11px", borderLeft: "3px solid #DC2626" }}>
+                <div style={{ fontSize: "0.58rem", color: T.textMuted, textTransform: "uppercase" }}>Rejections</div>
+                <div style={{ fontSize: "0.78rem", fontWeight: 700, color: "#DC2626", marginTop: 2 }}>Rejected by {modal.data.rejectedBy.length} NGO(s)</div>
+              </div>
+            )}
+            {["pending", "rejected"].includes(modal.data.status) && (
+              <div style={{ gridColumn: "1 / -1", display: "flex", gap: 10, marginTop: 10 }}>
+                <button
+                  type="button"
+                  disabled={assignLoading}
+                  onClick={() => handleAutoAssign(modal.data.id)}
+                  style={{ flex: 1, padding: "10px", borderRadius: 8, background: T.accent, border: "none", color: "#fff", fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}
+                >
+                  {assignLoading ? "Assigning..." : "Auto-Assign NGO"}
+                </button>
+              </div>
+            )}
           </div>
         )}
       </DashboardModal>

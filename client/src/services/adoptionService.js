@@ -51,9 +51,9 @@ export const fetchAdoptionStats = async () => {
   }
 };
 
-export const applyForAdoption = async (adoptionId, message = "") => {
+export const applyForAdoption = async (adoptionId, applicationData) => {
   try {
-    const { data } = await api.post(`/adoption/${adoptionId}/apply`, { message });
+    const { data } = await api.post(`/adoption/${adoptionId}/apply`, applicationData);
     return { success: true, data: data.data };
   } catch (error) {
     return {

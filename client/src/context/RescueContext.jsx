@@ -7,8 +7,10 @@ import {
   getSingleRescue,
   updateRescueStatus,
   assignNgo,
+  autoAssignNgo,
   assignVolunteer,
   acceptMission,
+  rejectMission,
   updateMissionStatus,
   getAssignedRescues,
   getRescueStats,
@@ -59,6 +61,7 @@ export const RescueProvider = ({ children }) => {
       rescueTimeline: Array.isArray(rescue.rescueTimeline) ? rescue.rescueTimeline : [],
       assignedNgo: rescue.assignedNgo || null,
       assignedVolunteer: rescue.assignedVolunteer || null,
+      rejectedBy: rescue.rejectedBy || [],
     };
 
     return normalized;
@@ -216,6 +219,27 @@ export const RescueProvider = ({ children }) => {
     return { success: false, message: result.message };
   };
 
+  const handleAutoAssignNgo = async (rescueId) => {
+    setLoading(true);
+    setError(null);
+
+    const result = await autoAssignNgo(rescueId);
+
+    if (result.success) {
+      const updated = normalizeRescue(result.data);
+      setRescues((prev) => mergeRescueIntoList(prev, updated));
+      setAssignedRescues((prev) => mergeRescueIntoList(prev, updated));
+      setCriticalRescues((prev) => mergeRescueIntoList(prev, updated));
+      if (user?.role === "admin") await handleFetchStats();
+      setLoading(false);
+      return { success: true, data: updated };
+    }
+
+    setError(result.message);
+    setLoading(false);
+    return { success: false, message: result.message };
+  };
+
   const handleAssignVolunteer = async (rescueId, volunteerId) => {
     setLoading(true);
     setError(null);
@@ -248,6 +272,29 @@ export const RescueProvider = ({ children }) => {
       setMyRescues((prev) => mergeRescueIntoList(prev, updated));
       setRescues((prev) => mergeRescueIntoList(prev, updated));
       setAssignedRescues((prev) => mergeRescueIntoList(prev, updated));
+      setCriticalRescues((prev) => mergeRescueIntoList(prev, updated));
+      if (user?.role === "admin") await handleFetchStats();
+      setLoading(false);
+      return { success: true, data: updated };
+    }
+
+    setError(result.message);
+    setLoading(false);
+    return { success: false, message: result.message };
+  };
+
+  const handleRejectMission = async (rescueId) => {
+    setLoading(true);
+    setError(null);
+
+    const result = await rejectMission(rescueId);
+
+    if (result.success) {
+      const updated = normalizeRescue(result.data);
+      // Remove from assigned list if the current user rejected it
+      setAssignedRescues((prev) => prev.filter(r => r.id !== updated.id));
+      setMyRescues((prev) => prev.filter(r => r.id !== updated.id));
+      setRescues((prev) => mergeRescueIntoList(prev, updated));
       setCriticalRescues((prev) => mergeRescueIntoList(prev, updated));
       if (user?.role === "admin") await handleFetchStats();
       setLoading(false);
@@ -383,8 +430,10 @@ export const RescueProvider = ({ children }) => {
         fetchCriticalRescues: handleFetchCriticalRescues,
         fetchAssignedRescues: handleFetchAssignedRescues,
         assignNgo: handleAssignNgo,
+        autoAssignNgo: handleAutoAssignNgo,
         assignVolunteer: handleAssignVolunteer,
         acceptMission: handleAcceptMission,
+        rejectMission: handleRejectMission,
         updateMissionStatus: handleUpdateMissionStatus,
         updateRescueStatus: handleUpdateRescueStatus,
         fetchStats: handleFetchStats,

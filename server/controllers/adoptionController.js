@@ -61,6 +61,10 @@ export const postAdoptionApplication = async (req, res) => {
       adoptionId: req.params.id,
       userId: req.user._id,
       message: req.body.message || "",
+      experience: req.body.experience || "",
+      livingEnvironment: req.body.livingEnvironment || "",
+      contactInfo: req.body.contactInfo || "",
+      address: req.body.address || "",
     });
 
     await notifyAdoptionSubmitted(application, application.adoption);

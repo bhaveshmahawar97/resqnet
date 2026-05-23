@@ -250,4 +250,65 @@ export const getRescueStatsAggregate = async () => {
   };
 };
 
+const haversineDistance = (coords1, coords2) => {
+  const toRad = (x) => (x * Math.PI) / 180;
+  const R = 6371; // Earth radius in km
+
+  const dLat = toRad(coords2.latitude - coords1.latitude);
+  const dLon = toRad(coords2.longitude - coords1.longitude);
+  const lat1 = toRad(coords1.latitude);
+  const lat2 = toRad(coords2.latitude);
+
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.sin(dLon / 2) * Math.sin(dLon / 2) * Math.cos(lat1) * Math.cos(lat2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+};
+
+export const findNearestNgo = async (rescue) => {
+  // Find all NGOs not in rejectedBy and active
+  const rejectedIds = rescue.rejectedBy || [];
+  const ngos = await User.find({
+    role: "ngo",
+    isActive: true,
+    _id: { $nin: rejectedIds },
+  }).lean();
+
+  if (ngos.length === 0) return null;
+
+  let bestMatch = null;
+  let minDistance = Infinity;
+
+  const hasRescueCoords = rescue.latitude != null && rescue.longitude != null;
+
+  for (const ngo of ngos) {
+    const hasNgoCoords = ngo.ngoProfile?.latitude != null && ngo.ngoProfile?.longitude != null;
+    
+    if (hasRescueCoords && hasNgoCoords) {
+      const distance = haversineDistance(
+        { latitude: rescue.latitude, longitude: rescue.longitude },
+        { latitude: ngo.ngoProfile.latitude, longitude: ngo.ngoProfile.longitude }
+      );
+      if (distance < minDistance) {
+        minDistance = distance;
+        bestMatch = ngo;
+      }
+    } else if (!bestMatch) {
+      // Fallback: Check city match
+      const ngoCity = ngo.ngoProfile?.city?.toLowerCase() || "";
+      const rescueCity = rescue.city?.toLowerCase() || "";
+      if (ngoCity === rescueCity && rescueCity !== "") {
+        bestMatch = ngo;
+        minDistance = 0; // City match prioritizes but we stop at first if no coords
+      } else if (!bestMatch) {
+        // Just pick the first available one as absolute fallback
+        bestMatch = ngo;
+      }
+    }
+  }
+
+  return bestMatch;
+};
+
 export { RESCUE_STATUSES, SEVERITY_LEVELS, parsePagination };

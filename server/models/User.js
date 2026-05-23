@@ -16,6 +16,8 @@ const ngoProfileSchema = new mongoose.Schema(
   {
     organizationName: { type: String, trim: true, default: "" },
     city: { type: String, trim: true, default: "" },
+    latitude: { type: Number, min: -90, max: 90 },
+    longitude: { type: Number, min: -180, max: 180 },
     registrationId: { type: String, trim: true, default: "" },
     serviceAreas: { type: [String], default: [] },
     description: { type: String, trim: true, default: "" },
@@ -30,6 +32,8 @@ const volunteerProfileSchema = new mongoose.Schema(
     skills: { type: [String], default: [] },
     availability: { type: String, enum: ["available", "limited", "unavailable"], default: "available" },
     city: { type: String, trim: true, default: "" },
+    latitude: { type: Number, min: -90, max: 90 },
+    longitude: { type: Number, min: -180, max: 180 },
     serviceRadiusKm: { type: Number, default: 10, min: 0 },
     bio: { type: String, trim: true, default: "" },
     verified: { type: Boolean, default: false },

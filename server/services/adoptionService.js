@@ -19,6 +19,7 @@ export const listPublicAdoptions = async ({ animalType, city, limit = 50 } = {})
 
   return Adoption.find(query)
     .populate(populateListing)
+    .populate("sourceRescue", "status severity condition")
     .sort({ createdAt: -1 })
     .limit(limit)
     .lean();
@@ -27,6 +28,7 @@ export const listPublicAdoptions = async ({ animalType, city, limit = 50 } = {})
 export const createAdoptionListing = async ({ userId, payload }) => {
   const listing = await Adoption.create({
     listedBy: userId,
+    sourceRescue: payload.sourceRescue || null,
     animalName: payload.animalName || "",
     animalType: payload.animalType,
     breed: payload.breed || "",
@@ -34,19 +36,30 @@ export const createAdoptionListing = async ({ userId, payload }) => {
     location: payload.location || "",
     images: payload.images || [],
     adoptionFee: payload.adoptionFee || 0,
-    status: payload.status === "draft" ? "draft" : "listed",
+    urgency: payload.urgency || "low",
+    healthCondition: payload.healthCondition || "Healthy",
+    vaccinationStatus: payload.vaccinationStatus || "Unknown",
+    status: payload.status === "draft" ? "draft" : "available",
   });
 
   return Adoption.findById(listing._id).populate(populateListing).lean();
 };
 
-export const applyForAdoption = async ({ adoptionId, userId, message = "" }) => {
+export const applyForAdoption = async ({
+  adoptionId,
+  userId,
+  message = "",
+  experience = "",
+  livingEnvironment = "",
+  contactInfo = "",
+  address = "",
+}) => {
   if (!mongoose.Types.ObjectId.isValid(adoptionId)) {
     throw new Error("Invalid adoption listing");
   }
 
   const listing = await Adoption.findById(adoptionId);
-  if (!listing || listing.status !== "listed") {
+  if (!listing || !["available", "listed"].includes(listing.status)) {
     throw new Error("This animal is not available for adoption");
   }
 
@@ -55,7 +68,7 @@ export const applyForAdoption = async ({ adoptionId, userId, message = "" }) => 
   const existing = await AdoptionApplication.findOne({
     adoption: adoptionId,
     applicant: userId,
-    status: { $in: ["pending", "approved"] },
+    status: { $in: ["pending", "interview_scheduled", "approved"] },
   });
 
   if (existing) {
@@ -67,6 +80,10 @@ export const applyForAdoption = async ({ adoptionId, userId, message = "" }) => 
     applicant: userId,
     ngo: listing.listedBy,
     message,
+    experience,
+    livingEnvironment,
+    contactInfo,
+    address,
     status: "pending",
   });
 
@@ -101,7 +118,7 @@ export const reviewApplication = async ({
   status,
   reviewNote = "",
 }) => {
-  if (!["approved", "rejected"].includes(status)) {
+  if (!["interview_scheduled", "approved", "rejected", "withdrawn"].includes(status)) {
     throw new Error("Invalid review status");
   }
 
@@ -120,9 +137,16 @@ export const reviewApplication = async ({
   await application.save();
 
   if (status === "approved") {
-    await Adoption.findByIdAndUpdate(application.adoption, { status: "adopted" });
+    await Adoption.findByIdAndUpdate(application.adoption, { status: "adoption_in_progress" });
   } else if (status === "rejected") {
-    await Adoption.findByIdAndUpdate(application.adoption, { status: "listed" });
+    // Determine if any other approved apps exist for this adoption
+    const otherApproved = await AdoptionApplication.findOne({
+      adoption: application.adoption,
+      status: "approved"
+    });
+    if (!otherApproved) {
+      await Adoption.findByIdAndUpdate(application.adoption, { status: "available" });
+    }
   }
 
   return AdoptionApplication.findById(applicationId)
@@ -132,13 +156,13 @@ export const reviewApplication = async ({
 };
 
 export const getAdoptionStats = async () => {
-  const [listed, pendingReview, adopted] = await Promise.all([
-    Adoption.countDocuments({ status: "listed" }),
-    Adoption.countDocuments({ status: "pending_review" }),
+  const [available, pendingReview, adopted] = await Promise.all([
+    Adoption.countDocuments({ status: { $in: ["listed", "available"] } }),
+    Adoption.countDocuments({ status: { $in: ["pending_review", "interview_scheduled", "adoption_in_progress"] } }),
     Adoption.countDocuments({ status: "adopted" }),
   ]);
 
-  return { listed, pendingReview, adopted, total: listed + pendingReview + adopted };
+  return { available, pendingReview, adopted, total: available + pendingReview + adopted };
 };
 
 export default {

@@ -2,7 +2,10 @@ export const USER_ROLES = ["user", "ngo", "volunteer", "admin"];
 
 export const RESCUE_STATUSES = [
   "pending",
+  "assigned",
   "accepted",
+  "rejected",
+  "volunteer_assigned",
   "in_progress",
   "rescued",
   "completed",
@@ -13,6 +16,8 @@ export const DISPATCH_STATUSES = [
   "unassigned",
   "assigned",
   "accepted",
+  "rejected",
+  "volunteer_assigned",
   "in_progress",
   "rescued",
   "completed",
@@ -46,8 +51,10 @@ export const NOTIFICATION_TYPES = [
   "ngo_accepted_mission",
   "ngo_rejected_mission",
   "adoption_submitted",
+  "adoption_interview",
   "adoption_approved",
   "adoption_rejected",
+  "adoption_completed",
   "adoption_status",
   "ai_scan_completed",
   "mission_alert",
@@ -59,9 +66,25 @@ export const NOTIFICATION_PRIORITIES = ["low", "medium", "high", "critical"];
 
 export const AI_SCAN_STATUSES = ["pending", "processing", "completed", "failed"];
 
-export const ADOPTION_STATUSES = ["draft", "listed", "pending_review", "adopted", "withdrawn"];
+export const ADOPTION_STATUSES = [
+  "draft",
+  "available",
+  "pending_review",
+  "interview_scheduled",
+  "approved",
+  "rejected",
+  "adoption_in_progress",
+  "adopted",
+  "cancelled",
+];
 
-export const ADOPTION_APPLICATION_STATUSES = ["pending", "approved", "rejected", "withdrawn"];
+export const ADOPTION_APPLICATION_STATUSES = [
+  "pending",
+  "interview_scheduled",
+  "approved",
+  "rejected",
+  "withdrawn"
+];
 
 export const REPORT_STATUSES = ["draft", "generated", "archived"];
 

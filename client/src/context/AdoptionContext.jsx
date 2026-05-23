@@ -55,8 +55,8 @@ export function AdoptionProvider({ children }) {
     return result;
   }, [user]);
 
-  const submitApplication = async (adoptionId, message) => {
-    const result = await applyForAdoption(adoptionId, message);
+  const submitApplication = async (adoptionId, applicationData) => {
+    const result = await applyForAdoption(adoptionId, applicationData);
     if (result.success) {
       await Promise.all([loadListings(), loadMyApplications(), loadStats()]);
     }

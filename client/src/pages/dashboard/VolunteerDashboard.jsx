@@ -197,15 +197,15 @@ export default function VolunteerDashboard() {
   const [reportText, setReportText] = useState("");
   const [statusUpdateLoading, setStatusUpdateLoading] = useState(false);
 
-  const missions = myRescues.filter((r) => r.status !== "completed" && r.status !== "cancelled");
-  const pendingAssignments = myRescues.filter((r) => r.status === "pending");
-  const completedCount = myRescues.filter((r) => r.status === "completed").length;
+  const missions = missionList.filter((r) => !["completed", "cancelled", "volunteer_assigned", "pending"].includes(r.status));
+  const pendingAssignments = missionList.filter((r) => r.status === "volunteer_assigned" || (r.status === "pending" && !r.assignedVolunteer));
+  const completedCount = missionList.filter((r) => r.status === "completed").length;
 
   const stats = [
     { label: "Active Missions", value: missions.length, icon: "🗺️", highlight: true, sub: "Assigned missions" },
     { label: "Completed", value: completedCount, icon: "✓", sub: "Finished missions", trend: "up" },
-    { label: "Ready to Accept", value: pendingAssignments.length, icon: "🚑", sub: "Assigned but pending" },
-    { label: "In Progress", value: myRescues.filter((r) => r.status === "in_progress").length, icon: "⏳", sub: "Field response" },
+    { label: "Ready to Accept", value: pendingAssignments.length, icon: "🚑", sub: "Assigned to you" },
+    { label: "In Progress", value: missionList.filter((r) => r.status === "in_progress").length, icon: "⏳", sub: "Field response" },
   ];
 
   const quickActions = [
@@ -225,9 +225,9 @@ export default function VolunteerDashboard() {
     : [];
 
   const buildMissionTasks = (rescue) => [
-    { id: "t1", label: "Report received", done: rescue.status !== "pending" },
-    { id: "t2", label: "Assignment accepted", done: rescue.status === "accepted" || rescue.status === "in_progress" || rescue.status === "rescued" || rescue.status === "completed" },
-    { id: "t3", label: "Field response", done: rescue.status === "in_progress" || rescue.status === "rescued" || rescue.status === "completed" },
+    { id: "t1", label: "Report received", done: !["pending", "assigned", "volunteer_assigned"].includes(rescue.status) },
+    { id: "t2", label: "Assignment accepted", done: ["accepted", "in_progress", "rescued", "completed"].includes(rescue.status) },
+    { id: "t3", label: "Field response", done: ["in_progress", "rescued", "completed"].includes(rescue.status) },
     { id: "t4", label: "Rescue completed", done: rescue.status === "completed" },
   ];
 
@@ -292,10 +292,10 @@ export default function VolunteerDashboard() {
           <div>
             <SectionLabel>Mission History</SectionLabel>
             <Card style={{ padding: "6px 0" }}>
-              {myRescues.filter((r) => ["completed", "cancelled"].includes(r.status)).map((r) => (
+              {missionList.filter((r) => ["completed", "cancelled"].includes(r.status)).map((r) => (
                 <RescueCaseRow key={r._id || r.id} rescue={r} onView={() => setModal({ open: true, type: "rescue", data: r })} />
               ))}
-              {myRescues.filter((r) => ["completed", "cancelled"].includes(r.status)).length === 0 && (
+              {missionList.filter((r) => ["completed", "cancelled"].includes(r.status)).length === 0 && (
                 <div style={{ textAlign: "center", padding: "20px", fontSize: "0.82rem", color: T.textMuted }}>No completed or cancelled missions yet.</div>
               )}
             </Card>

@@ -15,6 +15,8 @@ import {
   getMyRescueRequests,
   getRescueStats,
   getCriticalRescues,
+  autoAssignNgo,
+  rejectRescueMission,
 } from "../controllers/rescueController.js";
 
 const router = express.Router();
@@ -60,6 +62,22 @@ router.put(
   authMiddleware,
   authorizeRoles("admin", "ngo", "volunteer"),
   acceptRescueMission
+);
+
+// REJECT RESCUE MISSION
+router.put(
+  "/reject/:id",
+  authMiddleware,
+  authorizeRoles("admin", "ngo"),
+  rejectRescueMission
+);
+
+// AUTO ASSIGN NGO TO MISSION
+router.put(
+  "/auto-assign/:id",
+  authMiddleware,
+  authorizeRoles("admin"),
+  autoAssignNgo
 );
 
 // UPDATE OPERATIONAL MISSION STATUS

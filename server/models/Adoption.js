@@ -50,13 +50,28 @@ const adoptionSchema = new mongoose.Schema(
     status: {
       type: String,
       enum: ADOPTION_STATUSES,
-      default: "draft",
+      default: "available",
       index: true,
     },
     adoptionFee: {
       type: Number,
       min: 0,
       default: 0,
+    },
+    urgency: {
+      type: String,
+      enum: ["low", "medium", "high"],
+      default: "low",
+    },
+    healthCondition: {
+      type: String,
+      trim: true,
+      default: "Healthy",
+    },
+    vaccinationStatus: {
+      type: String,
+      trim: true,
+      default: "Unknown",
     },
     metadata: {
       type: mongoose.Schema.Types.Mixed,

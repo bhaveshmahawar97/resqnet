@@ -128,7 +128,7 @@ export default function NGODashboard() {
   const { user } = useAuth();
   const {
     rescues, criticalRescues, stats, loading, error,
-    updateRescueStatus, assignVolunteer, acceptMission,
+    updateRescueStatus, assignVolunteer, acceptMission, rejectMission,
   } = useRescue();
 
   const [volunteerDirectory, setVolunteerDirectory] = useState([]);
@@ -150,7 +150,7 @@ export default function NGODashboard() {
   const [listingFile, setListingFile] = useState(null);
   const [listingErrors, setListingErrors] = useState({});
   const [listingForm, setListingForm] = useState({
-    animalName: "", animalType: "", age: "", condition: "", description: "",
+    sourceRescue: "", animalName: "", animalType: "", age: "", condition: "", description: "",
   });
 
   const activeRescues = rescues.filter((r) => r.status !== "completed" && r.status !== "cancelled");
@@ -211,7 +211,7 @@ export default function NGODashboard() {
   };
 
   const resetListingForm = () => {
-    setListingForm({ animalName: "", animalType: "", age: "", condition: "", description: "" });
+    setListingForm({ sourceRescue: "", animalName: "", animalType: "", age: "", condition: "", description: "" });
     setListingFile(null); setListingImagePreview(null); setListingErrors({});
   };
 
@@ -232,6 +232,7 @@ export default function NGODashboard() {
     try {
       const imageUrl = await uploadToCloudinary(listingFile);
       const result = await createAdoptionListing({
+        sourceRescue: listingForm.sourceRescue || null,
         animalName: listingForm.animalName.trim(), animalType: listingForm.animalType.trim(),
         description: listingForm.description.trim(), images: [imageUrl],
         metadata: { age: listingForm.age.trim(), condition: listingForm.condition.trim() },
@@ -291,6 +292,15 @@ export default function NGODashboard() {
     setAssignLoading(false);
     if (result.success) { showToast("Mission accepted"); setModal((m) => ({ ...m, data: result.data })); }
     else showToast(result.message || "Could not accept");
+  };
+
+  const handleRejectRescue = async () => {
+    if (!modal.data) return;
+    setAssignLoading(true);
+    const result = await rejectMission(modal.data._id || modal.data.id);
+    setAssignLoading(false);
+    if (result.success) { showToast("Mission rejected"); setModal({ open: false, type: null, data: null }); }
+    else showToast(result.message || "Could not reject");
   };
 
   const handleUpdateStatus = async (status) => {
@@ -388,15 +398,25 @@ export default function NGODashboard() {
                     <div style={{ fontSize: "0.76rem", color: T.textMuted, lineHeight: 1.5, marginBottom: 10 }}>
                       {app.message || "No details provided."}
                     </div>
-                    <div style={{ display: "flex", gap: 8 }}>
-                      <button disabled={busy} onClick={() => handleReviewApplication(app._id || app.id, "approved")}
-                        style={{ padding: "7px 14px", borderRadius: 8, border: "none", background: T.accent, color: "#fff", cursor: busy ? "not-allowed" : "pointer", fontWeight: 700, fontFamily: "inherit", fontSize: "0.76rem" }}>
-                        {busy ? "…" : "Approve"}
-                      </button>
-                      <button disabled={busy} onClick={() => handleReviewApplication(app._id || app.id, "rejected")}
-                        style={{ padding: "7px 14px", borderRadius: 8, border: `1px solid ${T.border}`, background: T.bgAlt, color: T.text, cursor: busy ? "not-allowed" : "pointer", fontWeight: 700, fontFamily: "inherit", fontSize: "0.76rem" }}>
-                        {busy ? "…" : "Reject"}
-                      </button>
+                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                      {["pending", "interview_scheduled"].includes(app.status) && (
+                        <>
+                          <button disabled={busy} onClick={() => handleReviewApplication(app._id || app.id, "approved")}
+                            style={{ padding: "7px 14px", borderRadius: 8, border: "none", background: T.accent, color: "#fff", cursor: busy ? "not-allowed" : "pointer", fontWeight: 700, fontFamily: "inherit", fontSize: "0.76rem" }}>
+                            {busy ? "…" : "Approve"}
+                          </button>
+                          {app.status === "pending" && (
+                            <button disabled={busy} onClick={() => handleReviewApplication(app._id || app.id, "interview_scheduled")}
+                              style={{ padding: "7px 14px", borderRadius: 8, border: `1px solid ${T.accent}`, background: T.bgAlt, color: T.accent, cursor: busy ? "not-allowed" : "pointer", fontWeight: 700, fontFamily: "inherit", fontSize: "0.76rem" }}>
+                              {busy ? "…" : "Schedule Interview"}
+                            </button>
+                          )}
+                          <button disabled={busy} onClick={() => handleReviewApplication(app._id || app.id, "rejected")}
+                            style={{ padding: "7px 14px", borderRadius: 8, border: `1px solid ${T.border}`, background: T.bgAlt, color: T.text, cursor: busy ? "not-allowed" : "pointer", fontWeight: 700, fontFamily: "inherit", fontSize: "0.76rem" }}>
+                            {busy ? "…" : "Reject"}
+                          </button>
+                        </>
+                      )}
                     </div>
                   </div>
                 );
@@ -511,25 +531,54 @@ export default function NGODashboard() {
               {user?.role && ["ngo", "admin"].includes(user.role) && (
                 <StatusUpdateControls rescue={modal.data} onUpdate={handleUpdateStatus} loading={statusLoading} T={T} />
               )}
+              {modal.data.status === "completed" && (
+                <div style={{ marginTop: 14 }}>
+                  <button
+                    onClick={() => {
+                      setListingForm(prev => ({
+                        ...prev,
+                        sourceRescue: modal.data._id || modal.data.id,
+                        animalType: modal.data.animalType || modal.data.animal || "",
+                        condition: modal.data.condition || "",
+                        description: `Rescue from ${modal.data.address || modal.data.location}`
+                      }));
+                      setModal({ open: false, type: null, data: null });
+                      setListingModalOpen(true);
+                    }}
+                    style={{
+                      width: "100%", padding: "10px", borderRadius: 8, border: "none",
+                      background: T.accent, color: "#fff", fontWeight: 700, cursor: "pointer", fontFamily: "inherit"
+                    }}
+                  >
+                    List for Adoption
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </DashboardModal>
 
         {/* ── Assign Volunteer Modal ── */}
-        <DashboardModal isOpen={modal.open && modal.type === "assign"} title="Assign Volunteer" onClose={() => setModal({ open: false, type: null, data: null })}>
+        <DashboardModal isOpen={modal.open && modal.type === "assign"} title={modal.data?.status === "assigned" ? "Mission Assignment" : "Assign Volunteer"} onClose={() => setModal({ open: false, type: null, data: null })}>
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            {modal.data && volunteerDirectory.map((vol) => (
+            {modal.data && ["accepted", "volunteer_assigned"].includes(modal.data.status) && volunteerDirectory.map((vol) => (
               <button key={vol.id} type="button" disabled={assignLoading} onClick={() => handleAssignVolunteerToRescue(vol.id)}
                 style={{ padding: "9px 12px", borderRadius: 8, border: `1px solid ${T.border}`, background: T.bgAlt, textAlign: "left", cursor: "pointer", fontFamily: "inherit", width: "100%" }}>
                 <div style={{ fontWeight: 700, color: T.text, fontSize: "0.82rem" }}>{vol.name}</div>
                 <div style={{ fontSize: "0.72rem", color: T.textMuted }}>{vol.city} · {vol.availability}</div>
               </button>
             ))}
-            {modal.data?.status === "pending" && (
-              <button type="button" disabled={assignLoading} onClick={handleAcceptRescue}
-                style={{ padding: "9px", borderRadius: 8, background: T.accent, border: "none", color: "#fff", fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>
-                {assignLoading ? "Working…" : "Accept mission as NGO"}
-              </button>
+            {modal.data?.status === "assigned" && (
+              <div style={{ display: "flex", gap: 10 }}>
+                <button type="button" disabled={assignLoading} onClick={handleAcceptRescue}
+                  style={{ flex: 1, padding: "9px", borderRadius: 8, background: T.accent, border: "none", color: "#fff", fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>
+                  {assignLoading ? "Working…" : "Accept Mission"}
+                </button>
+                <button type="button" disabled={assignLoading} onClick={handleRejectRescue}
+                  style={{ flex: 1, padding: "9px", borderRadius: 8, background: T.bgAlt, border: `1px solid ${T.border}`, color: T.text, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>
+                  {assignLoading ? "Working…" : "Reject Mission"}
+                </button>
+              </div>
             )}
           </div>
         </DashboardModal>
