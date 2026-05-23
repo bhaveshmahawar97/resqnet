@@ -23,23 +23,13 @@ import {
   notifyRescueCompleted,
 } from "../services/missionNotificationService.js";
 import {
-  validateCreateRescueBody,
-  validateStatusUpdate,
   extractUploadedImageUrls,
   parseImageField,
 } from "../validators/rescueValidator.js";
 import { sendSuccess, sendError } from "../utils/apiResponse.js";
 
-export const createRescueRequest = async (req, res) => {
+export const createRescueRequest = async (req, res, next) => {
   try {
-    const validation = validateCreateRescueBody(req.body);
-    if (!validation.valid) {
-      return sendError(res, {
-        status: 400,
-        message: validation.errors.join("; "),
-      });
-    }
-
     const uploaded = extractUploadedImageUrls(req.files);
     const fallback = parseImageField(req.body.images);
     const imageUrls = uploaded.length > 0 ? uploaded : fallback;
@@ -56,12 +46,7 @@ export const createRescueRequest = async (req, res) => {
       data: rescue,
     });
   } catch (error) {
-    console.error("CREATE RESCUE ERROR:", error);
-    return sendError(res, {
-      status: 500,
-      message: error.message || "Unable to create rescue request",
-      error,
-    });
+    next(error);
   }
 };
 
@@ -478,18 +463,13 @@ export const getAssignedRescues = async (req, res) => {
   }
 };
 
-export const updateRescueStatus = async (req, res) => {
+export const updateRescueStatus = async (req, res, next) => {
   try {
     const { id } = req.params;
     const { status, note } = req.body;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return sendError(res, { status: 400, message: "Invalid rescue request id" });
-    }
-
-    const statusCheck = validateStatusUpdate(status);
-    if (!statusCheck.valid) {
-      return sendError(res, { status: 400, message: statusCheck.message });
     }
 
     const request = await RescueRequest.findById(id);
@@ -541,12 +521,7 @@ export const updateRescueStatus = async (req, res) => {
       data: updated,
     });
   } catch (error) {
-    console.error("UPDATE RESCUE STATUS ERROR:", error);
-    return sendError(res, {
-      status: 500,
-      message: error.message || "Unable to update rescue status",
-      error,
-    });
+    next(error);
   }
 };
 

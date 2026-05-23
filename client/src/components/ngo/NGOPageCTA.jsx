@@ -1,4 +1,5 @@
 import { motion, useReducedMotion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import { useT } from "../../context/ThemeContext";
 import useViewport from "../../hooks/useViewport";
 import Button from "../ui/Button";
@@ -13,6 +14,7 @@ const STEPS = [
 export default function NGOPageCTA() {
   const { T } = useT();
   const vp = useViewport();
+  const navigate = useNavigate();
   const reduce = useReducedMotion();
 
   const fadeUp = {
@@ -153,12 +155,14 @@ export default function NGOPageCTA() {
 
         {/* CTA buttons */}
         <div style={{ display: "flex", gap: "0.65rem", justifyContent: "center", flexWrap: "wrap" }}>
-          <Button variant="primary" size="lg">Register Your NGO — Free</Button>
+          <Button variant="primary" size="lg" onClick={() => navigate("/ngo-register")}>
+            Register Your NGO — Free
+          </Button>
           <Button variant="ghost" size="lg">Talk to Our Team</Button>
         </div>
 
         <div style={{ textAlign: "center", marginTop: "1.25rem", fontSize: "0.68rem", color: T.textMuted }}>
-          No cost for verified NGOs · Verified in 48 hrs · 312+ organizations already onboard
+          No cost for verified NGOs · Verified in 48 hrs · 0 organizations already onboard
         </div>
       </div>
     </section>

@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { timeAgo } from "../../utils/operationalData";
+import { timeAgo } from "../../utils/dateUtils";
 import { useT } from "../../context/ThemeContext";
 
 const priorityConfig = {

@@ -1,14 +1,13 @@
-export const validateRegisterBody = ({ fullName, email, password }) => {
-  const errors = [];
-  if (!fullName?.trim()) errors.push("fullName is required");
-  if (!email?.trim()) errors.push("email is required");
-  if (!password || password.length < 6) errors.push("password must be at least 6 characters");
-  return { valid: errors.length === 0, errors };
-};
+import { z } from "zod";
 
-export const validateLoginBody = ({ email, password }) => {
-  const errors = [];
-  if (!email?.trim()) errors.push("email is required");
-  if (!password) errors.push("password is required");
-  return { valid: errors.length === 0, errors };
-};
+export const registerSchema = z.object({
+  fullName: z.string().trim().min(2, "Full name must be at least 2 characters long"),
+  email: z.string().trim().email("Invalid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters long"),
+  role: z.enum(["user", "ngo", "volunteer", "admin"]).optional().default("user"),
+});
+
+export const loginSchema = z.object({
+  email: z.string().trim().email("Invalid email address"),
+  password: z.string().min(1, "Password is required"),
+});

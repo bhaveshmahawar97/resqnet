@@ -1,33 +1,23 @@
+import { z } from "zod";
 import { RESCUE_STATUSES, SEVERITY_LEVELS } from "../constants/enums.js";
 
-export const validateCreateRescueBody = (body) => {
-  const errors = [];
-  const { animalType, condition, description, severity, address } = body;
+export const createRescueSchema = z.object({
+  animalType: z.string().trim().min(1, "animalType is required"),
+  condition: z.string().trim().min(1, "condition is required"),
+  description: z.string().trim().min(1, "description is required"),
+  address: z.string().trim().min(1, "address is required"),
+  city: z.string().trim().optional(),
+  state: z.string().trim().optional(),
+  severity: z.enum(SEVERITY_LEVELS),
+  latitude: z.union([z.string(), z.number()]).optional().transform(v => v === "" ? undefined : Number(v)).refine(val => val === undefined || (val >= -90 && val <= 90), { message: "invalid latitude" }),
+  longitude: z.union([z.string(), z.number()]).optional().transform(v => v === "" ? undefined : Number(v)).refine(val => val === undefined || (val >= -180 && val <= 180), { message: "invalid longitude" }),
+  images: z.union([z.string(), z.array(z.string())]).optional(),
+  contactPhone: z.string().trim().optional()
+});
 
-  if (!animalType?.trim()) errors.push("animalType is required");
-  if (!condition?.trim()) errors.push("condition is required");
-  if (!description?.trim()) errors.push("description is required");
-  if (!address?.trim()) errors.push("address is required");
-  if (!severity || !SEVERITY_LEVELS.includes(severity)) {
-    errors.push(`severity must be one of: ${SEVERITY_LEVELS.join(", ")}`);
-  }
-
-  if (body.latitude !== undefined && body.latitude !== "") {
-    const lat = Number(body.latitude);
-    if (isNaN(lat) || lat < -90 || lat > 90) errors.push("invalid latitude");
-  }
-
-  if (body.longitude !== undefined && body.longitude !== "") {
-    const lng = Number(body.longitude);
-    if (isNaN(lng) || lng < -180 || lng > 180) errors.push("invalid longitude");
-  }
-
-  return { valid: errors.length === 0, errors };
-};
-
-export const validateStatusUpdate = (status) => ({
-  valid: RESCUE_STATUSES.includes(status),
-  message: `Invalid status. Valid options: ${RESCUE_STATUSES.join(", ")}`,
+export const updateRescueStatusSchema = z.object({
+  status: z.enum(RESCUE_STATUSES, { errorMap: () => ({ message: `Invalid status. Valid options: ${RESCUE_STATUSES.join(", ")}` }) }),
+  notes: z.string().optional()
 });
 
 export const extractUploadedImageUrls = (files) => {

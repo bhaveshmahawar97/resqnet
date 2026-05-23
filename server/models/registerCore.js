@@ -7,6 +7,7 @@ import { adoptionSchema } from "./Adoption.js";
 import { adoptionApplicationSchema } from "./AdoptionApplication.js";
 import { analyticsSchema } from "./Analytics.js";
 import { reportSchema } from "./Report.js";
+import { ngoSchema } from "./NGO.js";
 
 /** @type {Record<string, import('mongoose').Model<any>>} */
 const coreModels = {};
@@ -24,6 +25,7 @@ export const bindCoreModels = (connection) => {
   );
   coreModels.Analytics = connection.model("Analytics", analyticsSchema);
   coreModels.Report = connection.model("Report", reportSchema);
+  coreModels.NGO = connection.model("NGO", ngoSchema);
   return coreModels;
 };
 

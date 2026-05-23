@@ -5,6 +5,7 @@ import useViewport from "../../hooks/useViewport";
 import Label from "../ui/Label";
 import Button from "../ui/Button";
 import { vFadeUp } from "../../animations/variants";
+import EmptyState from "../system/EmptyState";
 
 const VOLUNTEERS = [
   { id: 1, name: "Rahul Sharma", role: "Senior Rescue Specialist", distance: "1.2 km", responseTime: "~4 min", skills: ["Large Animals", "First Aid", "Wildlife"], cases: 234, rating: 4.9, status: "available", avatar: "👨‍⚕️" },
@@ -80,77 +81,83 @@ export default function VolunteerGrid() {
         {/* Volunteer grid */}
         <div style={{ display: "grid", gridTemplateColumns: vp.mobile ? "1fr" : vp.tablet ? "repeat(2, 1fr)" : "repeat(3, 1fr)", gap: "1.25rem" }}>
           <AnimatePresence>
-            {filtered.map((v, i) => {
-              const sc = STATUS_CONFIG[v.status];
-              const isAssigned = assigned.has(v.id);
-              return (
-                <motion.div
-                  key={v.id}
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ delay: i * 0.07 }}
-                  style={{
-                    background: T.bgCard,
-                    borderRadius: 14,
-                    border: `1px solid ${isAssigned ? T.accent : T.border}`,
-                    padding: "1.25rem",
-                    boxShadow: T.shadow,
-                    transition: "all 0.25s",
-                  }}
-                >
-                  <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.75rem" }}>
-                    <div style={{ fontSize: "1.8rem", width: 46, height: 46, borderRadius: 12, background: T.bgAlt, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                      {v.avatar}
-                    </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontWeight: 700, fontSize: "0.9rem", color: T.text, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{v.name}</div>
-                      <div style={{ fontSize: "0.72rem", color: T.textMuted }}>{v.role}</div>
-                    </div>
-                    <div style={{ fontSize: "0.68rem", fontWeight: 700, padding: "3px 8px", borderRadius: 20, background: sc.bg, color: sc.color, flexShrink: 0 }}>
-                      {sc.label}
-                    </div>
-                  </div>
-
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "0.4rem", marginBottom: "0.75rem" }}>
-                    {[["Distance", v.distance], ["ETA", v.responseTime], ["Cases", v.cases]].map(([k, val]) => (
-                      <div key={k} style={{ textAlign: "center", padding: "0.4rem", borderRadius: 7, background: T.bgAlt }}>
-                        <div style={{ fontSize: "0.8rem", fontWeight: 700, color: T.text }}>{val}</div>
-                        <div style={{ fontSize: "0.62rem", color: T.textMuted }}>{k}</div>
+            {filtered.length === 0 ? (
+              <div style={{ gridColumn: "1 / -1" }}>
+                <EmptyState icon="👥" title="No Volunteers Found" message="No volunteers match the current filter." minHeight="200px" />
+              </div>
+            ) : (
+              filtered.map((v, i) => {
+                const sc = STATUS_CONFIG[v.status];
+                const isAssigned = assigned.has(v.id);
+                return (
+                  <motion.div
+                    key={v.id}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ delay: i * 0.07 }}
+                    style={{
+                      background: T.bgCard,
+                      borderRadius: 14,
+                      border: `1px solid ${isAssigned ? T.accent : T.border}`,
+                      padding: "1.25rem",
+                      boxShadow: T.shadow,
+                      transition: "all 0.25s",
+                    }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.75rem" }}>
+                      <div style={{ fontSize: "1.8rem", width: 46, height: 46, borderRadius: 12, background: T.bgAlt, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                        {v.avatar}
                       </div>
-                    ))}
-                  </div>
-
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: "0.3rem", marginBottom: "0.75rem" }}>
-                    {v.skills.map((s) => (
-                      <span key={s} style={{ fontSize: "0.65rem", padding: "2px 7px", borderRadius: 10, background: T.accentPale, color: T.accent, fontWeight: 600 }}>{s}</span>
-                    ))}
-                  </div>
-
-                  <div style={{ display: "flex", gap: "0.4rem" }}>
-                    {isAssigned ? (
-                      <div style={{ flex: 1, padding: "0.55rem", borderRadius: 8, background: T.accentPale, border: `1px solid ${T.accent}`, textAlign: "center", fontSize: "0.78rem", fontWeight: 700, color: T.accent }}>
-                        ✓ Assigned to Rescue
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontWeight: 700, fontSize: "0.9rem", color: T.text, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{v.name}</div>
+                        <div style={{ fontSize: "0.72rem", color: T.textMuted }}>{v.role}</div>
                       </div>
-                    ) : (
-                      <>
-                        <Button
-                          variant="primary"
-                          size="sm"
-                          onClick={() => setAssigned((s) => new Set([...s, v.id]))}
-                          style={{ flex: 1, opacity: v.status === "off-duty" ? 0.5 : 1, pointerEvents: v.status === "off-duty" ? "none" : "auto", fontSize: "0.75rem" }}
-                        >
-                          Assign
-                        </Button>
-                        <Button variant="ghost" size="sm" onClick={() => setProfileModal(v)} style={{ fontSize: "0.75rem" }}>
-                          Profile
-                        </Button>
-                      </>
-                    )}
-                  </div>
-                </motion.div>
-              );
-            })}
+                      <div style={{ fontSize: "0.68rem", fontWeight: 700, padding: "3px 8px", borderRadius: 20, background: sc.bg, color: sc.color, flexShrink: 0 }}>
+                        {sc.label}
+                      </div>
+                    </div>
+
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "0.4rem", marginBottom: "0.75rem" }}>
+                      {[["Distance", v.distance], ["ETA", v.responseTime], ["Cases", v.cases]].map(([k, val]) => (
+                        <div key={k} style={{ textAlign: "center", padding: "0.4rem", borderRadius: 7, background: T.bgAlt }}>
+                          <div style={{ fontSize: "0.8rem", fontWeight: 700, color: T.text }}>{val}</div>
+                          <div style={{ fontSize: "0.62rem", color: T.textMuted }}>{k}</div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: "0.3rem", marginBottom: "0.75rem" }}>
+                      {v.skills.map((s) => (
+                        <span key={s} style={{ fontSize: "0.65rem", padding: "2px 7px", borderRadius: 10, background: T.accentPale, color: T.accent, fontWeight: 600 }}>{s}</span>
+                      ))}
+                    </div>
+
+                    <div style={{ display: "flex", gap: "0.4rem" }}>
+                      {isAssigned ? (
+                        <div style={{ flex: 1, padding: "0.55rem", borderRadius: 8, background: T.accentPale, border: `1px solid ${T.accent}`, textAlign: "center", fontSize: "0.78rem", fontWeight: 700, color: T.accent }}>
+                          ✓ Assigned to Rescue
+                        </div>
+                      ) : (
+                        <>
+                          <Button
+                            variant="primary"
+                            size="sm"
+                            onClick={() => setAssigned((s) => new Set([...s, v.id]))}
+                            style={{ flex: 1, opacity: v.status === "off-duty" ? 0.5 : 1, pointerEvents: v.status === "off-duty" ? "none" : "auto", fontSize: "0.75rem" }}
+                          >
+                            Assign
+                          </Button>
+                          <Button variant="ghost" size="sm" onClick={() => setProfileModal(v)} style={{ fontSize: "0.75rem" }}>
+                            Profile
+                          </Button>
+                        </>
+                      )}
+                    </div>
+                  </motion.div>
+                );
+              })
+            )}
           </AnimatePresence>
         </div>
       </div>

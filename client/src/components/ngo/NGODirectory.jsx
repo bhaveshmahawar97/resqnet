@@ -6,8 +6,11 @@ import { vFadeUp } from "../../animations/variants";
 import Btn from "../ui/Button";
 import Label from "../ui/Label";
 import { fetchNgos } from "../../services/userService";
-import { TYPE_COLORS, ALL_STATUS } from "../../data/ngos";
+import NgoCard from "./NgoCard";
+import SkeletonCard from "../system/SkeletonCard";
+import EmptyState from "../system/EmptyState";
 
+const ALL_STATUS = ["All", "Verified"];
 function FilterBar({ typeOptions, typeFilter, setTypeFilter, statusFilter, setStatusFilter, search, setSearch }) {
   const { T } = useT();
   const vp = useViewport();
@@ -79,97 +82,7 @@ function FilterBar({ typeOptions, typeFilter, setTypeFilter, statusFilter, setSt
   );
 }
 
-function NGOCard({ ngo, i }) {
-  const { T } = useT();
-  const [hov, setHov] = useState(false);
-  const type = (ngo.specialties || ["Partner"])[0];
-  const focus = (ngo.specialties || []).slice(0, 3).join(", ") || "Rescue support";
-  const tc = TYPE_COLORS[type] || TYPE_COLORS.Rescue;
-
-  return (
-    <motion.div
-      custom={i}
-      initial="hidden"
-      whileInView="show"
-      viewport={{ once: true, margin: "-40px" }}
-      variants={vFadeUp}
-      onMouseEnter={() => setHov(true)}
-      onMouseLeave={() => setHov(false)}
-      style={{
-        background: hov ? T.bgCardHov : T.bgCard,
-        border: `1px solid ${hov ? T.borderHov : T.border}`,
-        borderRadius: 14,
-        padding: "clamp(1.1rem, 2.5vw, 1.6rem)",
-        cursor: "pointer",
-        transition: "all 0.3s ease",
-        transform: hov ? "translateY(-3px)" : "none",
-        boxShadow: hov ? T.shadowHov : T.shadow,
-        flex: "1 1 clamp(280px, 30vw, 380px)",
-        display: "flex", flexDirection: "column", gap: "1rem",
-      }}>
-
-      {/* Header row */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-        <div style={{ display: "flex", gap: "0.7rem", alignItems: "center" }}>
-          <div style={{ width: 42, height: 42, borderRadius: 11, background: T.accentPale, border: `1px solid ${T.accentGlow}`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={T.accent} strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-            </svg>
-          </div>
-          <div>
-            <h3 style={{ fontSize: "clamp(0.86rem, 1.8vw, 0.98rem)", fontWeight: 700, margin: 0, color: T.text, lineHeight: 1.3 }}>{ngo.name}</h3>
-            <div style={{ display: "flex", alignItems: "center", gap: 4, marginTop: "0.18rem" }}>
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke={T.textMuted} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>
-              <span style={{ fontSize: "0.72rem", color: T.textSub }}>{ngo.city}</span>
-            </div>
-          </div>
-        </div>
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "0.35rem" }}>
-          <span style={{ fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: tc.text, background: tc.bg, padding: "0.18rem 0.55rem", borderRadius: 20 }}>{type}</span>
-          <div style={{ display: "flex", alignItems: "center", gap: "0.25rem" }}>
-            <div style={{ width: 5, height: 5, borderRadius: "50%", background: ngo.verified ? T.accent : "#F59E0B" }} />
-            <span style={{ fontSize: "0.65rem", color: ngo.verified ? T.accent : "#D97706", fontWeight: 600 }}>{ngo.verified ? "Verified" : "Unverified"}</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Focus tag */}
-      <div style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap" }}>
-        {focus && (
-          <span style={{ fontSize: "0.66rem", color: T.textSub, background: T.bgAlt, border: `1px solid ${T.border}`, padding: "0.18rem 0.6rem", borderRadius: 20 }}>{focus}</span>
-        )}
-        {(ngo.distance || ngo.responseTime) && (
-          <span style={{ fontSize: "0.66rem", color: T.textSub, background: T.bgAlt, border: `1px solid ${T.border}`, padding: "0.18rem 0.6rem", borderRadius: 20 }}>
-            {ngo.distance ? `${ngo.distance} away` : ngo.responseTime}
-          </span>
-        )}
-      </div>
-
-      {/* Stats row */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "0.5rem", borderTop: `1px solid ${T.border}`, paddingTop: "0.9rem" }}>
-        {[
-          { val: ngo.responseTime || "~20 min", sub: "Response" },
-          { val: ngo.missionsCompleted?.toLocaleString?.() ?? 0, sub: "Missions" },
-          { val: `${ngo.rating ?? 4.8}★`, sub: "Rating" },
-        ].map(({ val, sub }) => (
-          <div key={sub} style={{ textAlign: "center" }}>
-            <div style={{ fontSize: "clamp(1rem, 2.2vw, 1.2rem)", fontWeight: 800, color: T.text, letterSpacing: "-0.03em" }}>{val}</div>
-            <div style={{ fontSize: "0.62rem", color: T.textMuted, marginTop: 1 }}>{sub}</div>
-          </div>
-        ))}
-      </div>
-
-      {/* Footer actions */}
-      <div style={{ display: "flex", gap: "0.55rem", alignItems: "center", marginTop: "auto" }}>
-        <Btn variant="primary" size="sm" style={{ flex: 1 }}>Contact NGO</Btn>
-        <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
-          style={{ width: 34, height: 34, borderRadius: 9, border: `1px solid ${T.border}`, background: T.bgCard, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={T.textSub} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg>
-        </motion.button>
-      </div>
-    </motion.div>
-  );
-}
+// NGOCard moved to NgoCard.jsx
 
 export default function NGODirectory() {
   const { T } = useT();
@@ -210,14 +123,14 @@ export default function NGODirectory() {
       typeFilter === "All" || (n.specialties || []).includes(typeFilter);
     const matchStatus =
       statusFilter === "All" ||
-      (statusFilter === "Verified" ? n.verified : !n.verified);
+      (statusFilter === "Verified" ? n.verified : false);
     const q = search.toLowerCase();
     const matchSearch =
       !q ||
       n.name?.toLowerCase().includes(q) ||
       n.city?.toLowerCase().includes(q) ||
       (n.specialties || []).join(" ").toLowerCase().includes(q);
-    return matchType && matchStatus && matchSearch;
+    return matchType && matchStatus && matchSearch && n.verified;
   });
 
   const visible = showAll ? filtered : filtered.slice(0, 6);
@@ -247,19 +160,9 @@ export default function NGODirectory() {
         />
 
         <AnimatePresence mode="popLayout">
-              {loading ? (
-            <div style={{ display: "flex", gap: "clamp(0.65rem, 1.5vw, 1rem)", flexWrap: "wrap" }}>
-              {Array.from({ length: 6 }).map((_, i) => (
-                <div
-                  key={i}
-                  style={{
-                    width: "clamp(280px, 30vw, 380px)", height: 240,
-                    borderRadius: 14, background: T.bgCard,
-                    border: `1px solid ${T.border}`,
-                    boxShadow: `0 2px 14px ${T.shadow}`,
-                  }}
-                />
-              ))}
+          {loading ? (
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "clamp(0.65rem, 1.5vw, 1rem)", marginBottom: "2rem" }}>
+              {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} height={240} />)}
             </div>
           ) : error ? (
             <motion.div key="error" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
@@ -268,14 +171,10 @@ export default function NGODirectory() {
               <div style={{ fontSize: "0.9rem" }}>{error}</div>
             </motion.div>
           ) : filtered.length === 0 ? (
-            <motion.div key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              style={{ textAlign: "center", padding: "4rem 0", color: T.textMuted }}>
-              <div style={{ fontSize: "2.5rem", marginBottom: "0.75rem" }}>🔍</div>
-              <div style={{ fontSize: "0.9rem" }}>No NGOs match your filters. Try a different search.</div>
-            </motion.div>
+            <EmptyState icon="🔍" title="No NGOs Found" message="No NGOs match your filters. Try a different search." minHeight="250px" />
           ) : (
             <motion.div key="grid" layout style={{ display: "flex", gap: "clamp(0.65rem, 1.5vw, 1rem)", flexWrap: "wrap" }}>
-              {visible.map((n, i) => <NGOCard key={n.id || n.name} ngo={n} i={i % 6} />)}
+              {visible.map((n, i) => <NgoCard key={n.id || n._id || n.name} ngo={n} i={i % 6} />)}
             </motion.div>
           )}
         </AnimatePresence>

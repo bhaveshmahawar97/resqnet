@@ -13,6 +13,10 @@ import aiRoutes from "./routes/aiRoutes.js";
 import userRoutes from "./routes/users.js";
 import adoptionRoutes from "./routes/adoption.js";
 import notificationRoutes from "./routes/notifications.js";
+import ngoRoutes from "./routes/ngos.js";
+import dashboardRoutes from "./routes/dashboard.js";
+
+import { globalErrorHandler, notFoundHandler } from "./middlewares/errorHandler.js";
 
 const envFile = fs.existsSync(path.resolve(process.cwd(), ".env.local")) ? ".env.local" : ".env";
 dotenv.config({ path: path.resolve(process.cwd(), envFile) });
@@ -82,28 +86,10 @@ app.use("/api/ai", aiRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/adoption", adoptionRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/ngos", ngoRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 
-app.use((req, res) => {
-  res.status(404).json({
-    success: false,
-    message: "Route Not Found",
-  });
-});
-
-app.use((err, req, res, next) => {
-  console.error("SERVER ERROR:", err);
-
-  const status = err.status || err.statusCode || 500;
-  const message =
-    status === 500 ? "Internal Server Error" : err.message || "Request failed";
-
-  res.status(status).json({
-    success: false,
-    message,
-    ...(process.env.NODE_ENV !== "production" && err.message
-      ? { error: err.message }
-      : {}),
-  });
-});
+app.use(notFoundHandler);
+app.use(globalErrorHandler);
 
 export default app;

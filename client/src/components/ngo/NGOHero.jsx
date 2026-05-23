@@ -1,19 +1,21 @@
 import { motion, useReducedMotion } from "framer-motion";
+import { Link } from "react-router-dom";
 import { useT } from "../../context/ThemeContext";
 import useViewport from "../../hooks/useViewport";
+import { usePlatformStats, formatStat } from "../../hooks/usePlatformStats";
 import Button from "../ui/Button";
-
-const TRUST_STATS = [
-  { value: "312", label: "Verified NGOs" },
-  { value: "18", label: "States Active" },
-  { value: "94%", label: "Response Rate" },
-  { value: "48k+", label: "Animals Rescued" },
-];
 
 export default function NGOHero() {
   const { T } = useT();
   const vp = useViewport();
   const reduce = useReducedMotion();
+  const { stats } = usePlatformStats();
+
+  const TRUST_STATS = [
+    { value: formatStat(stats.totalNgos), label: "NGOs" },
+    { value: formatStat(stats.citiesCovered), label: "Cities" },
+    { value: formatStat(stats.totalRescues), label: "Rescues" },
+  ];
 
   const fadeUp = {
     initial: reduce ? {} : { opacity: 0, y: 16 },

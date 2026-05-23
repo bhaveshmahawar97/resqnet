@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useT } from "../../context/ThemeContext";
 import { useNotification } from "../../context/NotificationContext";
 import NotificationCard from "./NotificationCard";
+import SkeletonTable from "../system/SkeletonTable";
+import EmptyState from "../system/EmptyState";
 
 export default function NotificationDropdown({ isOpen, onClose }) {
   const { T } = useT();
@@ -103,17 +105,9 @@ export default function NotificationDropdown({ isOpen, onClose }) {
             }}
           >
             {loading && notifications.length === 0 ? (
-              <div style={{ padding: 24, textAlign: "center", color: T.textMuted, fontSize: "0.82rem" }}>
-                Loading updates...
-              </div>
+              <SkeletonTable rows={4} />
             ) : notifications.length === 0 ? (
-              <div style={{ padding: 32, textAlign: "center", color: T.textMuted }}>
-                <div style={{ fontSize: "2rem", marginBottom: 8 }}>📭</div>
-                <div style={{ fontSize: "0.85rem" }}>You're all caught up!</div>
-                <div style={{ fontSize: "0.75rem", marginTop: 4, opacity: 0.7 }}>
-                  No new operational alerts.
-                </div>
-              </div>
+              <EmptyState icon="📭" title="You're all caught up!" message="No new operational alerts." minHeight="200px" />
             ) : (
               <div>
                 {notifications.map((notif) => (

@@ -1,6 +1,9 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { reportRescueSchema } from "../../utils/validators";
 import { useT } from "../../context/ThemeContext";
 import { useAuth } from "../../context/AuthContext";
 import { useRescue } from "../../context/RescueContext";
@@ -26,22 +29,40 @@ export default function EmergencyForm({ onSuccess }) {
   const { createRescue, loading: rescueLoading, error: rescueError } = useRescue();
 
   const fileRef = useRef();
-  const [form, setForm] = useState({
-    animalType: "",
-    breed: "",
-    condition: "",
-    severity: "",
-    address: "",
-    city: "",
-    state: "",
-    latitude: null,
-    longitude: null,
-    contact: "",
-    notes: "",
+  
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    reset,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(reportRescueSchema),
+    defaultValues: {
+      animalType: "",
+      breed: "",
+      condition: "",
+      severity: "",
+      address: "",
+      city: "",
+      state: "",
+      latitude: undefined,
+      longitude: undefined,
+      contactPhone: "",
+      notes: "",
+    },
   });
+
+  const severity = watch("severity");
+  const address = watch("address");
+  const city = watch("city");
+  const state = watch("state");
+  const latitude = watch("latitude");
+  const longitude = watch("longitude");
+
   const [imagePreview, setImagePreview] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
-  const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState(0);
   const [successMsg, setSuccessMsg] = useState("");
@@ -57,7 +78,6 @@ export default function EmergencyForm({ onSuccess }) {
   const handleImage = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    // Basic client-side validation
     if (file.size > 5 * 1024 * 1024) {
       setErrorMsg("Image too large. Max 5MB per file.");
       return;
@@ -67,50 +87,33 @@ export default function EmergencyForm({ onSuccess }) {
       setErrorMsg("Unsupported image type.");
       return;
     }
+    setErrorMsg("");
     const reader = new FileReader();
     reader.onload = (ev) => setImagePreview(ev.target.result);
     reader.readAsDataURL(file);
     setSelectedFile(file);
   };
 
-  const validate = () => {
-    const e = {};
-    if (!form.animalType) e.animalType = "Select animal type";
-    if (!form.condition.trim()) e.condition = "Describe the condition";
-    if (!form.severity) e.severity = "Select severity level";
-    if (!form.address.trim()) e.address = "Enter location";
-    if (!form.contact.trim()) e.contact = "Enter contact number";
-    setErrors(e);
-    return Object.keys(e).length === 0;
-  };
-
   const handleLocationChange = (location) => {
-    setForm((f) => ({
-      ...f,
-      address: location.address || f.address,
-      city: location.city || f.city,
-      state: location.state || f.state,
-      latitude: location.latitude ?? f.latitude,
-      longitude: location.longitude ?? f.longitude,
-    }));
-    setErrors((err) => ({ ...err, address: "" }));
+    if (location.address) setValue("address", location.address, { shouldValidate: true });
+    if (location.city) setValue("city", location.city);
+    if (location.state) setValue("state", location.state);
+    if (location.latitude !== undefined) setValue("latitude", location.latitude);
+    if (location.longitude !== undefined) setValue("longitude", location.longitude);
   };
 
-  const handleSubmit = async () => {
+  const onSubmit = async (data) => {
     if (!user) {
       setErrorMsg("Please log in to submit a rescue request");
       setTimeout(() => navigate("/login"), 1500);
       return;
     }
 
-    if (!validate()) return;
-
     setLoading(true);
     setErrorMsg("");
     setSuccessMsg("");
     setStep(0);
 
-    // Animate through loading steps
     const interval = setInterval(() => {
       setStep((s) => {
         if (s >= LOADING_STEPS.length - 1) {
@@ -121,33 +124,30 @@ export default function EmergencyForm({ onSuccess }) {
       });
     }, 700);
 
-    const description = form.notes.trim()
-      ? `${form.condition.trim()}\n\nAdditional notes: ${form.notes.trim()}`
-      : form.condition.trim();
+    const description = data.notes?.trim()
+      ? `${data.condition.trim()}\n\nAdditional notes: ${data.notes.trim()}`
+      : data.condition.trim();
 
     const formData = new FormData();
-    formData.append("animalType", form.animalType.trim());
-    formData.append("condition", form.condition.trim());
+    formData.append("animalType", data.animalType.trim());
+    formData.append("condition", data.condition.trim());
     formData.append("description", description);
-    formData.append("severity", form.severity);
-    formData.append("address", form.address.trim());
-    if (form.city?.trim()) {
-      formData.append("city", form.city.trim());
-    }
-    if (form.state?.trim()) {
-      formData.append("state", form.state.trim());
-    }
+    formData.append("severity", data.severity);
+    formData.append("address", data.address.trim());
+    if (data.city?.trim()) formData.append("city", data.city.trim());
+    if (data.state?.trim()) formData.append("state", data.state.trim());
+    formData.append("contactPhone", data.contactPhone.trim());
 
-    if (Number.isFinite(form.latitude) && Number.isFinite(form.longitude)) {
-      formData.append("latitude", String(form.latitude));
-      formData.append("longitude", String(form.longitude));
+    if (Number.isFinite(data.latitude) && Number.isFinite(data.longitude)) {
+      formData.append("latitude", String(data.latitude));
+      formData.append("longitude", String(data.longitude));
     } else {
       try {
         const position = await getCurrentPosition();
         formData.append("latitude", String(position.latitude));
         formData.append("longitude", String(position.longitude));
       } catch {
-        // Location optional — address still used for NGO matching
+        // Location optional
       }
     }
 
@@ -163,18 +163,9 @@ export default function EmergencyForm({ onSuccess }) {
       setSuccessMsg("✅ Rescue request submitted successfully!");
       setTimeout(() => {
         setLoading(false);
-        setForm({
-          animalType: "",
-          breed: "",
-          condition: "",
-          severity: "",
-          address: "",
-          contact: "",
-          notes: "",
-        });
+        reset();
         setImagePreview(null);
         setSelectedFile(null);
-        setErrors({});
         onSuccess?.(result.data);
       }, 1200);
     } else {
@@ -262,314 +253,304 @@ export default function EmergencyForm({ onSuccess }) {
             </motion.div>
           )}
 
-          {/* Image upload */}
-          <div style={{ marginBottom: "1.5rem" }}>
+          {/* Form wrapper */}
+          <form onSubmit={handleSubmit(onSubmit)}>
+            {/* Image upload */}
+            <div style={{ marginBottom: "1.5rem" }}>
+              <div
+                onClick={() => !loading && fileRef.current?.click()}
+                className="rq-upload-zone"
+                style={{
+                  cursor: loading ? "default" : "pointer",
+                  background: imagePreview ? "transparent" : undefined,
+                  opacity: loading ? 0.6 : 1,
+                }}
+              >
+                <input
+                  ref={fileRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImage}
+                  style={{ display: "none" }}
+                  disabled={loading}
+                />
+                {imagePreview ? (
+                  <div style={{ position: "relative" }}>
+                    <img
+                      src={imagePreview}
+                      alt="Animal preview"
+                      style={{ maxHeight: 200, borderRadius: 8, margin: "0 auto", objectFit: "contain" }}
+                    />
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setImagePreview(null);
+                        setSelectedFile(null);
+                      }}
+                      disabled={loading}
+                      style={{
+                        position: "absolute",
+                        top: 4,
+                        right: 4,
+                        background: "rgba(0,0,0,0.6)",
+                        color: "#fff",
+                        border: "none",
+                        borderRadius: "50%",
+                        width: 24,
+                        height: 24,
+                        cursor: loading ? "default" : "pointer",
+                        fontSize: "0.75rem",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <div style={{ fontSize: "2rem", marginBottom: "0.5rem" }}>📷</div>
+                    <div style={{ fontSize: "0.88rem", color: T.textSub, fontWeight: 600 }}>
+                      Upload Animal Photo
+                    </div>
+                    <div style={{ fontSize: "0.75rem", color: T.textMuted, marginTop: 4 }}>
+                      Click or drag — helps rescuers prepare
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Grid fields */}
             <div
-              onClick={() => !loading && fileRef.current?.click()}
-              className="rq-upload-zone"
               style={{
-                cursor: loading ? "default" : "pointer",
-                background: imagePreview ? "transparent" : undefined,
-                opacity: loading ? 0.6 : 1,
+                display: "grid",
+                gridTemplateColumns: vp.mobile ? "1fr" : "1fr 1fr",
+                gap: "1rem",
+                marginBottom: "1rem",
               }}
             >
-              <input
-                ref={fileRef}
-                type="file"
-                accept="image/*"
-                onChange={handleImage}
-                style={{ display: "none" }}
+              {/* Animal Type */}
+              <div>
+                <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: T.textSub, marginBottom: "0.4rem", letterSpacing: "0.04em" }}>
+                  ANIMAL TYPE *
+                </label>
+                <select
+                  disabled={loading}
+                  {...register("animalType")}
+                  className="rq-input"
+                  style={{ borderColor: errors.animalType ? "#EF4444" : undefined, opacity: loading ? 0.6 : 1 }}
+                >
+                  <option value="">Select type…</option>
+                  {ANIMAL_TYPES.map((t) => (
+                    <option key={t} value={t}>
+                      {t}
+                    </option>
+                  ))}
+                </select>
+                {errors.animalType && <div style={{ color: "#EF4444", fontSize: "0.72rem", marginTop: 4 }}>{errors.animalType.message}</div>}
+              </div>
+
+              {/* Breed */}
+              <div>
+                <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: T.textSub, marginBottom: "0.4rem", letterSpacing: "0.04em" }}>
+                  BREED (OPTIONAL)
+                </label>
+                <input
+                  {...register("breed")}
+                  placeholder="e.g. Labrador, Indie…"
+                  disabled={loading}
+                  className="rq-input"
+                  style={{ opacity: loading ? 0.6 : 1 }}
+                />
+              </div>
+            </div>
+
+            {/* Condition description */}
+            <div style={{ marginBottom: "1rem" }}>
+              <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: T.textSub, marginBottom: "0.4rem", letterSpacing: "0.04em" }}>
+                CONDITION / INJURY *
+              </label>
+              <textarea
+                {...register("condition")}
+                placeholder="Describe what you observe — wounds, behavior, posture…"
+                rows={3}
                 disabled={loading}
+                className="rq-textarea"
+                style={{ borderColor: errors.condition ? "#EF4444" : undefined, opacity: loading ? 0.6 : 1 }}
               />
-              {imagePreview ? (
-                <div style={{ position: "relative" }}>
-                  <img
-                    src={imagePreview}
-                    alt="Animal preview"
-                    style={{ maxHeight: 200, borderRadius: 8, margin: "0 auto", objectFit: "contain" }}
-                  />
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setImagePreview(null);
-                      setSelectedFile(null);
+              {errors.condition && <div style={{ color: "#EF4444", fontSize: "0.72rem", marginTop: 4 }}>{errors.condition.message}</div>}
+            </div>
+
+            {/* Severity level */}
+            <div style={{ marginBottom: "1rem" }}>
+              <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: T.textSub, marginBottom: "0.6rem", letterSpacing: "0.04em" }}>
+                SEVERITY *
+              </label>
+              <div style={{ display: "grid", gridTemplateColumns: vp.mobile ? "1fr 1fr" : "repeat(4, 1fr)", gap: "0.6rem" }}>
+                {EMERGENCY_LEVELS.map(({ value, label, desc }) => (
+                  <motion.div
+                    key={value}
+                    whileHover={!loading ? { scale: 1.02 } : {}}
+                    whileTap={!loading ? { scale: 0.97 } : {}}
+                    onClick={() => {
+                      if (!loading) {
+                        setValue("severity", value, { shouldValidate: true });
+                      }
                     }}
-                    disabled={loading}
                     style={{
-                      position: "absolute",
-                      top: 4,
-                      right: 4,
-                      background: "rgba(0,0,0,0.6)",
-                      color: "#fff",
-                      border: "none",
-                      borderRadius: "50%",
-                      width: 24,
-                      height: 24,
+                      padding: "0.75rem",
+                      borderRadius: 10,
+                      border: `1.5px solid ${severity === value ? T.accent : T.border}`,
+                      background: severity === value ? T.accentPale : T.bgCard,
                       cursor: loading ? "default" : "pointer",
-                      fontSize: "0.75rem",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
+                      transition: "all 0.2s",
+                      opacity: loading ? 0.6 : 1,
                     }}
                   >
-                    ✕
-                  </button>
-                </div>
-              ) : (
-                <>
-                  <div style={{ fontSize: "2rem", marginBottom: "0.5rem" }}>📷</div>
-                  <div style={{ fontSize: "0.88rem", color: T.textSub, fontWeight: 600 }}>
-                    Upload Animal Photo
-                  </div>
-                  <div style={{ fontSize: "0.75rem", color: T.textMuted, marginTop: 4 }}>
-                    Click or drag — helps rescuers prepare
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-
-          {/* Grid fields */}
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: vp.mobile ? "1fr" : "1fr 1fr",
-              gap: "1rem",
-              marginBottom: "1rem",
-            }}
-          >
-            {/* Animal Type */}
-            <div>
-              <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: T.textSub, marginBottom: "0.4rem", letterSpacing: "0.04em" }}>
-                ANIMAL TYPE *
-              </label>
-              <select
-                value={form.animalType}
-                onChange={(e) => {
-                  setForm((f) => ({ ...f, animalType: e.target.value }));
-                  setErrors((err) => ({ ...err, animalType: "" }));
-                }}
-                disabled={loading}
-                className="rq-input"
-                style={{ borderColor: errors.animalType ? "#EF4444" : undefined, opacity: loading ? 0.6 : 1 }}
-              >
-                <option value="">Select type…</option>
-                {ANIMAL_TYPES.map((t) => (
-                  <option key={t} value={t}>
-                    {t}
-                  </option>
+                    <div style={{ fontSize: "0.82rem", fontWeight: 700, color: T.text, marginBottom: 3 }}>
+                      {label}
+                    </div>
+                    <div style={{ fontSize: "0.68rem", color: T.textMuted, lineHeight: 1.4 }}>{desc}</div>
+                  </motion.div>
                 ))}
-              </select>
-              {errors.animalType && <div style={{ color: "#EF4444", fontSize: "0.72rem", marginTop: 4 }}>{errors.animalType}</div>}
+              </div>
+              {errors.severity && <div style={{ color: "#EF4444", fontSize: "0.72rem", marginTop: 4 }}>{errors.severity.message}</div>}
             </div>
 
-            {/* Breed */}
-            <div>
+            {/* Location + Contact */}
+            <div style={{ display: "grid", gridTemplateColumns: vp.mobile ? "1fr" : "1fr 1fr", gap: "1rem", marginBottom: "1rem" }}>
+              <div>
+                <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: T.textSub, marginBottom: "0.4rem", letterSpacing: "0.04em" }}>
+                  LOCATION *
+                </label>
+                <input
+                  {...register("address")}
+                  onChange={(e) => {
+                    setValue("address", e.target.value, { shouldValidate: true });
+                    setValue("latitude", undefined);
+                    setValue("longitude", undefined);
+                  }}
+                  placeholder="Street, landmark, city…"
+                  className="rq-input"
+                  style={{ borderColor: errors.address ? "#EF4444" : undefined, opacity: loading ? 0.6 : 1 }}
+                />
+                {errors.address && <div style={{ color: "#EF4444", fontSize: "0.72rem", marginTop: 4 }}>{errors.address.message}</div>}
+              </div>
+              <div>
+                <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: T.textSub, marginBottom: "0.4rem", letterSpacing: "0.04em" }}>
+                  CONTACT NUMBER *
+                </label>
+                <input
+                  {...register("contactPhone")}
+                  placeholder="+91 XXXXX XXXXX"
+                  className="rq-input"
+                  style={{ borderColor: errors.contactPhone ? "#EF4444" : undefined, opacity: loading ? 0.6 : 1 }}
+                />
+                {errors.contactPhone && <div style={{ color: "#EF4444", fontSize: "0.72rem", marginTop: 4 }}>{errors.contactPhone.message}</div>}
+              </div>
+            </div>
+            <RescueLocationPicker
+              value={{
+                address: address || "",
+                city: city || "",
+                state: state || "",
+                latitude: latitude,
+                longitude: longitude,
+              }}
+              onChange={handleLocationChange}
+            />
+
+            {/* Notes */}
+            <div style={{ marginBottom: "1.5rem" }}>
               <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: T.textSub, marginBottom: "0.4rem", letterSpacing: "0.04em" }}>
-                BREED (OPTIONAL)
+                ADDITIONAL NOTES
               </label>
-              <input
-                value={form.breed}
-                onChange={(e) => setForm((f) => ({ ...f, breed: e.target.value }))}
-                placeholder="e.g. Labrador, Indie…"
+              <textarea
+                {...register("notes")}
+                placeholder="Any other details that might help the rescue team…"
+                rows={2}
                 disabled={loading}
-                className="rq-input"
+                className="rq-textarea"
                 style={{ opacity: loading ? 0.6 : 1 }}
               />
             </div>
-          </div>
 
-          {/* Condition description */}
-          <div style={{ marginBottom: "1rem" }}>
-            <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: T.textSub, marginBottom: "0.4rem", letterSpacing: "0.04em" }}>
-              CONDITION / INJURY *
-            </label>
-            <textarea
-              value={form.condition}
-              onChange={(e) => {
-                setForm((f) => ({ ...f, condition: e.target.value }));
-                setErrors((err) => ({ ...err, condition: "" }));
-              }}
-              placeholder="Describe what you observe — wounds, behavior, posture…"
-              rows={3}
-              disabled={loading}
-              className="rq-textarea"
-              style={{ borderColor: errors.condition ? "#EF4444" : undefined, opacity: loading ? 0.6 : 1 }}
-            />
-            {errors.condition && <div style={{ color: "#EF4444", fontSize: "0.72rem", marginTop: 4 }}>{errors.condition}</div>}
-          </div>
-
-          {/* Severity level */}
-          <div style={{ marginBottom: "1rem" }}>
-            <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: T.textSub, marginBottom: "0.6rem", letterSpacing: "0.04em" }}>
-              SEVERITY *
-            </label>
-            <div style={{ display: "grid", gridTemplateColumns: vp.mobile ? "1fr 1fr" : "repeat(4, 1fr)", gap: "0.6rem" }}>
-              {EMERGENCY_LEVELS.map(({ value, label, desc }) => (
+            {/* Submit */}
+            <AnimatePresence mode="wait">
+              {loading ? (
                 <motion.div
-                  key={value}
-                  whileHover={!loading ? { scale: 1.02 } : {}}
-                  whileTap={!loading ? { scale: 0.97 } : {}}
-                  onClick={() => {
-                    if (!loading) {
-                      setForm((f) => ({ ...f, severity: value }));
-                      setErrors((err) => ({ ...err, severity: "" }));
-                    }
-                  }}
+                  key="loading"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
                   style={{
-                    padding: "0.75rem",
+                    padding: "1rem",
                     borderRadius: 10,
-                    border: `1.5px solid ${form.severity === value ? T.accent : T.border}`,
-                    background: form.severity === value ? T.accentPale : T.bgCard,
-                    cursor: loading ? "default" : "pointer",
-                    transition: "all 0.2s",
-                    opacity: loading ? 0.6 : 1,
+                    background: T.accentPale,
+                    border: `1px solid ${T.accentBorder || T.border}`,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.75rem",
                   }}
                 >
-                  <div style={{ fontSize: "0.82rem", fontWeight: 700, color: T.text, marginBottom: 3 }}>
-                    {label}
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                    style={{
+                      width: 20,
+                      height: 20,
+                      border: `2px solid ${T.border}`,
+                      borderTop: `2px solid ${T.accent}`,
+                      borderRadius: "50%",
+                      flexShrink: 0,
+                    }}
+                  />
+                  <div style={{ flex: 1, textAlign: "left" }}>
+                    <div style={{ fontSize: "0.85rem", fontWeight: 700, color: T.text }}>
+                      {LOADING_STEPS[step]}
+                    </div>
+                    <div style={{ height: 4, borderRadius: 2, background: T.border, marginTop: 6 }}>
+                      <motion.div
+                        animate={{
+                          width: `${((step + 1) / LOADING_STEPS.length) * 100}%`,
+                        }}
+                        transition={{ duration: 0.5 }}
+                        style={{ height: "100%", borderRadius: 2, background: T.accent }}
+                      />
+                    </div>
                   </div>
-                  <div style={{ fontSize: "0.68rem", color: T.textMuted, lineHeight: 1.4 }}>{desc}</div>
                 </motion.div>
-              ))}
-            </div>
-            {errors.severity && <div style={{ color: "#EF4444", fontSize: "0.72rem", marginTop: 4 }}>{errors.severity}</div>}
-          </div>
-
-          {/* Location + Contact */}
-          <div style={{ display: "grid", gridTemplateColumns: vp.mobile ? "1fr" : "1fr 1fr", gap: "1rem", marginBottom: "1rem" }}>
-            <div>
-              <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: T.textSub, marginBottom: "0.4rem", letterSpacing: "0.04em" }}>
-                LOCATION *
-              </label>
-              <input
-                value={form.address}
-                onChange={(e) => {
-                  setForm((f) => ({ ...f, address: e.target.value, latitude: null, longitude: null }));
-                  setErrors((err) => ({ ...err, address: "" }));
-                }}
-                placeholder="Street, landmark, city…"
-                className="rq-input"
-                style={{ borderColor: errors.address ? "#EF4444" : undefined, opacity: loading ? 0.6 : 1 }}
-              />
-              {errors.address && <div style={{ color: "#EF4444", fontSize: "0.72rem", marginTop: 4 }}>{errors.address}</div>}
-            </div>
-            <div>
-              <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: T.textSub, marginBottom: "0.4rem", letterSpacing: "0.04em" }}>
-                CONTACT NUMBER *
-              </label>
-              <input
-                value={form.contact}
-                onChange={(e) => {
-                  setForm((f) => ({ ...f, contact: e.target.value }));
-                  setErrors((err) => ({ ...err, contact: "" }));
-                }}
-                placeholder="+91 XXXXX XXXXX"
-                className="rq-input"
-                style={{ borderColor: errors.contact ? "#EF4444" : undefined, opacity: loading ? 0.6 : 1 }}
-              />
-              {errors.contact && <div style={{ color: "#EF4444", fontSize: "0.72rem", marginTop: 4 }}>{errors.contact}</div>}
-            </div>
-          </div>
-          <RescueLocationPicker
-            value={{
-              address: form.address,
-              city: form.city,
-              state: form.state,
-              latitude: form.latitude,
-              longitude: form.longitude,
-            }}
-            onChange={handleLocationChange}
-          />
-
-          {/* Notes */}
-          <div style={{ marginBottom: "1.5rem" }}>
-            <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: T.textSub, marginBottom: "0.4rem", letterSpacing: "0.04em" }}>
-              ADDITIONAL NOTES
-            </label>
-            <textarea
-              value={form.notes}
-              onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
-              placeholder="Any other details that might help the rescue team…"
-              rows={2}
-              disabled={loading}
-              className="rq-textarea"
-              style={{ opacity: loading ? 0.6 : 1 }}
-            />
-          </div>
-
-          {/* Submit */}
-          <AnimatePresence mode="wait">
-            {loading ? (
-              <motion.div
-                key="loading"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                style={{
-                  padding: "1rem",
-                  borderRadius: 10,
-                  background: T.accentPale,
-                  border: `1px solid ${T.accentBorder || T.border}`,
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "0.75rem",
-                }}
-              >
-                <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+              ) : (
+                <motion.button
+                  key="submit"
+                  type="submit"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  whileHover={{ scale: 1.02, boxShadow: "0 0 24px rgba(239,68,68,0.35)" }}
+                  whileTap={{ scale: 0.97 }}
+                  disabled={loading}
                   style={{
-                    width: 20,
-                    height: 20,
-                    border: `2px solid ${T.border}`,
-                    borderTop: `2px solid ${T.accent}`,
-                    borderRadius: "50%",
-                    flexShrink: 0,
+                    width: "100%",
+                    padding: "0.95rem",
+                    borderRadius: 10,
+                    border: "none",
+                    background: "linear-gradient(135deg, #EF4444, #DC2626)",
+                    color: "#fff",
+                    fontSize: "1rem",
+                    fontWeight: 700,
+                    cursor: loading ? "default" : "pointer",
+                    fontFamily: "inherit",
+                    letterSpacing: "-0.01em",
                   }}
-                />
-                <div style={{ flex: 1, textAlign: "left" }}>
-                  <div style={{ fontSize: "0.85rem", fontWeight: 700, color: T.text }}>
-                    {LOADING_STEPS[step]}
-                  </div>
-                  <div style={{ height: 4, borderRadius: 2, background: T.border, marginTop: 6 }}>
-                    <motion.div
-                      animate={{
-                        width: `${((step + 1) / LOADING_STEPS.length) * 100}%`,
-                      }}
-                      transition={{ duration: 0.5 }}
-                      style={{ height: "100%", borderRadius: 2, background: T.accent }}
-                    />
-                  </div>
-                </div>
-              </motion.div>
-            ) : (
-              <motion.button
-                key="submit"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                whileHover={{ scale: 1.02, boxShadow: "0 0 24px rgba(239,68,68,0.35)" }}
-                whileTap={{ scale: 0.97 }}
-                onClick={handleSubmit}
-                disabled={loading}
-                style={{
-                  width: "100%",
-                  padding: "0.95rem",
-                  borderRadius: 10,
-                  border: "none",
-                  background: "linear-gradient(135deg, #EF4444, #DC2626)",
-                  color: "#fff",
-                  fontSize: "1rem",
-                  fontWeight: 700,
-                  cursor: loading ? "default" : "pointer",
-                  fontFamily: "inherit",
-                  letterSpacing: "-0.01em",
-                }}
-              >
-                🚨 Submit Emergency Rescue Request
-              </motion.button>
-            )}
-          </AnimatePresence>
+                >
+                  🚨 Submit Emergency Rescue Request
+                </motion.button>
+              )}
+            </AnimatePresence>
+          </form>
         </motion.div>
       </div>
     </section>

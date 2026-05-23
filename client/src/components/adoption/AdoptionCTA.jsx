@@ -157,7 +157,7 @@ export default function AdoptionCTA() {
         </div>
 
         <div style={{ textAlign: "center", marginTop: "1.25rem", fontSize: "0.68rem", color: T.textMuted }}>
-          No fees for adopters · 312+ NGO partners · AI-matched for your lifestyle
+          No fees for adopters · 0 NGO partners · AI-matched for your lifestyle
         </div>
       </div>
     </section>

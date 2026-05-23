@@ -1,16 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useT } from "../../context/ThemeContext";
-import { getRescueStats } from "../../services/rescueService";
-import { fetchAdoptionStats } from "../../services/adoptionService";
-
-const FALLBACK_STATS = [
-  { value: 48200, suffix: "+", label: "Animals Rescued", description: "Lives saved through our network" },
-  { value: 312, suffix: "", label: "Partner NGOs", description: "Verified rescue organizations" },
-  { value: 94, suffix: "%", label: "Recovery Rate", description: "Successful case outcomes" },
-  { value: 18, suffix: "m", label: "Avg Response", description: "Emergency response time" },
-  { value: 7400, suffix: "+", label: "Adoptions", description: "Animals found new homes" },
-];
+import { usePlatformStats, formatStat } from "../../hooks/usePlatformStats";
 
 function useCountUp(target, duration = 1800, active = false) {
   const [count, setCount] = useState(0);
@@ -76,7 +67,7 @@ function StatCard({ stat, index, active }) {
           fontFamily: "'Plus Jakarta Sans', sans-serif",
         }}
       >
-        {active ? count.toLocaleString() : stat.value.toLocaleString()}
+        {active ? formatStat(count) : formatStat(stat.value)}
         <span style={{ color: T.accent, fontSize: "0.7em" }}>{stat.suffix}</span>
       </div>
 
@@ -100,39 +91,16 @@ function StatCard({ stat, index, active }) {
 
 export default function StatsSection() {
   const { T } = useT();
-  const [stats, setStats] = useState(FALLBACK_STATS);
-  const [loaded, setLoaded] = useState(false);
+  const { stats, loading } = usePlatformStats();
   const [inView, setInView] = useState(false);
 
-  useEffect(() => {
-    let mounted = true;
-    async function fetchStats() {
-      try {
-        const [rescueRes, adoptionRes] = await Promise.allSettled([
-          getRescueStats(),
-          fetchAdoptionStats(),
-        ]);
-        if (!mounted) return;
-        const rescue = rescueRes.status === "fulfilled" && rescueRes.value?.success ? rescueRes.value.data : null;
-        const adoption = adoptionRes.status === "fulfilled" && adoptionRes.value?.success ? adoptionRes.value.data : null;
-        if (rescue || adoption) {
-          setStats([
-            { value: rescue?.total ?? FALLBACK_STATS[0].value, suffix: "+", label: "Animals Rescued", description: "Lives saved through our network" },
-            { value: FALLBACK_STATS[1].value, suffix: "", label: "Partner NGOs", description: "Verified rescue organizations" },
-            { value: rescue?.completionRate ? Math.round(rescue.completionRate) : FALLBACK_STATS[2].value, suffix: "%", label: "Recovery Rate", description: "Successful case outcomes" },
-            { value: rescue?.avgResponseMinutes ?? FALLBACK_STATS[3].value, suffix: "m", label: "Avg Response", description: "Emergency response time" },
-            { value: adoption?.adopted ?? FALLBACK_STATS[4].value, suffix: "+", label: "Adoptions", description: "Animals found new homes" },
-          ]);
-        }
-      } catch {
-        // keep fallback
-      } finally {
-        if (mounted) setLoaded(true);
-      }
-    }
-    fetchStats();
-    return () => { mounted = false; };
-  }, []);
+  const displayStats = [
+    { value: stats.totalRescues, suffix: "", label: "Animals Rescued", description: "Lives saved through our network" },
+    { value: stats.totalNgos, suffix: "", label: "Partner NGOs", description: "Verified rescue organizations" },
+    { value: stats.recoveryRate, suffix: "%", label: "Recovery Rate", description: "Successful case outcomes" },
+    { value: stats.avgResponseMinutes, suffix: "m", label: "Avg Response", description: "Emergency response time" },
+    { value: stats.totalAdoptions, suffix: "", label: "Adoptions", description: "Animals found new homes" },
+  ];
 
   return (
     <section style={{ width: "100%", padding: "clamp(3rem, 6vw, 5rem) 0", background: T.bgAlt }}>
@@ -195,13 +163,13 @@ export default function StatsSection() {
             justifyContent: "center",
           }}
         >
-          {stats.map((s, i) => (
+          {displayStats.map((s, i) => (
             <StatCard key={s.label} stat={s} index={i} active={inView} />
           ))}
         </div>
 
         {/* Live indicator */}
-        {loaded && (
+        {!loading && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}

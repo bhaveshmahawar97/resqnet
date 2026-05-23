@@ -1,14 +1,8 @@
 import { registerUser, loginUser } from "../services/authService.js";
-import { validateRegisterBody, validateLoginBody } from "../validators/authValidator.js";
 import { sendSuccess, sendError } from "../utils/apiResponse.js";
 
-export const register = async (req, res) => {
+export const register = async (req, res, next) => {
   try {
-    const validation = validateRegisterBody(req.body);
-    if (!validation.valid) {
-      return sendError(res, { status: 400, message: validation.errors.join(", ") });
-    }
-
     const result = await registerUser(req.body);
 
     return res.status(201).json({
@@ -18,22 +12,12 @@ export const register = async (req, res) => {
       user: result.user,
     });
   } catch (error) {
-    console.error("REGISTER ERROR:", error);
-    return sendError(res, {
-      status: error.status || 500,
-      message: error.message || "Registration failed",
-      error,
-    });
+    next(error);
   }
 };
 
-export const login = async (req, res) => {
+export const login = async (req, res, next) => {
   try {
-    const validation = validateLoginBody(req.body);
-    if (!validation.valid) {
-      return sendError(res, { status: 400, message: validation.errors.join(", ") });
-    }
-
     const result = await loginUser(req.body);
 
     return res.status(200).json({
@@ -43,12 +27,7 @@ export const login = async (req, res) => {
       user: result.user,
     });
   } catch (error) {
-    console.error("LOGIN ERROR:", error);
-    return sendError(res, {
-      status: error.status || 500,
-      message: error.message || "Login failed",
-      error,
-    });
+    next(error);
   }
 };
 

@@ -44,6 +44,27 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+import { showErrorToast } from "../utils/toastEvent";
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      localStorage.removeItem("token");
+      delete api.defaults.headers.common.Authorization;
+      window.dispatchEvent(new Event("auth-expired"));
+    }
+
+    // Attempt to extract backend error message
+    const message = error.response?.data?.message || error.message || "An unexpected error occurred.";
+    
+    // Dispatch global toast (unless the request explicitly asked to suppress it - we could add logic for that later)
+    showErrorToast(message);
+
+    return Promise.reject(error);
+  }
+);
+
 export function setAuthToken(token) {
   if (token) {
     api.defaults.headers.common.Authorization = `Bearer ${token}`;

@@ -5,8 +5,11 @@
  * Auth pages render inside MainLayout but override full-screen layout via CSS.
  */
 
-import { useState, useEffect } from "react";
+import { useState, forwardRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { registerSchema } from "../../utils/validators";
 import { useAuth, ROLES } from "../../context/AuthContext";
 import { useT } from "../../context/ThemeContext";
 
@@ -108,7 +111,6 @@ function BrandPanel({ mode }) {
         padding: "clamp(2rem, 4vw, 3rem)",
       }}
     >
-      {/* Grid overlay */}
       <div
         style={{
           position: "absolute",
@@ -119,8 +121,6 @@ function BrandPanel({ mode }) {
           pointerEvents: "none",
         }}
       />
-
-      {/* Ambient glow */}
       <div
         style={{
           position: "absolute",
@@ -133,8 +133,6 @@ function BrandPanel({ mode }) {
           pointerEvents: "none",
         }}
       />
-
-      {/* Network visualization */}
       <div style={{ position: "absolute", inset: 0, pointerEvents: "none" }}>
         <svg
           width="100%"
@@ -169,8 +167,6 @@ function BrandPanel({ mode }) {
           />
         ))}
       </div>
-
-      {/* Logo */}
       <div style={{ position: "relative", zIndex: 2 }}>
         <div style={{ display: "flex", alignItems: "center", gap: "0.65rem", marginBottom: "0.35rem" }}>
           <div
@@ -207,8 +203,6 @@ function BrandPanel({ mode }) {
           Animal Rescue Intelligence
         </span>
       </div>
-
-      {/* Mission copy */}
       <div
         style={{
           position: "relative",
@@ -244,8 +238,6 @@ function BrandPanel({ mode }) {
         >
           Connect with rescue organizations, volunteer coordinators, and AI-powered triage — all on one platform.
         </p>
-
-        {/* Testimonial cards */}
         <div style={{ display: "flex", flexDirection: "column", gap: "0.65rem", marginTop: "2rem" }}>
           {testimonials.map((t) => (
             <div
@@ -268,8 +260,6 @@ function BrandPanel({ mode }) {
           ))}
         </div>
       </div>
-
-      {/* Bottom trust bar */}
       <div
         style={{
           position: "relative",
@@ -296,7 +286,6 @@ function BrandPanel({ mode }) {
           </div>
         ))}
       </div>
-
       <style>{`
         @keyframes rqNodePulse {
           0%, 100% { opacity: 0.45; transform: translate(-50%, -50%) scale(1); }
@@ -308,7 +297,7 @@ function BrandPanel({ mode }) {
 }
 
 // ─── AUTH INPUT ───────────────────────────────────────────────────────────────
-function AuthInput({ label, type = "text", value, onChange, placeholder, autoComplete, T, error }) {
+const AuthInput = forwardRef(({ label, type = "text", placeholder, autoComplete, T, error, ...rest }, ref) => {
   const [focused, setFocused] = useState(false);
   return (
     <label style={{ display: "flex", flexDirection: "column", gap: "0.4rem" }}>
@@ -316,13 +305,16 @@ function AuthInput({ label, type = "text", value, onChange, placeholder, autoCom
         {label}
       </span>
       <input
+        ref={ref}
         type={type}
-        value={value}
-        onChange={onChange}
         placeholder={placeholder}
         autoComplete={autoComplete}
         onFocus={() => setFocused(true)}
-        onBlur={() => setFocused(false)}
+        onBlur={(e) => {
+          setFocused(false);
+          rest.onBlur && rest.onBlur(e);
+        }}
+        {...rest}
         style={{
           width: "100%",
           padding: "0.75rem 1rem",
@@ -347,7 +339,7 @@ function AuthInput({ label, type = "text", value, onChange, placeholder, autoCom
       )}
     </label>
   );
-}
+});
 
 // ─── ROLE CARD ────────────────────────────────────────────────────────────────
 function RoleCard({ role, selected, onSelect, T }) {
@@ -448,55 +440,37 @@ function PasswordStrength({ password, T }) {
 // ─── REGISTER PAGE ────────────────────────────────────────────────────────────
 export default function Register() {
   const { T, mode } = useT();
-  const { signIn, register: registerFn, email: currentEmail, role: currentRole } = useAuth();
+  const { register: registerFn } = useAuth();
   const navigate = useNavigate();
-  const isDark = mode === "dark";
 
-  const [fullName, setFullName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [selectedRole, setSelectedRole] = useState(ROLES.user);
-  const [fieldErrors, setFieldErrors] = useState({});
   const [globalError, setGlobalError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Redirect if already signed in
-  useEffect(() => {
-    if (currentEmail) {
-      navigate(ROLE_REDIRECTS[currentRole] || "/dashboard/user", { replace: true });
-    }
-  }, [currentEmail, currentRole, navigate]);
+  const {
+    register,
+    handleSubmit,
+    watch,
+    setValue,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(registerSchema),
+    defaultValues: {
+      role: ROLES.user,
+    },
+  });
 
-  function validate() {
-    const errs = {};
-    if (!fullName.trim()) errs.fullName = "Full name is required.";
-    if (!email.trim()) errs.email = "Email address is required.";
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()))
-      errs.email = "Enter a valid email address.";
-    if (!password) errs.password = "Password is required.";
-    else if (password.length < 6) errs.password = "Password must be at least 6 characters.";
-    if (!confirmPassword) errs.confirmPassword = "Please confirm your password.";
-    else if (password !== confirmPassword) errs.confirmPassword = "Passwords do not match.";
-    return errs;
-  }
+  const selectedRole = watch("role");
+  const currentPassword = watch("password") || "";
 
-  async function handleSubmit(e) {
-    e.preventDefault();
-    const errs = validate();
-    if (Object.keys(errs).length > 0) {
-      setFieldErrors(errs);
-      return;
-    }
-    setFieldErrors({});
+  const onSubmit = async (data) => {
     setGlobalError("");
     setLoading(true);
 
     const payload = {
-      fullName: fullName.trim(),
-      email: email.trim().toLowerCase(),
-      password,
-      role: selectedRole,
+      fullName: data.fullName,
+      email: data.email,
+      password: data.password,
+      role: data.role,
     };
 
     const res = await registerFn(payload);
@@ -507,9 +481,9 @@ export default function Register() {
       return;
     }
 
-    const role = res.user?.role || selectedRole || "user";
+    const role = res.user?.role || data.role || "user";
     navigate(ROLE_REDIRECTS[role] || "/dashboard/user", { replace: true });
-  }
+  };
 
   return (
     <div
@@ -625,7 +599,7 @@ export default function Register() {
 
           {/* Form */}
           <form
-            onSubmit={handleSubmit}
+            onSubmit={handleSubmit(onSubmit)}
             style={{ display: "flex", flexDirection: "column", gap: "1rem" }}
           >
             {/* Account type */}
@@ -646,7 +620,7 @@ export default function Register() {
                     key={role.id}
                     role={role}
                     selected={selectedRole === role.id}
-                    onSelect={setSelectedRole}
+                    onSelect={(id) => setValue("role", id)}
                     T={T}
                   />
                 ))}
@@ -657,30 +631,22 @@ export default function Register() {
             <AuthInput
               label="Full name"
               type="text"
-              value={fullName}
-              onChange={(e) => {
-                setFullName(e.target.value);
-                setFieldErrors((p) => ({ ...p, fullName: "" }));
-              }}
               placeholder="Your full name"
               autoComplete="name"
               T={T}
-              error={fieldErrors.fullName}
+              error={errors.fullName?.message}
+              {...register("fullName")}
             />
 
             {/* Email */}
             <AuthInput
               label="Email address"
               type="email"
-              value={email}
-              onChange={(e) => {
-                setEmail(e.target.value);
-                setFieldErrors((p) => ({ ...p, email: "" }));
-              }}
               placeholder="you@example.com"
               autoComplete="email"
               T={T}
-              error={fieldErrors.email}
+              error={errors.email?.message}
+              {...register("email")}
             />
 
             {/* Password + Confirm */}
@@ -688,34 +654,26 @@ export default function Register() {
               <AuthInput
                 label="Password"
                 type="password"
-                value={password}
-                onChange={(e) => {
-                  setPassword(e.target.value);
-                  setFieldErrors((p) => ({ ...p, password: "", confirmPassword: "" }));
-                }}
                 placeholder="Min. 6 characters"
                 autoComplete="new-password"
                 T={T}
-                error={fieldErrors.password}
+                error={errors.password?.message}
+                {...register("password")}
               />
               <AuthInput
                 label="Confirm password"
                 type="password"
-                value={confirmPassword}
-                onChange={(e) => {
-                  setConfirmPassword(e.target.value);
-                  setFieldErrors((p) => ({ ...p, confirmPassword: "" }));
-                }}
                 placeholder="Repeat password"
                 autoComplete="new-password"
                 T={T}
-                error={fieldErrors.confirmPassword}
+                error={errors.confirmPassword?.message}
+                {...register("confirmPassword")}
               />
             </div>
 
             {/* Password strength indicator */}
-            {password.length > 0 && (
-              <PasswordStrength password={password} T={T} />
+            {currentPassword.length > 0 && (
+              <PasswordStrength password={currentPassword} T={T} />
             )}
 
             {/* Global error */}

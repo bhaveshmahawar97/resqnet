@@ -1,4 +1,4 @@
-import { User } from "../models/index.js";
+import { User, NGO } from "../models/index.js";
 import { extractCityFromAddress, haversineKm, formatDistance } from "../utils/geo.js";
 
 const NGO_SELECT =
@@ -26,6 +26,94 @@ const buildVolunteerCityFilter = (city) => {
   };
 };
 
+const buildStandaloneNgoFilter = (city) => {
+  if (!city?.trim()) return {};
+  const pattern = new RegExp(city.trim(), "i");
+  return {
+    $or: [
+      { city: pattern },
+      { serviceAreas: pattern },
+      { organizationName: pattern },
+    ],
+  };
+};
+
+const formatUserNgo = (ngo, city, latitude, longitude) => {
+  const orgName = ngo.ngoProfile?.organizationName || ngo.fullName;
+  const ngoCity =
+    ngo.ngoProfile?.city ||
+    ngo.ngoProfile?.serviceAreas?.[0] ||
+    city ||
+    "India";
+  let distanceKm = null;
+  const meta = ngo.ngoProfile?.metadata || {};
+  if (Number.isFinite(latitude) && Number.isFinite(longitude)) {
+    if (Number.isFinite(meta.latitude) && Number.isFinite(meta.longitude)) {
+      distanceKm = haversineKm(latitude, longitude, meta.latitude, meta.longitude);
+    }
+  }
+
+  const ngoLatitude = Number.isFinite(meta.latitude)
+    ? meta.latitude
+    : Number.isFinite(ngo.ngoProfile?.latitude)
+      ? ngo.ngoProfile.latitude
+      : null;
+  const ngoLongitude = Number.isFinite(meta.longitude)
+    ? meta.longitude
+    : Number.isFinite(ngo.ngoProfile?.longitude)
+      ? ngo.ngoProfile.longitude
+      : null;
+
+  return {
+    id: ngo._id.toString(),
+    name: orgName,
+    city: ngoCity,
+    latitude: ngoLatitude,
+    longitude: ngoLongitude,
+    distance: distanceKm != null ? formatDistance(distanceKm) : null,
+    distanceKm,
+    responseTime: distanceKm != null && distanceKm < 5 ? "~10 min" : "~20 min",
+    specialties: ngo.ngoProfile?.serviceAreas?.length
+      ? ngo.ngoProfile.serviceAreas.slice(0, 4)
+      : ["Rescue", "Rehabilitation"],
+    rating: 4.8,
+    verified: Boolean(ngo.ngoProfile?.verified),
+    status: "available",
+    phone: ngo.phone || "",
+    email: ngo.email,
+    missionsCompleted: ngo.missionStats?.missionsCompleted || 0,
+    source: "user",
+  };
+};
+
+const formatStandaloneNgo = (ngo, latitude, longitude) => {
+  let distanceKm = null;
+  if (Number.isFinite(latitude) && Number.isFinite(longitude)) {
+    if (Number.isFinite(ngo.latitude) && Number.isFinite(ngo.longitude)) {
+      distanceKm = haversineKm(latitude, longitude, ngo.latitude, ngo.longitude);
+    }
+  }
+
+  return {
+    id: ngo._id.toString(),
+    name: ngo.organizationName,
+    city: ngo.city,
+    latitude: ngo.latitude,
+    longitude: ngo.longitude,
+    distance: distanceKm != null ? formatDistance(distanceKm) : null,
+    distanceKm,
+    responseTime: distanceKm != null && distanceKm < 5 ? "~10 min" : "~20 min",
+    specialties: ngo.ngoType && ngo.ngoType.length ? ngo.ngoType.slice(0, 4) : ["Rescue"],
+    rating: ngo.rating || 4.5,
+    verified: ngo.verified,
+    status: "available",
+    phone: ngo.phone,
+    email: ngo.email,
+    missionsCompleted: ngo.missionsCompleted || 0,
+    source: "standalone",
+  };
+};
+
 export const listNgos = async ({ city, latitude, longitude, limit = 24, sort = "verified" } = {}) => {
   const query = {
     role: "ngo",
@@ -38,54 +126,30 @@ export const listNgos = async ({ city, latitude, longitude, limit = 24, sort = "
       ? { createdAt: -1 }
       : { "ngoProfile.verified": -1, createdAt: -1 };
 
-  const ngos = await User.find(query).select(NGO_SELECT).sort(sortOptions).limit(limit).lean();
+  const userNgos = await User.find(query).select(NGO_SELECT).sort(sortOptions).limit(limit).lean();
 
-  return ngos.map((ngo) => {
-    const orgName = ngo.ngoProfile?.organizationName || ngo.fullName;
-    const ngoCity =
-      ngo.ngoProfile?.city ||
-      ngo.ngoProfile?.serviceAreas?.[0] ||
-      city ||
-      "India";
-    let distanceKm = null;
-    const meta = ngo.ngoProfile?.metadata || {};
-    if (Number.isFinite(latitude) && Number.isFinite(longitude)) {
-      if (Number.isFinite(meta.latitude) && Number.isFinite(meta.longitude)) {
-        distanceKm = haversineKm(latitude, longitude, meta.latitude, meta.longitude);
-      }
-    }
+  const formattedUserNgos = userNgos.map((ngo) => formatUserNgo(ngo, city, latitude, longitude));
 
-    const ngoLatitude = Number.isFinite(meta.latitude)
-      ? meta.latitude
-      : Number.isFinite(ngo.ngoProfile?.latitude)
-        ? ngo.ngoProfile.latitude
-        : null;
-    const ngoLongitude = Number.isFinite(meta.longitude)
-      ? meta.longitude
-      : Number.isFinite(ngo.ngoProfile?.longitude)
-        ? ngo.ngoProfile.longitude
-        : null;
+  // Get standalone NGOs
+  const standaloneQuery = {
+    isActive: true,
+    verified: true,
+    ...buildStandaloneNgoFilter(city),
+  };
 
-    return {
-      id: ngo._id.toString(),
-      name: orgName,
-      city: ngoCity,
-      latitude: ngoLatitude,
-      longitude: ngoLongitude,
-      distance: distanceKm != null ? formatDistance(distanceKm) : null,
-      distanceKm,
-      responseTime: distanceKm != null && distanceKm < 5 ? "~10 min" : "~20 min",
-      specialties: ngo.ngoProfile?.serviceAreas?.length
-        ? ngo.ngoProfile.serviceAreas.slice(0, 4)
-        : ["Rescue", "Rehabilitation"],
-      rating: 4.8,
-      verified: Boolean(ngo.ngoProfile?.verified),
-      status: "available",
-      phone: ngo.phone || "",
-      email: ngo.email,
-      missionsCompleted: ngo.missionStats?.missionsCompleted || 0,
-    };
-  }).sort((a, b) => {
+  const standaloneNgos = await NGO.find(standaloneQuery)
+    .select("organizationName email phone city state address ngoType description verified rating responseTime missionsCompleted latitude longitude")
+    .limit(limit)
+    .lean();
+
+  const formattedStandaloneNgos = standaloneNgos.map((ngo) => formatStandaloneNgo(ngo, latitude, longitude));
+
+  // Combine and sort by distance if available
+  const allNgos = [...formattedUserNgos, ...formattedStandaloneNgos];
+
+  return allNgos.sort((a, b) => {
+    // Sort verified first, then by distance
+    if (a.verified !== b.verified) return b.verified - a.verified;
     if (a.distanceKm == null) return 1;
     if (b.distanceKm == null) return -1;
     return a.distanceKm - b.distanceKm;

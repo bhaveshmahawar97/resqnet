@@ -4,8 +4,18 @@ import { useT } from "../../context/ThemeContext";
 import useViewport from "../../hooks/useViewport";
 import Label from "../ui/Label";
 import { vFadeUp } from "../../animations/variants";
-import { AI_TRAITS, AI_MATCHES } from "../../data/adoptionData";
+const AI_TRAITS = [
+  { label: "Living Space", options: ["Apartment", "House with Yard", "Villa"] },
+  { label: "Activity Level", options: ["Sedentary", "Moderate", "Active"] },
+  { label: "Experience", options: ["First-timer", "Some experience", "Expert"] },
+  { label: "Household", options: ["Solo", "Couple", "Family + Kids"] },
+];
 
+const AI_MATCHES = [
+  { name: "Karo",    breed: "Indian Pariah · 5 yrs", score: 97, img: "https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=300&q=70" },
+  { name: "Biscuit", breed: "Golden Mix · 6 yrs",    score: 94, img: "https://images.unsplash.com/photo-1601979031925-424e53b6caaa?w=300&q=70" },
+  { name: "Bruno",   breed: "Labrador Mix · 2 yrs",  score: 88, img: "https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=300&q=70" },
+];
 export default function AIMatching() {
   const { T } = useT();
   const vp    = useViewport();

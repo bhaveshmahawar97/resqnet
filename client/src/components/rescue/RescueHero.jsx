@@ -3,18 +3,19 @@ import { Link } from "react-router-dom";
 import { useT } from "../../context/ThemeContext";
 import useViewport from "../../hooks/useViewport";
 import Button from "../ui/Button";
-
-const TRUST_STATS = [
-  { value: "47", label: "Active Rescues", accent: true },
-  { value: "8min", label: "Avg Response" },
-  { value: "312", label: "NGOs Online" },
-  { value: "94%", label: "Recovery Rate" },
-];
+import { usePlatformStats, formatStat } from "../../hooks/usePlatformStats";
 
 export default function RescueHero({ onRequestRescue, onAIScan }) {
   const { T } = useT();
   const vp = useViewport();
   const reduce = useReducedMotion();
+  const { stats } = usePlatformStats();
+
+  const TRUST_STATS = [
+    { value: formatStat(stats.totalRescues), label: "Animals Rescued" },
+    { value: formatStat(stats.totalNgos), label: "Partner NGOs" },
+    { value: formatStat(stats.recoveryRate, true), label: "Recovery Rate" },
+  ];
 
   const fadeUp = {
     initial: reduce ? {} : { opacity: 0, y: 16 },

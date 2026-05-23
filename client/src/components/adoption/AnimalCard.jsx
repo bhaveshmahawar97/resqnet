@@ -3,8 +3,19 @@ import { motion } from "framer-motion";
 import { useT } from "../../context/ThemeContext";
 import Button from "../ui/Button";
 import { vFadeUp } from "../../animations/variants";
-import { SPECIES_COLORS, STATUS_META } from "../../data/adoptionData";
+const SPECIES_COLORS = {
+  Dog:      { bg: "rgba(22,160,86,0.10)",  text: "#16A056" },
+  Cat:      { bg: "rgba(139,92,246,0.10)", text: "#7C3AED" },
+  Bird:     { bg: "rgba(245,158,11,0.10)", text: "#D97706" },
+  Wildlife: { bg: "rgba(239,68,68,0.10)",  text: "#DC2626" },
+  Rabbit:   { bg: "rgba(59,130,246,0.10)", text: "#3B82F6" },
+};
 
+const STATUS_META = {
+  Available:   { bg: "#16A056", label: "Available" },
+  "In Foster": { bg: "#F59E0B", label: "In Foster" },
+  "On Hold":   { bg: "#3B82F6", label: "On Hold"   },
+};
 export default function AnimalCard({ animal, i, onAdopt }) {
   const { T } = useT();
   const [hov,       setHov]       = useState(false);

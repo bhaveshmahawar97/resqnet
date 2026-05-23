@@ -7,8 +7,12 @@ import Button from "../ui/Button";
 import AnimalCard from "./AnimalCard";
 import AdoptionModal from "./AdoptionModal";
 import { vFadeUp } from "../../animations/variants";
-import { ALL_SPECIES, ALL_STATUSES } from "../../data/adoptionData";
 import { useAdoption } from "../../context/AdoptionContext";
+import SkeletonCard from "../system/SkeletonCard";
+import EmptyState from "../system/EmptyState";
+
+const ALL_SPECIES  = ["All", "Dog", "Cat", "Bird", "Rabbit", "Wildlife"];
+const ALL_STATUSES = ["All", "Available", "In Foster", "On Hold"];
 import { useAuth } from "../../context/AuthContext";
 
 const PLACEHOLDER_IMG = (species) =>
@@ -185,7 +189,11 @@ export default function AdoptionGrid() {
             </span>
           </motion.div>
 
-          {loading && <p style={{ padding: 16, color: T.textMuted }}>Loading adoptable animals…</p>}
+          {loading && (
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "clamp(0.65rem, 1.5vw, 1rem)", marginBottom: "2rem" }}>
+              {Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} height={300} />)}
+            </div>
+          )}
 
           <FilterBar
             speciesFilter={speciesFilter} setSpeciesFilter={setSpeciesFilter}
@@ -196,18 +204,7 @@ export default function AdoptionGrid() {
           {/* Cards */}
           <AnimatePresence mode="popLayout">
             {filtered.length === 0 ? (
-              <motion.div
-                key="empty"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                style={{ textAlign: "center", padding: "4rem 0", color: T.textMuted }}
-              >
-                <div style={{ fontSize: "2.5rem", marginBottom: "0.75rem" }}>🔍</div>
-                <div style={{ fontSize: "0.9rem" }}>
-                  No animals match your filters. Try broadening your search.
-                </div>
-              </motion.div>
+              <EmptyState icon="🔍" title="No Animals Found" message="No animals match your filters. Try broadening your search." minHeight="250px" />
             ) : (
               <motion.div
                 key="grid"

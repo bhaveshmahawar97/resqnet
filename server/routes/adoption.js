@@ -1,6 +1,12 @@
 import express from "express";
 import authMiddleware from "../middleware/authMiddleware.js";
 import authorizeRoles from "../middleware/roleMiddleware.js";
+import { validateRequest } from "../middlewares/validateRequest.js";
+import {
+  createAdoptionListingSchema,
+  createAdoptionApplicationSchema,
+  reviewAdoptionApplicationSchema,
+} from "../validators/adoptionValidator.js";
 import {
   getAdoptionListings,
   getAdoptionStatsOverview,
@@ -20,6 +26,7 @@ router.post(
   "/listings",
   authMiddleware,
   authorizeRoles("ngo", "admin"),
+  validateRequest(createAdoptionListingSchema),
   postAdoptionListing
 );
 
@@ -31,11 +38,18 @@ router.get(
   getNgoAdoptionApplications
 );
 
-router.post("/:id/apply", authMiddleware, postAdoptionApplication);
+router.post(
+  "/:id/apply",
+  authMiddleware,
+  validateRequest(createAdoptionApplicationSchema),
+  postAdoptionApplication
+);
+
 router.put(
   "/applications/:applicationId/review",
   authMiddleware,
   authorizeRoles("ngo", "admin"),
+  validateRequest(reviewAdoptionApplicationSchema),
   putReviewAdoptionApplication
 );
 

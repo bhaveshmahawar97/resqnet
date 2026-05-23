@@ -1,12 +1,8 @@
-/**
- * ResQNet — Login Page (Premium Two-Column Auth)
- * Route: /login
- * Integrates with AuthContext (signIn, ROLES) + React Router (navigate by role).
- * Auth pages render inside MainLayout but override full-screen layout via CSS.
- */
-
-import { useState, useEffect } from "react";
+import { useState, forwardRef } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { loginSchema } from "../../utils/validators";
 import { useAuth, ROLES } from "../../context/AuthContext";
 import { useT } from "../../context/ThemeContext";
 // ─── ROLE REDIRECT MAP ────────────────────────────────────────────────────────
@@ -16,14 +12,6 @@ const ROLE_REDIRECTS = {
   [ROLES.volunteer]: "/dashboard/volunteer",
   [ROLES.admin]: "/dashboard/admin",
 };
-
-/** Seeded Atlas test accounts (npm run seed:test) */
-const DEMO_ACCOUNTS = [
-  { email: "aarav.sharma@test.com", password: "Aarav@123", role: ROLES.user, label: "User" },
-  { email: "contact@jeevraksha.org", password: "NGO@123", role: ROLES.ngo, label: "NGO" },
-  { email: "priya.verma@test.com", password: "Volunteer@123", role: ROLES.volunteer, label: "Volunteer" },
-  { email: "admin@resqnet.in", password: "Admin@123", role: ROLES.admin, label: "Admin" },
-];
 
 // ─── BRAND PANEL (LEFT) ───────────────────────────────────────────────────────
 function BrandPanel() {
@@ -176,10 +164,8 @@ function BrandPanel() {
   );
 }
 
-
-
 // ─── AUTH INPUT ───────────────────────────────────────────────────────────────
-function AuthInput({ label, type = "text", value, onChange, placeholder, autoComplete, T }) {
+const AuthInput = forwardRef(({ label, type = "text", placeholder, autoComplete, T, error, ...rest }, ref) => {
   const [focused, setFocused] = useState(false);
   return (
     <label style={{ display: "flex", flexDirection: "column", gap: "0.4rem" }}>
@@ -187,18 +173,21 @@ function AuthInput({ label, type = "text", value, onChange, placeholder, autoCom
         {label}
       </span>
       <input
+        ref={ref}
         type={type}
-        value={value}
-        onChange={onChange}
         placeholder={placeholder}
         autoComplete={autoComplete}
         onFocus={() => setFocused(true)}
-        onBlur={() => setFocused(false)}
+        onBlur={(e) => {
+          setFocused(false);
+          rest.onBlur && rest.onBlur(e);
+        }}
+        {...rest}
         style={{
           width: "100%",
           padding: "0.75rem 1rem",
           borderRadius: 10,
-          border: `1.5px solid ${focused ? T.accent : T.border}`,
+          border: `1.5px solid ${error ? "rgba(220,38,38,0.5)" : focused ? T.accent : T.border}`,
           background: T.bgCard,
           color: T.text,
           fontSize: "0.9rem",
@@ -206,56 +195,56 @@ function AuthInput({ label, type = "text", value, onChange, placeholder, autoCom
           outline: "none",
           boxSizing: "border-box",
           transition: "border-color 0.18s, box-shadow 0.18s",
-          boxShadow: focused ? `0 0 0 2px ${T.accentPale}` : "none",
+          boxShadow: error
+            ? "0 0 0 3px rgba(220,38,38,0.08)"
+            : focused
+            ? `0 0 0 2px ${T.accentPale}`
+            : "none",
         }}
       />
+      {error && (
+        <span style={{ fontSize: "0.72rem", color: "#DC2626", marginTop: "0.1rem" }}>{error}</span>
+      )}
     </label>
   );
-}
+});
 
 // ─── LOGIN PAGE ───────────────────────────────────────────────────────────────
 export default function Login() {
   const { T, mode } = useT();
-  const { signIn, email: currentEmail, role: currentRole } = useAuth();
+  const { signIn, role: currentRole } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const isDark = mode === "dark";
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [remember, setRemember] = useState(false);
-  const [error, setError] = useState("");
+  const [globalError, setGlobalError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [remember, setRemember] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(loginSchema),
+  });
 
   const from = location.state?.from?.pathname;
 
-  useEffect(() => {
-    if (currentEmail) {
-      navigate(ROLE_REDIRECTS[currentRole] || "/dashboard/user", { replace: true });
-    }
-  }, [currentEmail, currentRole, navigate]);
-
-  async function handleSubmit(e) {
-    e.preventDefault();
-    const normalized = email.trim().toLowerCase();
-    if (!normalized) { setError("Please enter your email address."); return; }
-    if (!password) { setError("Please enter your password."); return; }
-    if (password.length < 6) { setError("Password must be at least 6 characters."); return; }
-
+  const onSubmit = async (data) => {
     setLoading(true);
-    setError("");
+    setGlobalError("");
 
-    const res = await signIn({ email: normalized, password });
+    const res = await signIn({ email: data.email, password: data.password });
     setLoading(false);
 
     if (!res.success) {
-      setError(res.message || "Invalid credentials");
+      setGlobalError(res.message || "Invalid credentials");
       return;
     }
 
     const role = res.user?.role || currentRole || "user";
     navigate(from || ROLE_REDIRECTS[role] || "/dashboard/user", { replace: true });
-  }
+  };
 
   return (
     <div
@@ -370,24 +359,24 @@ export default function Login() {
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+          <form onSubmit={handleSubmit(onSubmit)} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
             <AuthInput
               label="Email address"
               type="email"
-              value={email}
-              onChange={(e) => { setEmail(e.target.value); setError(""); }}
               placeholder="you@example.com"
               autoComplete="email"
               T={T}
+              error={errors.email?.message}
+              {...register("email")}
             />
             <AuthInput
               label="Password"
               type="password"
-              value={password}
-              onChange={(e) => { setPassword(e.target.value); setError(""); }}
               placeholder="Enter your password"
               autoComplete="current-password"
               T={T}
+              error={errors.password?.message}
+              {...register("password")}
             />
 
             {/* Remember + Forgot */}
@@ -435,7 +424,7 @@ export default function Login() {
             </div>
 
             {/* Error */}
-            {error && (
+            {globalError && (
               <div
                 style={{
                   display: "flex",
@@ -451,7 +440,7 @@ export default function Login() {
                   <circle cx="8" cy="8" r="7" stroke="#DC2626" strokeWidth="1.5" />
                   <path d="M8 5v3.5M8 11v.5" stroke="#DC2626" strokeWidth="1.5" strokeLinecap="round" />
                 </svg>
-                <span style={{ fontSize: "0.78rem", color: "#DC2626" }}>{error}</span>
+                <span style={{ fontSize: "0.78rem", color: "#DC2626" }}>{globalError}</span>
               </div>
             )}
 
@@ -508,64 +497,7 @@ export default function Login() {
             </Link>
           </p>
 
-          {/* Demo accounts */}
-          <div
-            style={{
-              marginTop: "1.75rem",
-              padding: "0.9rem 1rem",
-              borderRadius: 10,
-              background: isDark ? "rgba(255,255,255,0.025)" : "rgba(0,0,0,0.025)",
-              border: `1px solid ${T.border}`,
-            }}
-          >
-            <div
-              style={{
-                fontSize: "0.68rem",
-                fontWeight: 700,
-                color: T.textMuted,
-                letterSpacing: "0.12em",
-                textTransform: "uppercase",
-                marginBottom: "0.65rem",
-              }}
-            >
-              Demo access
-            </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.35rem" }}>
-              {DEMO_ACCOUNTS.map((d) => (
-                <button
-                  key={d.email}
-                  type="button"
-                  onClick={() => { setEmail(d.email); setPassword(d.password); setError(""); }}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    background: "none",
-                    border: "none",
-                    cursor: "pointer",
-                    fontFamily: "inherit",
-                    padding: "0.15rem 0",
-                    textAlign: "left",
-                  }}
-                >
-                  <span style={{ fontSize: "0.78rem", color: T.textSub }}>{d.label} — {d.email}</span>
-                  <span
-                    style={{
-                      fontSize: "0.63rem",
-                      fontWeight: 600,
-                      color: T.accent,
-                      background: T.accentPale,
-                      borderRadius: 4,
-                      padding: "1px 6px",
-                      textTransform: "capitalize",
-                    }}
-                  >
-                    {d.role}
-                  </span>
-                </button>
-              ))}
-            </div>
-          </div>
+
         </div>
       </div>
 

@@ -1,19 +1,12 @@
 import { useRef, useState } from "react";
-import { motion, useInView } from "framer-motion";
+import { motion } from "framer-motion";
 import { useT } from "../../context/ThemeContext";
+import { usePlatformStats, formatStat } from "../../hooks/usePlatformStats";
 import useCountUp from "../../hooks/useCountUp";
-
-const STATS = [
-  { value: 312, suffix: "", label: "Verified NGOs", desc: "Active rescue organizations" },
-  { value: 18, suffix: "", label: "States Active", desc: "Nationwide coverage" },
-  { value: 48200, suffix: "+", label: "Animals Rescued", desc: "Lives saved through the network" },
-  { value: 1240, suffix: "+", label: "Active Volunteers", desc: "Trained field responders" },
-  { value: 7400, suffix: "+", label: "Successful Adoptions", desc: "Animals found new homes" },
-];
 
 function StatCard({ stat, index, active }) {
   const { T } = useT();
-  const count = useCountUp(stat.value, active);
+  const count = useCountUp(typeof stat.value === 'number' ? stat.value : 0, active);
 
   return (
     <motion.div
@@ -35,15 +28,12 @@ function StatCard({ stat, index, active }) {
         overflow: "hidden",
       }}
     >
-      {/* Left accent line */}
       <div style={{ position: "absolute", left: 0, top: "25%", bottom: "25%", width: 3, background: T.accent, borderRadius: "0 3px 3px 0", opacity: 0.5 }} />
 
       <div style={{ fontSize: "clamp(1.4rem, 2.5vw, 2rem)", fontWeight: 800, color: T.textHeading, letterSpacing: "-0.035em", lineHeight: 1, marginBottom: "0.35rem" }}>
-        {active ? count.toLocaleString() : stat.value.toLocaleString()}
-        <span style={{ color: T.accent, fontSize: "0.7em" }}>{stat.suffix}</span>
+        {typeof stat.value === 'number' ? (active ? count.toLocaleString() : stat.value.toLocaleString()) : stat.value}
       </div>
       <div style={{ fontSize: "0.82rem", fontWeight: 600, color: T.text, marginBottom: "0.3rem" }}>{stat.label}</div>
-      <div style={{ fontSize: "0.72rem", color: T.textMuted, lineHeight: 1.45 }}>{stat.desc}</div>
     </motion.div>
   );
 }
@@ -51,12 +41,19 @@ function StatCard({ stat, index, active }) {
 export default function NGOStats() {
   const { T } = useT();
   const ref = useRef(null);
+  const { stats } = usePlatformStats();
   const [active, setActive] = useState(false);
+
+  const STATS = [
+    { value: stats.totalNgos, label: "Registered NGOs" },
+    { value: stats.totalRescues, label: "Animals Saved" },
+    { value: stats.citiesCovered, label: "Cities Covered" },
+    { value: "24/7", label: "Support Network" },
+  ];
 
   return (
     <section style={{ width: "100%", padding: "clamp(3rem, 6vw, 5rem) 0", background: T.bgAlt }}>
       <div style={{ width: "100%", maxWidth: 1200, margin: "0 auto", padding: "0 clamp(1.25rem, 4vw, 3rem)" }}>
-        {/* Section header */}
         <motion.div
           ref={ref}
           initial={{ opacity: 0, y: 16 }}

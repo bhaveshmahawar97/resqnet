@@ -2,8 +2,36 @@ import { motion } from "framer-motion";
 import { useT } from "../../context/ThemeContext";
 import Label from "../ui/Label";
 import { vFadeUp } from "../../animations/variants";
-import { SUCCESS_STORIES } from "../../data/adoptionData";
 
+const SUCCESS_STORIES = [
+  {
+    adoptee: "Rahul & Priya Sharma",
+    animal: "Buddy (now Sheru)",
+    breed: "Labrador Mix · 3 yrs",
+    quote: "We never imagined a rescue dog would bond this fast with our toddler. Sheru is our family's heartbeat now. ResQNet made the whole process transparent and trustworthy.",
+    city: "Mumbai",
+    outcome: "Adopted 6 months ago",
+    img: "https://images.unsplash.com/photo-1601758003122-53c40e686a19?w=400&q=75",
+  },
+  {
+    adoptee: "Ananya Krishnan",
+    animal: "Mittens",
+    breed: "Persian Mix · 2 yrs",
+    quote: "As a first-time cat owner living alone, the AI compatibility matching gave me so much confidence. Mittens was exactly the calm, indoor-loving companion I needed.",
+    city: "Bengaluru",
+    outcome: "Adopted 3 months ago",
+    img: "https://images.unsplash.com/photo-1543955430-d5b784b96494?w=400&q=75",
+  },
+  {
+    adoptee: "The Mehta Family",
+    animal: "Pepper",
+    breed: "Indie Street Dog · 4 yrs",
+    quote: "Our kids learn about compassion every day from Pepper. He came from a tough background but you'd never know it. The transition support from the NGO was excellent.",
+    city: "Pune",
+    outcome: "Adopted 1 year ago",
+    img: "https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400&q=75",
+  },
+];
 export default function SuccessStories() {
   const { T } = useT();
 

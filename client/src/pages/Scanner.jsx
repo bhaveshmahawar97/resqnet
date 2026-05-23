@@ -10,8 +10,6 @@ import ScannerHero from "../components/scanner/ScannerHero";
 import ScannerHistory from "../components/scanner/ScannerHistory";
 import ScannerLoader from "../components/scanner/ScannerLoader";
 import { validateImageFile } from "../components/scanner/scannerUtils";
-import sampleScanResult from "../data/aiScanSample";
-
 export default function Scanner() {
   const { T } = useT();
   const vp = useViewport();
@@ -81,16 +79,6 @@ export default function Scanner() {
       URL.revokeObjectURL(previewUrl);
     }
     setPreviewUrl("");
-  };
-
-  const loadSampleScan = () => {
-    setScanError("");
-    setImageFile(null);
-    if (previewUrl) {
-      URL.revokeObjectURL(previewUrl);
-    }
-    setPreviewUrl("");
-    setScanResult(sampleScanResult);
   };
 
   const handleScan = async () => {
@@ -164,26 +152,6 @@ export default function Scanner() {
                 </>
               )}
             </div>
-          </div>
-
-          <div style={{ display: "flex", justifyContent: "center", marginTop: "1.25rem" }}>
-            <button
-              type="button"
-              onClick={loadSampleScan}
-              disabled={isBusy}
-              style={{
-                padding: "0.95rem 1.25rem",
-                borderRadius: 14,
-                border: `1px solid ${T.border}`,
-                background: T.bgCard,
-                color: T.text,
-                fontWeight: 700,
-                cursor: isBusy ? "not-allowed" : "pointer",
-                fontFamily: "inherit",
-              }}
-            >
-              Load sample AI scan result
-            </button>
           </div>
 
         </div>

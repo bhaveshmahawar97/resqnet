@@ -3,8 +3,26 @@ import { useT } from "../../context/ThemeContext";
 import { vFadeUp } from "../../animations/variants";
 import Orbs from "../ui/BackgroundOrbs";
 import Label from "../ui/Label";
-import { TESTIMONIALS } from "../../data/ngos";
-
+const TESTIMONIALS = [
+  {
+    name: "Dr. Aarti Singh",
+    role: "Chief Veterinarian",
+    city: "Mumbai",
+    quote: "ResQNet's AI scanner changed how we triage. We can prioritize critical cases before the animal even arrives at our facility.",
+  },
+  {
+    name: "Rajesh Kumar",
+    role: "NGO Director",
+    city: "Delhi",
+    quote: "The unified dashboard means our volunteers spend less time coordinating on WhatsApp and more time actually rescuing animals.",
+  },
+  {
+    name: "Anita Desai",
+    role: "Independent Rescuer",
+    city: "Pune",
+    quote: "Finally, a platform that connects finders directly with verified NGOs. The real-time updates build incredible trust.",
+  }
+];
 export default function NGOTestimonials() {
   const { T } = useT();
 

@@ -1,19 +1,22 @@
 import { motion, useReducedMotion } from "framer-motion";
+import { Link } from "react-router-dom";
 import { useT } from "../../context/ThemeContext";
 import useViewport from "../../hooks/useViewport";
 import Button from "../ui/Button";
-
-const TRUST_STATS = [
-  { value: "7,400+", label: "Adoptions" },
-  { value: "312", label: "NGO Partners" },
-  { value: "98%", label: "Bond Rate" },
-  { value: "AI", label: "Matching" },
-];
+import { usePlatformStats, formatStat } from "../../hooks/usePlatformStats";
 
 export default function AdoptionHero() {
   const { T } = useT();
   const vp = useViewport();
   const reduce = useReducedMotion();
+  const { stats } = usePlatformStats();
+
+  const TRUST_STATS = [
+    { value: formatStat(stats.totalAdoptions), label: "Adoptions" },
+    { value: formatStat(stats.totalNgos), label: "NGO Partners" },
+    { value: "98%", label: "Bond Rate" },
+    { value: "AI", label: "Matching" },
+  ];
 
   const fadeUp = {
     initial: reduce ? {} : { opacity: 0, y: 16 },

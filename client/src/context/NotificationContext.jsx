@@ -25,7 +25,9 @@ export function NotificationProvider({ children }) {
         setUnreadCount(unreadRes.data.count || 0);
       }
     } catch (error) {
-      console.error("Failed to fetch notifications:", error);
+      if (error.response?.status !== 401) {
+        console.error("Failed to fetch notifications:", error);
+      }
     } finally {
       setLoading(false);
     }

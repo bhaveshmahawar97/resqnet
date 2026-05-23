@@ -7,9 +7,9 @@
   "scripts": {
     "dev": "nodemon server.js",
     "start": "node server.js",
-    "seed:test": "node scripts/seedTestData.js",
-    "verify:test": "node scripts/verifyTestData.js",
-    "verify:atlas": "node scripts/verifyAtlasInfrastructure.js"
+    "seed:test": "node ../scripts/dev/seedTestData.js",
+    "verify:test": "node ../scripts/dev/verifyTestData.js",
+    "verify:atlas": "node ../scripts/dev/verifyAtlasInfrastructure.js"
   },
   "keywords": [],
   "author": "",
@@ -25,7 +25,8 @@
     "mongoose": "^9.6.2",
     "multer": "^2.1.1",
     "node-fetch": "^3.3.2",
-    "openai": "^6.38.0"
+    "openai": "^6.38.0",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "nodemon": "^3.1.14"

@@ -3,8 +3,32 @@ import { useT } from "../../context/ThemeContext";
 import useViewport from "../../hooks/useViewport";
 import Label from "../ui/Label";
 import { vFadeUp } from "../../animations/variants";
-import { CARE_CARDS } from "../../data/adoptionData";
-
+const CARE_CARDS = [
+  {
+    icon: "💉",
+    title: "Vaccination First",
+    desc: "All ResQNet animals are vaccinated against core diseases before adoption. Maintain annual boosters and rabies vaccines through your local vet.",
+    badge: "Health Protocol",
+  },
+  {
+    icon: "🏠",
+    title: "Home Preparation",
+    desc: "Prepare a quiet space, safe-proof hazards, and stock essentials before your animal arrives. A calm first week sets the foundation for trust.",
+    badge: "Onboarding",
+  },
+  {
+    icon: "🤝",
+    title: "Ethical Adoption",
+    desc: "Never buy when you can adopt. Every purchase from a breeder or pet shop funds demand for animals kept in poor conditions. Rescue is the right choice.",
+    badge: "Ethics",
+  },
+  {
+    icon: "📅",
+    title: "Long-Term Commitment",
+    desc: "Dogs live 12–15 years. Cats up to 18. Adoption is a decade-long commitment. Plan for vet costs, travel care, and life changes before you adopt.",
+    badge: "Commitment",
+  },
+];
 export default function ResponsibleAdoption() {
   const { T } = useT();
   const vp    = useViewport();

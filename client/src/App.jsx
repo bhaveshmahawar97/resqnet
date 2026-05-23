@@ -1,6 +1,20 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import AppRoutes from "./routes/AppRoutes";
+import AuthLoaderGate from "./components/auth/AuthLoaderGate";
+import GlobalErrorBoundary from "./components/system/GlobalErrorBoundary";
+import { ToastProvider } from "./context/ToastContext";
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: 1,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+    },
+  },
+});
 
 function ScrollToHash() {
   const location = useLocation();
@@ -25,17 +39,25 @@ function ScrollToHash() {
 
 function App() {
   return (
-    <div
-      style={{
-        width: "100%",
-        minHeight: "100vh",
-        overflowX: "hidden",
-        boxSizing: "border-box",
-      }}
-    >
-      <ScrollToHash />
-      <AppRoutes />
-    </div>
+    <QueryClientProvider client={queryClient}>
+      <GlobalErrorBoundary>
+        <ToastProvider>
+          <div
+            style={{
+              width: "100%",
+              minHeight: "100vh",
+              overflowX: "hidden",
+              boxSizing: "border-box",
+            }}
+          >
+            <ScrollToHash />
+            <AuthLoaderGate>
+              <AppRoutes />
+            </AuthLoaderGate>
+          </div>
+        </ToastProvider>
+      </GlobalErrorBoundary>
+    </QueryClientProvider>
   );
 }
 

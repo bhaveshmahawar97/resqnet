@@ -19,10 +19,13 @@ import {
   rejectRescueMission,
 } from "../controllers/rescueController.js";
 
+import { validateRequest } from "../middlewares/validateRequest.js";
+import { createRescueSchema, updateRescueStatusSchema } from "../validators/rescueValidator.js";
+
 const router = express.Router();
 
 // CREATE RESCUE REQUEST (multipart field: images)
-router.post("/create", authMiddleware, handleRescueUpload, createRescueRequest);
+router.post("/create", authMiddleware, handleRescueUpload, validateRequest(createRescueSchema), createRescueRequest);
 
 // GET ALL RESCUE REQUESTS (Operational roles only)
 router.get(
@@ -106,11 +109,11 @@ router.get("/my/requests", authMiddleware, getMyRescueRequests);
 // GET SINGLE RESCUE REQUEST
 router.get("/:id", authMiddleware, getSingleRescueRequest);
 
-// UPDATE RESCUE STATUS (Operational roles only)
 router.put(
   "/update-status/:id",
   authMiddleware,
   authorizeRoles("ngo", "volunteer", "admin"),
+  validateRequest(updateRescueStatusSchema),
   updateRescueStatus
 );
 

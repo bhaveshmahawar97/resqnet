@@ -5,14 +5,12 @@ import useViewport from "../../hooks/useViewport";
 import useCountUp from "../../hooks/useCountUp";
 import Label from "../ui/Label";
 import { vFadeUp } from "../../animations/variants";
+import { usePlatformStats, formatStat } from "../../hooks/usePlatformStats";
 
 const STATS = [
-  { value: 47, suffix: "", label: "Active Rescues", sub: "Right now across India", icon: "🚨", color: "#EF4444", live: true },
-  { value: 8, suffix: "min", label: "Avg Response Time", sub: "Down from 24 min last year", icon: "⚡", color: "#F97316" },
-  { value: 48200, suffix: "+", label: "Animals Saved", sub: "Since ResQNet launched", icon: "💚", color: "#22C55E" },
-  { value: 312, suffix: "", label: "NGOs Online Now", sub: "Ready for dispatch", icon: "🏥", color: "#3B82F6" },
-  { value: 94, suffix: "%", label: "Recovery Rate", sub: "Post-rescue survival rate", icon: "📈", color: "#8B5CF6" },
-  { value: 2400, suffix: "+", label: "Field Volunteers", sub: "Trained & verified", icon: "🧑‍⚕️", color: "#EC4899" },
+  { value: 0, suffix: "", label: "Avg Response", sub: "For critical emergencies", icon: "⚡", color: "#EF4444" },
+  { value: 0, suffix: "", label: "Verified NGOs", sub: "On standby nationwide", icon: "🏥", color: "#3B82F6" },
+  { value: 0, suffix: "", label: "Animals Saved", sub: "Since ResQNet launched", icon: "💚", color: "#22C55E" },
 ];
 
 function StatCard({ stat, active }) {
@@ -69,6 +67,14 @@ function StatCard({ stat, active }) {
 
 export default function EmergencyStats() {
   const { T } = useT();
+  const { stats } = usePlatformStats();
+
+  const STATS = [
+    { value: stats.avgResponseMinutes, suffix: "m", label: "Avg Response", sub: "For critical emergencies", icon: "⚡", color: "#EF4444" },
+    { value: stats.totalNgos, suffix: "", label: "Verified NGOs", sub: "On standby nationwide", icon: "🏥", color: "#3B82F6" },
+    { value: stats.totalRescues, suffix: "", label: "Animals Saved", sub: "Since ResQNet launched", icon: "💚", color: "#22C55E" },
+  ];
+  
   const vp = useViewport();
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-100px" });

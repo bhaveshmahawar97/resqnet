@@ -6,7 +6,7 @@ import Button from "../ui/Button";
 const TRUST_STATS = [
   { value: "CV v4", label: "Vision Model" },
   { value: "<5s", label: "Analysis Time" },
-  { value: "312", label: "NGOs Linked" },
+  { value: "0", label: "NGOs Linked" },
   { value: "94%", label: "Accuracy" },
 ];
 

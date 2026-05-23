@@ -1,20 +1,21 @@
 import { motion, useReducedMotion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useT } from "../../context/ThemeContext";
 import useViewport from "../../hooks/useViewport";
 import Button from "../ui/Button";
-
-const TRUST_STATS = [
-  { value: "48,200+", label: "Animals Rescued" },
-  { value: "312", label: "NGO Partners" },
-  { value: "94%", label: "Recovery Rate" },
-  { value: "18m", label: "Avg Response" },
-];
+import { usePlatformStats, formatStat } from "../../hooks/usePlatformStats";
 
 export default function HeroSection() {
   const { T } = useT();
   const vp = useViewport();
   const reduce = useReducedMotion();
+  const { stats } = usePlatformStats();
+
+  const TRUST_STATS = [
+    { value: formatStat(stats.totalRescues), label: "Animals Rescued" },
+    { value: formatStat(stats.totalNgos), label: "NGO Partners" },
+    { value: formatStat(stats.recoveryRate, true), label: "Recovery Rate" },
+  ];
 
   const fadeUp = {
     initial: reduce ? {} : { opacity: 0, y: 16 },

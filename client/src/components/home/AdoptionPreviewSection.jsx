@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import { useT } from "../../context/ThemeContext";
 import useAdoptions from "../../hooks/useAdoptions";
 import Button from "../ui/Button";
+import SkeletonCard from "../system/SkeletonCard";
+import EmptyState from "../system/EmptyState";
 
 export default function AdoptionPreviewSection() {
   const { T } = useT();
@@ -76,8 +78,8 @@ export default function AdoptionPreviewSection() {
 
         {/* Pet cards */}
         {loading ? (
-          <div style={{ textAlign: "center", padding: "2rem 0", color: T.textMuted, fontSize: "0.85rem" }}>
-            Loading adoption listings...
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(230px, 1fr))", gap: "0.875rem", marginBottom: "2rem" }}>
+            {Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} height={160} />)}
           </div>
         ) : previewPets.length > 0 ? (
           <motion.div
@@ -170,9 +172,7 @@ export default function AdoptionPreviewSection() {
             })}
           </motion.div>
         ) : (
-          <div style={{ textAlign: "center", padding: "2rem 0", color: T.textMuted, fontSize: "0.85rem" }}>
-            No pets available for adoption yet.
-          </div>
+          <EmptyState icon="🐾" title="No Pets Available" message="There are no pets available for adoption right now." minHeight="200px" />
         )}
 
         {/* CTA */}

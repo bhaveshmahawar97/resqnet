@@ -1,19 +1,24 @@
+/* eslint-disable react-refresh/only-export-components */
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import Home from "../pages/Home";
 import Adoption from "../pages/Adoption";
 import Rescue from "../pages/Rescue";
 import NGOs from "../pages/NGOs";
+import NGORegister from "../pages/NGORegister";
 import Scanner from "../pages/Scanner";
 import Login from "../pages/auth/Login";
 import Register from "../pages/auth/Register";
 import UserDashboard from "../pages/dashboard/UserDashboard";
 import NGODashboard from "../pages/dashboard/NGODashboard";
 import VolunteerDashboard from "../pages/dashboard/VolunteerDashboard";
-import AdminRoute from "./AdminRoute";
+import AdminDashboard from "../pages/dashboard/AdminDashboard";
 
 function DashboardRedirect() {
   const { role } = useAuth();
+  
+  if (!role) return null; // Let loading state or guard handle it
+  
   const destination = {
     user: "/dashboard/user",
     ngo: "/dashboard/ngo",
@@ -24,6 +29,7 @@ function DashboardRedirect() {
   return <Navigate to={destination} replace />;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const ROUTE_LINKS = [
   { label: "Home", to: "/" },
   { label: "NGOs", to: "/ngos" },
@@ -32,21 +38,25 @@ export const ROUTE_LINKS = [
   { label: "Emergency", to: "/rescue" },
 ];
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const APP_ROUTES = [
   { index: true, element: <Home /> },
-  { path: "scanner", element: <Scanner />, protected: true },
   { path: "ai-health", element: <Scanner /> },
   { path: "adoption", element: <Adoption /> },
   { path: "adopt", element: <Navigate to="/adoption" replace /> },
   { path: "rescue", element: <Rescue /> },
   { path: "ngos", element: <NGOs /> },
-  { path: "login", element: <Login /> },
-  { path: "register", element: <Register /> },
+  { path: "ngo-register", element: <NGORegister /> },
+  { path: "login", element: <Login />, guestOnly: true },
+  { path: "register", element: <Register />, guestOnly: true },
   { path: "signup", element: <Navigate to="/register" replace /> },
+  
+  // Protected Routes
+  { path: "scanner", element: <Scanner />, protected: true },
   { path: "dashboard", element: <DashboardRedirect />, protected: true },
-  { path: "dashboard/user", element: <UserDashboard />, protected: true, role: "user" },
-  { path: "dashboard/ngo", element: <NGODashboard />, protected: true, role: "ngo" },
-  { path: "dashboard/volunteer", element: <VolunteerDashboard />, protected: true, role: "volunteer" },
-  { path: "dashboard/admin", element: <AdminRoute />, protected: true, role: "admin" },
+  { path: "dashboard/user", element: <UserDashboard />, protected: true, allowedRoles: ["user"] },
+  { path: "dashboard/ngo", element: <NGODashboard />, protected: true, allowedRoles: ["ngo"] },
+  { path: "dashboard/volunteer", element: <VolunteerDashboard />, protected: true, allowedRoles: ["volunteer"] },
+  { path: "dashboard/admin", element: <AdminDashboard />, protected: true, allowedRoles: ["admin"] },
   { path: "admin", element: <Navigate to="/dashboard/admin" replace /> },
 ];

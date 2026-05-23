@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { adoptionApplicationSchema } from "../../utils/validators";
 import { useT } from "../../context/ThemeContext";
 import { useAuth } from "../../context/AuthContext";
 import { useAdoption } from "../../context/AdoptionContext";
@@ -19,30 +22,37 @@ export default function AdoptionModal({ animal, onClose }) {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { submitApplication } = useAdoption();
-  const [formData, setFormData] = useState({
-    message: "",
-    experience: "",
-    livingEnvironment: "",
-    contactInfo: user?.phone || "",
-    address: user?.location || "",
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(adoptionApplicationSchema),
+    defaultValues: {
+      message: "",
+      experience: "",
+      livingEnvironment: "",
+      contactInfo: user?.phone || "",
+      address: user?.location || "",
+    },
   });
+
   const [submitting, setSubmitting] = useState(false);
   const [feedback, setFeedback] = useState("");
+  const [success, setSuccess] = useState(false);
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleApply = async () => {
+  const onSubmit = async (data) => {
     if (!user) {
       navigate("/login");
       return;
     }
     setSubmitting(true);
     setFeedback("");
-    const result = await submitApplication(animal.id, formData);
+    const result = await submitApplication(animal.id, data);
     setSubmitting(false);
     if (result.success) {
+      setSuccess(true);
       setFeedback("Application submitted! The NGO will review your request.");
     } else {
       setFeedback(result.message || "Could not submit application.");
@@ -199,68 +209,111 @@ export default function AdoptionModal({ animal, onClose }) {
             ))}
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "0.85rem", marginBottom: "1rem" }}>
-            <textarea
-              name="message"
-              value={formData.message}
-              onChange={handleChange}
-              placeholder="Tell the NGO why you want to adopt…"
-              rows={2}
-              className="rq-textarea"
-            />
-            <textarea
-              name="experience"
-              value={formData.experience}
-              onChange={handleChange}
-              placeholder="Your experience with animals (e.g., have you owned pets before?)"
-              rows={2}
-              className="rq-textarea"
-            />
-            <input
-              type="text"
-              name="livingEnvironment"
-              value={formData.livingEnvironment}
-              onChange={handleChange}
-              placeholder="Living Environment (e.g., Apartment, House with yard)"
-              className="rq-input"
-            />
-            <div style={{ display: "flex", gap: "0.85rem" }}>
-              <input
-                type="text"
-                name="contactInfo"
-                value={formData.contactInfo}
-                onChange={handleChange}
-                placeholder="Phone Number"
-                className="rq-input"
-                style={{ flex: 1 }}
-              />
-              <input
-                type="text"
-                name="address"
-                value={formData.address}
-                onChange={handleChange}
-                placeholder="City, State / Address"
-                className="rq-input"
-                style={{ flex: 1 }}
-              />
-            </div>
-          </div>
-          {feedback && <p style={{ fontSize: "0.85rem", color: T.accent, marginBottom: "0.75rem" }}>{feedback}</p>}
+          {success ? (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              style={{ padding: "1.5rem", textAlign: "center", background: "rgba(34, 197, 94, 0.1)", borderRadius: 12, border: "1px solid rgba(34, 197, 94, 0.3)" }}
+            >
+              <div style={{ fontSize: "2rem", marginBottom: "0.5rem" }}>🎉</div>
+              <div style={{ color: "#16A34A", fontWeight: 700, fontSize: "1.1rem", marginBottom: "0.25rem" }}>
+                Application Submitted!
+              </div>
+              <div style={{ color: T.textSub, fontSize: "0.85rem", lineHeight: 1.5 }}>
+                {feedback}
+              </div>
+            </motion.div>
+          ) : (
+            <form id="adoption-form" onSubmit={handleSubmit(onSubmit)}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "0.85rem", marginBottom: "1rem" }}>
+                <div>
+                  <textarea
+                    {...register("message")}
+                    placeholder="Tell the NGO why you want to adopt…"
+                    rows={2}
+                    className="rq-textarea"
+                    style={{ borderColor: errors.message ? "#EF4444" : undefined }}
+                    disabled={submitting}
+                  />
+                  {errors.message && <div style={{ color: "#EF4444", fontSize: "0.72rem", marginTop: 4 }}>{errors.message.message}</div>}
+                </div>
+
+                <div>
+                  <textarea
+                    {...register("experience")}
+                    placeholder="Your experience with animals (e.g., have you owned pets before?)"
+                    rows={2}
+                    className="rq-textarea"
+                    style={{ borderColor: errors.experience ? "#EF4444" : undefined }}
+                    disabled={submitting}
+                  />
+                  {errors.experience && <div style={{ color: "#EF4444", fontSize: "0.72rem", marginTop: 4 }}>{errors.experience.message}</div>}
+                </div>
+
+                <div>
+                  <input
+                    type="text"
+                    {...register("livingEnvironment")}
+                    placeholder="Living Environment (e.g., Apartment, House with yard)"
+                    className="rq-input"
+                    style={{ borderColor: errors.livingEnvironment ? "#EF4444" : undefined }}
+                    disabled={submitting}
+                  />
+                  {errors.livingEnvironment && <div style={{ color: "#EF4444", fontSize: "0.72rem", marginTop: 4 }}>{errors.livingEnvironment.message}</div>}
+                </div>
+
+                <div style={{ display: "flex", gap: "0.85rem", flexWrap: "wrap" }}>
+                  <div style={{ flex: "1 1 calc(50% - 0.425rem)" }}>
+                    <input
+                      type="text"
+                      {...register("contactInfo")}
+                      placeholder="Phone Number"
+                      className="rq-input"
+                      style={{ borderColor: errors.contactInfo ? "#EF4444" : undefined }}
+                      disabled={submitting}
+                    />
+                    {errors.contactInfo && <div style={{ color: "#EF4444", fontSize: "0.72rem", marginTop: 4 }}>{errors.contactInfo.message}</div>}
+                  </div>
+                  <div style={{ flex: "1 1 calc(50% - 0.425rem)" }}>
+                    <input
+                      type="text"
+                      {...register("address")}
+                      placeholder="City, State / Address"
+                      className="rq-input"
+                      style={{ borderColor: errors.address ? "#EF4444" : undefined }}
+                      disabled={submitting}
+                    />
+                    {errors.address && <div style={{ color: "#EF4444", fontSize: "0.72rem", marginTop: 4 }}>{errors.address.message}</div>}
+                  </div>
+                </div>
+              </div>
+
+              {!success && feedback && (
+                <p style={{ fontSize: "0.85rem", color: "#EF4444", marginBottom: "0.75rem", padding: "0.5rem", background: "rgba(239, 68, 68, 0.1)", borderRadius: 6 }}>
+                  {feedback}
+                </p>
+              )}
+            </form>
+          )}
 
           </div>
 
           <div className="rq-modal-footer" style={{ flexDirection: "column", alignItems: "stretch", gap: "0.85rem", flexShrink: 0, borderTop: `1px solid ${T.border}`, paddingTop: 16 }}>
             <div style={{ display: "flex", gap: "0.6rem" }}>
-              <Button variant="primary" size="lg" style={{ flex: 1 }} onClick={handleApply} disabled={submitting}>
-                {submitting ? "Submitting…" : `Apply to adopt ${animal.name}`}
-              </Button>
-              <Button variant="ghost" onClick={onClose}>
-                Cancel
+              {!success && (
+                <Button variant="primary" size="lg" style={{ flex: 1 }} type="submit" form="adoption-form" disabled={submitting}>
+                  {submitting ? "Submitting…" : `Apply to adopt ${animal.name}`}
+                </Button>
+              )}
+              <Button variant="ghost" onClick={onClose} style={success ? { flex: 1 } : {}}>
+                {success ? "Close" : "Cancel"}
               </Button>
             </div>
-            <p style={{ fontSize: "0.65rem", color: T.textMuted, textAlign: "center", lineHeight: 1.6 }}>
-              No fees for adopters · All adoptions facilitated by verified NGOs · Post-adoption support included
-            </p>
+            {!success && (
+              <p style={{ fontSize: "0.65rem", color: T.textMuted, textAlign: "center", lineHeight: 1.6 }}>
+                No fees for adopters · All adoptions facilitated by verified NGOs · Post-adoption support included
+              </p>
+            )}
           </div>
         </motion.div>
       </motion.div>
