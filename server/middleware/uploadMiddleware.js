@@ -9,7 +9,7 @@ const allowedMimeTypes = [
   "image/jpeg",
   "image/jpg",
   "image/png",
-  "image/webp",
+  "application/pdf",
 ];
 
 /**
@@ -51,7 +51,7 @@ class CloudinaryStorage {
 
       const uploadOptions = {
         folder: this.params.folder || UPLOAD_FOLDER,
-        resource_type: "image",
+        resource_type: "auto",
       };
 
       const uploadStream = this.cloudinary.uploader.upload_stream(
@@ -84,7 +84,7 @@ class CloudinaryStorage {
       return cb(null);
     }
 
-    this.cloudinary.uploader.destroy(file.filename, { resource_type: "image" }, cb);
+    this.cloudinary.uploader.destroy(file.filename, { resource_type: "auto" }, cb);
   }
 }
 
@@ -97,7 +97,7 @@ const fileFilter = (req, file, cb) => {
   if (allowedMimeTypes.includes(file.mimetype)) {
     cb(null, true);
   } else {
-    cb(new Error("Only JPEG, PNG, and WebP images are allowed"), false);
+    cb(new Error("Only JPEG, PNG, and PDF files are allowed"), false);
   }
 };
 

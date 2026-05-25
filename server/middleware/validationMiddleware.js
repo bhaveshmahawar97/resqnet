@@ -19,8 +19,8 @@ export const validateRequest = (schema, source = "body") => {
         const errorMessages = error.errors.map((err) => `${err.path.join(".")}: ${err.message}`);
         return sendError(res, {
           status: 400,
-          message: "Validation Error",
-          error: errorMessages,
+          message: "Validation failed",
+          errors: errorMessages,
         });
       }
       next(error);

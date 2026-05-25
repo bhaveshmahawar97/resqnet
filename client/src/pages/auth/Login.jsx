@@ -15,6 +15,7 @@ const ROLE_REDIRECTS = {
 
 // ─── BRAND PANEL (LEFT) ───────────────────────────────────────────────────────
 function BrandPanel() {
+  const { T } = useT();
   const features = [
     { text: "AI-powered health scan & triage" },
     { text: "Real-time rescue coordination" },

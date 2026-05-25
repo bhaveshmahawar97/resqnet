@@ -1,6 +1,7 @@
 import express from "express";
 import authMiddleware from "../middleware/authMiddleware.js";
 import authorizeRoles from "../middleware/roleMiddleware.js";
+import { verifyNgoAccess } from "../middleware/ngoVerificationMiddleware.js";
 import {
   registerNGO,
   getAllNGOs,
@@ -31,8 +32,9 @@ router.post("/register", validateRequest(ngoRegistrationSchema), registerNGO);
 router.get("/:id/verification-status", getVerificationStatus);
 
 // NGO owner routes (authenticated)
-router.get("/my-profile", authMiddleware, getMyNgoProfile);
-router.put("/:id", authMiddleware, updateNGO);
+// NGO owner routes (authenticated & verified)
+router.get("/my-profile", authMiddleware, verifyNgoAccess, getMyNgoProfile);
+router.put("/:id", authMiddleware, verifyNgoAccess, updateNGO);
 
 // Get single NGO (public - must come last to avoid conflicts)
 router.get("/:id", getNGOById);

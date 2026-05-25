@@ -30,16 +30,13 @@ export const sendSuccess = (res, {
 export const sendError = (res, {
   status = 500,
   message = "Request failed",
-  error = null,
+  errors = [],
 }) => {
   const payload = {
     success: false,
     message,
+    errors: Array.isArray(errors) ? errors : (errors ? [errors] : []),
   };
-
-  if (error && process.env.NODE_ENV !== "production") {
-    payload.error = typeof error === "string" ? error : error.message || error;
-  }
 
   return res.status(status).json(payload);
 };

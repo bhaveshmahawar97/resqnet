@@ -1,73 +1,57 @@
-import { sendError } from "../utils/apiResponse.js";
-
 /**
- * Global Error Handler Middleware
- * Catches all unhandled async exceptions and Zod validation errors.
+ * Centralized Error Handling Middleware
+ * Enforces the standard response format:
+ * { success: false, message: "...", errors: [] }
  */
-export const globalErrorHandler = (err, req, res, next) => {
-  console.error("🔥 GLOBAL ERROR HANDLER CAUGHT AN EXCEPTION:");
-  console.error(err);
 
-  // Zod Validation Error (if it bypassed the request validator somehow)
-  if (err.name === "ZodError") {
-    return sendError(res, {
-      status: 400,
-      message: "Validation Error",
-      error: process.env.NODE_ENV !== "production" ? err.errors : "Invalid input data",
-    });
-  }
-
-  // Mongoose Duplicate Key Error
-  if (err.code === 11000) {
-    const duplicateField = Object.keys(err.keyValue)[0];
-    return sendError(res, {
-      status: 409, // Conflict
-      message: `${duplicateField} already exists. Please use a different value.`,
-    });
-  }
-
-  // Mongoose Validation Error
-  if (err.name === "ValidationError") {
-    const messages = Object.values(err.errors).map(val => val.message);
-    return sendError(res, {
-      status: 400,
-      message: "Validation Error",
-      error: process.env.NODE_ENV !== "production" ? messages : "Invalid input data",
-    });
-  }
-
-  // JWT Errors
-  if (err.name === "JsonWebTokenError") {
-    return sendError(res, {
-      status: 401,
-      message: "Invalid token. Please log in again.",
-    });
-  }
-
-  if (err.name === "TokenExpiredError") {
-    return sendError(res, {
-      status: 401,
-      message: "Your token has expired. Please log in again.",
-    });
-  }
-
-  // Default Fallback
-  const statusCode = err.status || err.statusCode || 500;
-  const message = err.message || "Internal Server Error";
-
-  return sendError(res, {
-    status: statusCode,
-    message: message,
-    error: process.env.NODE_ENV !== "production" ? err.stack : undefined,
-  });
+export const notFoundHandler = (req, res, next) => {
+  const error = new Error(`Not Found - ${req.originalUrl}`);
+  res.status(404);
+  next(error);
 };
 
-/**
- * Route Not Found Handler
- */
-export const notFoundHandler = (req, res, next) => {
-  return sendError(res, {
-    status: 404,
-    message: `API Route Not Found - ${req.originalUrl}`,
+export const globalErrorHandler = (err, req, res, next) => {
+  let statusCode = res.statusCode === 200 ? 500 : res.statusCode;
+  let message = err.message || "Internal Server Error";
+  let errors = err.errors || [];
+
+  // Handle Mongoose Validation Error
+  if (err.name === "ValidationError") {
+    statusCode = 400;
+    message = "Validation failed";
+    errors = Object.values(err.errors).map((val) => val.message);
+  }
+
+  // Handle Mongoose Cast Error (e.g. invalid ObjectId)
+  if (err.name === "CastError") {
+    statusCode = 404;
+    message = "Resource not found";
+  }
+
+  // Handle Mongoose Duplicate Key Error
+  if (err.code === 11000) {
+    statusCode = 400;
+    message = "Duplicate field value entered";
+    const field = Object.keys(err.keyValue)[0];
+    errors = [`The field '${field}' is already in use.`];
+  }
+
+  // Handle JWT Error
+  if (err.name === "JsonWebTokenError") {
+    statusCode = 401;
+    message = "Invalid token. Please log in again.";
+  }
+
+  // Handle JWT Expired Error
+  if (err.name === "TokenExpiredError") {
+    statusCode = 401;
+    message = "Your token has expired. Please log in again.";
+  }
+
+  res.status(statusCode).json({
+    success: false,
+    message,
+    errors,
+    ...(process.env.NODE_ENV !== "production" && { stack: err.stack })
   });
 };

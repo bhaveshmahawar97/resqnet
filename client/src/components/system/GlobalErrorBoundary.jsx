@@ -25,11 +25,11 @@ export default class GlobalErrorBoundary extends React.Component {
           justifyContent: "center",
           height: "100vh",
           backgroundColor: "#0A2218",
-          color: T.textOnAccent,
+          color: "var(--text-on-accent)",
           textAlign: "center",
           padding: "2rem"
         }}>
-          <h1 style={{ fontSize: "2rem", marginBottom: "1rem", color: T.danger }}>Something went wrong.</h1>
+          <h1 style={{ fontSize: "2rem", marginBottom: "1rem", color: "var(--danger)" }}>Something went wrong.</h1>
           <p style={{ fontSize: "1rem", marginBottom: "2rem", color: "#9CA3AF", maxWidth: "600px" }}>
             We encountered an unexpected error. The engineering team has been notified.
             <br/><br/>

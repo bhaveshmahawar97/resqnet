@@ -4,6 +4,8 @@ import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import helmet from "helmet";
+import morgan from "morgan";
 
 import { CORE_DB_NAME, AI_DB_NAME, isCoreConnected, isAiConnected } from "./config/database.js";
 import { CORE_COLLECTIONS, AI_COLLECTIONS } from "./models/index.js";
@@ -15,9 +17,10 @@ import adoptionRoutes from "./routes/adoption.js";
 import notificationRoutes from "./routes/notifications.js";
 import ngoRoutes from "./routes/ngos.js";
 import dashboardRoutes from "./routes/dashboard.js";
-import reportRoutes from "../backend/routes/reportRoutes.js";
+import reportRoutes from "./routes/reportRoutes.js";
 
 import { globalErrorHandler, notFoundHandler } from "./middleware/errorMiddleware.js";
+import { apiLimiter } from "./middleware/rateLimiter.js";
 
 const envFile = fs.existsSync(path.resolve(process.cwd(), ".env.local")) ? ".env.local" : ".env";
 dotenv.config({ path: path.resolve(process.cwd(), envFile) });
@@ -44,6 +47,19 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
+
+// Logging
+if (process.env.NODE_ENV !== "production") {
+  app.use(morgan("dev"));
+} else {
+  app.use(morgan("combined"));
+}
+
+// Security Middlewares
+app.use(helmet());
+
+// Apply rate limiter to all /api routes
+app.use("/api", apiLimiter);
 
 app.use(express.json({ limit: "2mb" }));
 app.use(express.urlencoded({ extended: true, limit: "2mb" }));
