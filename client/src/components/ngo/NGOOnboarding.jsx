@@ -56,7 +56,7 @@ const OnboardingInput = forwardRef(({ label, type = "text", error, readOnly, ...
           boxSizing: "border-box"
         }}
       />
-      {error && <span style={{ fontSize: "0.75rem", color: "#EF4444", fontWeight: 600 }}>{error}</span>}
+      {error && <span style={{ fontSize: "0.75rem", color: T.danger, fontWeight: 600 }}>{error}</span>}
     </div>
   );
 });
@@ -217,7 +217,7 @@ export default function NGOOnboarding() {
         maxWidth: 600, margin: "0 auto", padding: "4rem 2rem", background: T.bgCard, 
         borderRadius: 24, border: `1px solid ${T.border}`, boxShadow: T.shadow, textAlign: "center"
       }}>
-        <div style={{ width: 80, height: 80, borderRadius: "50%", background: "#D1FAE5", color: "#059669", 
+        <div style={{ width: 80, height: 80, borderRadius: "50%", background: "#D1FAE5", color: T.success, 
           display: "flex", alignItems: "center", justifyContent: "center", fontSize: "2.5rem", margin: "0 auto 1.5rem" }}>
           ✓
         </div>
@@ -269,7 +269,7 @@ export default function NGOOnboarding() {
 
       <div style={{ padding: "clamp(2rem, 5vw, 3rem)" }}>
         {globalError && (
-          <div style={{ padding: "1rem", background: "#FEE2E2", color: "#991B1B", borderRadius: 8, marginBottom: "2rem", border: "1px solid #FCA5A5", fontSize: "0.9rem", fontWeight: 600 }}>
+          <div style={{ padding: "1rem", background: T.dangerPale, color: "#991B1B", borderRadius: 8, marginBottom: "2rem", border: "1px solid #FCA5A5", fontSize: "0.9rem", fontWeight: 600 }}>
             {globalError}
           </div>
         )}
@@ -308,7 +308,7 @@ export default function NGOOnboarding() {
                         </button>
                       ))}
                     </div>
-                    {errors.ngoType && <div style={{ fontSize: "0.75rem", color: "#EF4444", marginTop: "0.4rem", fontWeight: 600 }}>{errors.ngoType.message}</div>}
+                    {errors.ngoType && <div style={{ fontSize: "0.75rem", color: T.danger, marginTop: "0.4rem", fontWeight: 600 }}>{errors.ngoType.message}</div>}
                   </div>
                 </div>
               </motion.div>
@@ -397,7 +397,7 @@ export default function NGOOnboarding() {
                         </>
                       )}
                     </label>
-                    {docError && <div style={{ fontSize: "0.75rem", color: "#EF4444", marginTop: "0.5rem", fontWeight: 600 }}>{docError}</div>}
+                    {docError && <div style={{ fontSize: "0.75rem", color: T.danger, marginTop: "0.5rem", fontWeight: 600 }}>{docError}</div>}
                   </div>
                 </div>
               </motion.div>
@@ -449,7 +449,7 @@ export default function NGOOnboarding() {
                 onClick={handleNext}
                 style={{
                   padding: "0.8rem 2.5rem", borderRadius: 10, border: "none", background: T.accent,
-                  color: "#fff", fontSize: "0.95rem", fontWeight: 700, cursor: "pointer", fontFamily: "inherit",
+                  color: T.textOnAccent, fontSize: "0.95rem", fontWeight: 700, cursor: "pointer", fontFamily: "inherit",
                   boxShadow: `0 4px 14px ${T.accent}40`
                 }}
               >
@@ -461,7 +461,7 @@ export default function NGOOnboarding() {
                 disabled={loading}
                 style={{
                   padding: "0.8rem 2.5rem", borderRadius: 10, border: "none", background: T.accent,
-                  color: "#fff", fontSize: "0.95rem", fontWeight: 700, cursor: loading ? "wait" : "pointer", 
+                  color: T.textOnAccent, fontSize: "0.95rem", fontWeight: 700, cursor: loading ? "wait" : "pointer", 
                   fontFamily: "inherit", boxShadow: `0 4px 14px ${T.accent}40`, display: "flex", gap: "0.5rem", alignItems: "center"
                 }}
               >

@@ -77,7 +77,7 @@ export default function AnimalCard({ animal, i, onAdopt }) {
             padding: "0.2rem 0.65rem",
             borderRadius: 20,
             background: st.bg,
-            color: "#fff",
+            color: T.textOnAccent,
             fontSize: "0.62rem",
             fontWeight: 800,
             letterSpacing: "0.06em",

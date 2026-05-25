@@ -139,7 +139,7 @@ export default function RescueCTA() {
             border: "1px solid rgba(239,68,68,0.2)",
           }}
         >
-          <div style={{ fontSize: "0.82rem", fontWeight: 700, color: "#EF4444", letterSpacing: "0.1em", marginBottom: "0.5rem" }}>🚨 EMERGENCY HELPLINE</div>
+          <div style={{ fontSize: "0.82rem", fontWeight: 700, color: T.danger, letterSpacing: "0.1em", marginBottom: "0.5rem" }}>🚨 EMERGENCY HELPLINE</div>
           <div style={{ fontSize: "clamp(1.4rem, 4vw, 2rem)", fontWeight: 900, color: T.text, letterSpacing: "-0.03em" }}>
             1800-RESQNET
           </div>

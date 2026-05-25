@@ -7,11 +7,7 @@ import Label from "../ui/Label";
 import { vFadeUp } from "../../animations/variants";
 import { usePlatformStats, formatStat } from "../../hooks/usePlatformStats";
 
-const STATS = [
-  { value: 0, suffix: "", label: "Avg Response", sub: "For critical emergencies", icon: "⚡", color: "#EF4444" },
-  { value: 0, suffix: "", label: "Verified NGOs", sub: "On standby nationwide", icon: "🏥", color: "#3B82F6" },
-  { value: 0, suffix: "", label: "Animals Saved", sub: "Since ResQNet launched", icon: "💚", color: "#22C55E" },
-];
+
 
 function StatCard({ stat, active }) {
   const { T } = useT();
@@ -48,7 +44,7 @@ function StatCard({ stat, active }) {
               transition={{ duration: 1.2, repeat: Infinity }}
               style={{ width: 6, height: 6, borderRadius: "50%", background: "#EF4444" }}
             />
-            <span style={{ fontSize: "0.62rem", fontWeight: 700, color: "#EF4444", letterSpacing: "0.08em" }}>LIVE</span>
+            <span style={{ fontSize: "0.62rem", fontWeight: 700, color: T.danger, letterSpacing: "0.08em" }}>LIVE</span>
           </div>
         )}
       </div>
@@ -70,7 +66,7 @@ export default function EmergencyStats() {
   const { stats } = usePlatformStats();
 
   const STATS = [
-    { value: stats.avgResponseMinutes, suffix: "m", label: "Avg Response", sub: "For critical emergencies", icon: "⚡", color: "#EF4444" },
+    { value: stats.avgResponseMinutes, suffix: "m", label: "Avg Response", sub: "For critical emergencies", icon: "⚡", color: T.danger },
     { value: stats.totalNgos, suffix: "", label: "Verified NGOs", sub: "On standby nationwide", icon: "🏥", color: "#3B82F6" },
     { value: stats.totalRescues, suffix: "", label: "Animals Saved", sub: "Since ResQNet launched", icon: "💚", color: "#22C55E" },
   ];

@@ -12,6 +12,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { registerSchema } from "../../utils/validators";
 import { useAuth, ROLES } from "../../context/AuthContext";
 import { useT } from "../../context/ThemeContext";
+import logoMain from "../../assets/logos/logo-main.png";
 
 // ─── ROLE REDIRECT MAP ────────────────────────────────────────────────────────
 const ROLE_REDIRECTS = {
@@ -76,9 +77,7 @@ const PUBLIC_ROLES = [
 ];
 
 // ─── BRAND PANEL (LEFT) ───────────────────────────────────────────────────────
-function BrandPanel({ mode }) {
-  const isDark = mode === "dark";
-
+function BrandPanel({ mode, T }) {
   const nodes = [
     { x: "22%", y: "18%", r: 5, d: 0 },
     { x: "68%", y: "12%", r: 4, d: 0.5 },
@@ -101,9 +100,7 @@ function BrandPanel({ mode }) {
         position: "relative",
         width: "100%",
         height: "100%",
-        background: isDark
-          ? "linear-gradient(145deg, #050D18 0%, #0A1828 50%, #071520 100%)"
-          : "linear-gradient(145deg, #0A2218 0%, #0F3A26 50%, #082B1C 100%)",
+        background: T.gradHero,
         overflow: "hidden",
         display: "flex",
         flexDirection: "column",
@@ -116,7 +113,7 @@ function BrandPanel({ mode }) {
           position: "absolute",
           inset: 0,
           backgroundImage:
-            "linear-gradient(rgba(46,210,130,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(46,210,130,0.04) 1px, transparent 1px)",
+            `linear-gradient(${T.grid} 1px, transparent 1px), linear-gradient(90deg, ${T.grid} 1px, transparent 1px)`,
           backgroundSize: "44px 44px",
           pointerEvents: "none",
         }}
@@ -129,7 +126,7 @@ function BrandPanel({ mode }) {
           transform: "translate(-50%, -50%)",
           width: 500,
           height: 500,
-          background: "radial-gradient(circle, rgba(22,160,86,0.08) 0%, transparent 65%)",
+          background: `radial-gradient(circle, ${T.accentPale} 0%, transparent 65%)`,
           pointerEvents: "none",
         }}
       />
@@ -140,14 +137,14 @@ function BrandPanel({ mode }) {
           style={{ position: "absolute", inset: 0 }}
           preserveAspectRatio="none"
         >
-          <line x1="22%" y1="18%" x2="48%" y2="34%" stroke="rgba(46,210,130,0.13)" strokeWidth="1" />
-          <line x1="68%" y1="12%" x2="48%" y2="34%" stroke="rgba(46,210,130,0.09)" strokeWidth="1" />
-          <line x1="48%" y1="34%" x2="30%" y2="55%" stroke="rgba(46,210,130,0.11)" strokeWidth="1" />
-          <line x1="48%" y1="34%" x2="70%" y2="50%" stroke="rgba(46,210,130,0.09)" strokeWidth="1" />
-          <line x1="30%" y1="55%" x2="14%" y2="75%" stroke="rgba(46,210,130,0.07)" strokeWidth="1" />
-          <line x1="70%" y1="50%" x2="85%" y2="70%" stroke="rgba(46,210,130,0.07)" strokeWidth="1" />
-          <line x1="30%" y1="55%" x2="55%" y2="68%" stroke="rgba(46,210,130,0.09)" strokeWidth="1" />
-          <line x1="70%" y1="50%" x2="55%" y2="68%" stroke="rgba(46,210,130,0.07)" strokeWidth="1" />
+          <line x1="22%" y1="18%" x2="48%" y2="34%" stroke={T.accentGlow} strokeWidth="1" />
+          <line x1="68%" y1="12%" x2="48%" y2="34%" stroke={T.accentGlow} strokeWidth="1" />
+          <line x1="48%" y1="34%" x2="30%" y2="55%" stroke={T.accentGlow} strokeWidth="1" />
+          <line x1="48%" y1="34%" x2="70%" y2="50%" stroke={T.accentGlow} strokeWidth="1" />
+          <line x1="30%" y1="55%" x2="14%" y2="75%" stroke={T.accentGlow} strokeWidth="1" />
+          <line x1="70%" y1="50%" x2="85%" y2="70%" stroke={T.accentGlow} strokeWidth="1" />
+          <line x1="30%" y1="55%" x2="55%" y2="68%" stroke={T.accentGlow} strokeWidth="1" />
+          <line x1="70%" y1="50%" x2="55%" y2="68%" stroke={T.accentGlow} strokeWidth="1" />
         </svg>
         {nodes.map((n, i) => (
           <div
@@ -159,8 +156,8 @@ function BrandPanel({ mode }) {
               width: n.r * 2,
               height: n.r * 2,
               borderRadius: "50%",
-              background: "rgba(46,210,130,0.6)",
-              boxShadow: "0 0 10px rgba(46,210,130,0.35)",
+              background: T.accent,
+              boxShadow: `0 0 10px ${T.accentGlow}`,
               transform: "translate(-50%, -50%)",
               animation: `rqNodePulse 3s ease-in-out ${n.d}s infinite`,
             }}
@@ -174,11 +171,11 @@ function BrandPanel({ mode }) {
               width: 36,
               height: 36,
               borderRadius: 10,
-              background: "linear-gradient(135deg, #16A056 0%, #0F7A40 100%)",
+              background: T.gradAccent,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              boxShadow: "0 4px 14px rgba(22,160,86,0.3)",
+              boxShadow: T.shadowMd,
               flexShrink: 0,
             }}
           >
@@ -187,7 +184,7 @@ function BrandPanel({ mode }) {
               <circle cx="12" cy="12" r="3" fill="rgba(255,255,255,0.92)" />
             </svg>
           </div>
-          <span style={{ fontSize: "1.15rem", fontWeight: 700, color: "#fff", letterSpacing: "-0.015em" }}>
+          <span style={{ fontSize: "1.15rem", fontWeight: 700, color: T.text, letterSpacing: "-0.015em" }}>
             ResQNet
           </span>
         </div>
@@ -195,7 +192,7 @@ function BrandPanel({ mode }) {
           style={{
             fontSize: "0.66rem",
             fontWeight: 600,
-            color: "rgba(46,210,130,0.65)",
+            color: T.accent,
             letterSpacing: "0.18em",
             textTransform: "uppercase",
           }}
@@ -219,19 +216,19 @@ function BrandPanel({ mode }) {
             fontSize: "clamp(1.4rem, 2.2vw, 1.85rem)",
             fontWeight: 800,
             lineHeight: 1.22,
-            color: "#fff",
+            color: T.text,
             marginBottom: "1rem",
             letterSpacing: "-0.025em",
           }}
         >
           Join the network
           <br />
-          <span style={{ color: "rgba(46,210,130,0.82)" }}>saving lives.</span>
+          <span style={{ color: T.accent }}>saving lives.</span>
         </p>
         <p
           style={{
             fontSize: "0.87rem",
-            color: "rgba(255,255,255,0.44)",
+            color: T.textSub,
             lineHeight: 1.72,
             maxWidth: 310,
           }}
@@ -243,48 +240,22 @@ function BrandPanel({ mode }) {
             <div
               key={t.name}
               style={{
-                background: "rgba(255,255,255,0.05)",
+                background: T.bgGlass,
                 backdropFilter: "blur(8px)",
-                border: "1px solid rgba(255,255,255,0.08)",
+                border: `1px solid ${T.borderGlass}`,
                 borderRadius: 10,
                 padding: "0.8rem 1rem",
               }}
             >
-              <p style={{ fontSize: "0.8rem", color: "rgba(255,255,255,0.65)", lineHeight: 1.55, margin: 0 }}>
+              <p style={{ fontSize: "0.8rem", color: T.textSub, lineHeight: 1.55, margin: 0 }}>
                 "{t.quote}"
               </p>
-              <p style={{ fontSize: "0.68rem", color: "rgba(46,210,130,0.6)", marginTop: "0.4rem", margin: "0.4rem 0 0" }}>
+              <p style={{ fontSize: "0.68rem", color: T.accent, marginTop: "0.4rem", margin: "0.4rem 0 0" }}>
                 — {t.name}, {t.org}
               </p>
             </div>
           ))}
         </div>
-      </div>
-      <div
-        style={{
-          position: "relative",
-          zIndex: 2,
-          display: "flex",
-          alignItems: "center",
-          gap: "1rem",
-          paddingTop: "1rem",
-          borderTop: "1px solid rgba(255,255,255,0.07)",
-        }}
-      >
-        {[
-          { v: "380+", l: "NGO partners" },
-          { v: "94%", l: "Response rate" },
-          { v: "Free", l: "to join" },
-        ].map((s) => (
-          <div key={s.l} style={{ flex: 1 }}>
-            <div style={{ fontSize: "1rem", fontWeight: 800, color: "#fff", letterSpacing: "-0.02em" }}>
-              {s.v}
-            </div>
-            <div style={{ fontSize: "0.64rem", color: "rgba(255,255,255,0.35)", marginTop: 2 }}>
-              {s.l}
-            </div>
-          </div>
-        ))}
       </div>
       <style>{`
         @keyframes rqNodePulse {
@@ -335,7 +306,7 @@ const AuthInput = forwardRef(({ label, type = "text", placeholder, autoComplete,
         }}
       />
       {error && (
-        <span style={{ fontSize: "0.72rem", color: "#DC2626", marginTop: "0.1rem" }}>{error}</span>
+        <span style={{ fontSize: "0.72rem", color: T.danger, marginTop: "0.1rem" }}>{error}</span>
       )}
     </label>
   );
@@ -507,7 +478,7 @@ export default function Register() {
           height: "100%",
         }}
       >
-        <BrandPanel mode={mode} />
+        <BrandPanel mode={mode} T={T} />
       </div>
 
       {/* ── RIGHT: Form ── */}
@@ -528,28 +499,14 @@ export default function Register() {
           style={{
             display: "none",
             alignItems: "center",
-            gap: "0.5rem",
+            gap: "0.65rem",
             marginBottom: "2.5rem",
             alignSelf: "flex-start",
           }}
         >
-          <div
-            style={{
-              width: 30,
-              height: 30,
-              borderRadius: 8,
-              background: "linear-gradient(135deg, #16A056 0%, #0F7A40 100%)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-              <path d="M12 2L3 7v10l9 5 9-5V7L12 2z" stroke="white" strokeWidth="2" strokeLinejoin="round" />
-              <circle cx="12" cy="12" r="3" fill="rgba(255,255,255,0.92)" />
-            </svg>
-          </div>
-          <span style={{ fontSize: "1rem", fontWeight: 700, color: T.text }}>ResQNet</span>
+          <Link to="/" style={{ display: "inline-flex", alignItems: "center", gap: "0.6rem", textDecoration: "none" }}>
+            <span style={{ fontSize: "1.05rem", fontWeight: 700, color: T.text }}>ResQNet</span>
+          </Link>
         </div>
 
         <div style={{ width: "100%", maxWidth: 440 }}>
@@ -693,7 +650,7 @@ export default function Register() {
                   <circle cx="8" cy="8" r="7" stroke="#DC2626" strokeWidth="1.5" />
                   <path d="M8 5v3.5M8 11v.5" stroke="#DC2626" strokeWidth="1.5" strokeLinecap="round" />
                 </svg>
-                <span style={{ fontSize: "0.78rem", color: "#DC2626" }}>{globalError}</span>
+                <span style={{ fontSize: "0.78rem", color: T.danger }}>{globalError}</span>
               </div>
             )}
 
@@ -707,7 +664,7 @@ export default function Register() {
                 borderRadius: 10,
                 border: "none",
                 background: `linear-gradient(135deg, ${T.accent} 0%, ${T.accentDim} 100%)`,
-                color: "#fff",
+                color: T.textOnAccent,
                 fontSize: "0.92rem",
                 fontWeight: 700,
                 cursor: loading ? "not-allowed" : "pointer",
@@ -749,6 +706,12 @@ export default function Register() {
               Sign in
             </Link>
           </p>
+
+          <div style={{ marginTop: "1.5rem", textAlign: "center" }}>
+            <Link to="/" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "0.6rem", textDecoration: "none", color: T.textSub, opacity: 0.95 }} aria-label="Go to ResQNet home">
+              <img src={logoMain} alt="ResQNet" style={{ width: 44, height: 44, objectFit: "contain" }} />
+            </Link>
+          </div>
 
           {/* Terms note */}
           <p

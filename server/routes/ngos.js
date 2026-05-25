@@ -13,7 +13,7 @@ import {
   getNgoStatsOverview,
 } from "../controllers/ngoController.js";
 
-import { validateRequest } from "../middlewares/validateRequest.js";
+import { validateRequest } from "../middleware/validationMiddleware.js";
 import { ngoRegistrationSchema } from "../validators/ngoValidator.js";
 
 const router = express.Router();

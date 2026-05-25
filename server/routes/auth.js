@@ -7,7 +7,7 @@ import {
 } from "../controllers/authController.js";
 
 import authMiddleware from "../middleware/authMiddleware.js";
-import { validateRequest } from "../middlewares/validateRequest.js";
+import { validateRequest } from "../middleware/validationMiddleware.js";
 import { registerSchema, loginSchema } from "../validators/authValidator.js";
 
 const router = express.Router();

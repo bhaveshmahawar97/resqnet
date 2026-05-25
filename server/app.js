@@ -15,8 +15,9 @@ import adoptionRoutes from "./routes/adoption.js";
 import notificationRoutes from "./routes/notifications.js";
 import ngoRoutes from "./routes/ngos.js";
 import dashboardRoutes from "./routes/dashboard.js";
+import reportRoutes from "../backend/routes/reportRoutes.js";
 
-import { globalErrorHandler, notFoundHandler } from "./middlewares/errorHandler.js";
+import { globalErrorHandler, notFoundHandler } from "./middleware/errorMiddleware.js";
 
 const envFile = fs.existsSync(path.resolve(process.cwd(), ".env.local")) ? ".env.local" : ".env";
 dotenv.config({ path: path.resolve(process.cwd(), envFile) });
@@ -88,6 +89,7 @@ app.use("/api/adoption", adoptionRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/ngos", ngoRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/report", reportRoutes(express));
 
 app.use(notFoundHandler);
 app.use(globalErrorHandler);

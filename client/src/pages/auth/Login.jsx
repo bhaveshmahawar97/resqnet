@@ -15,12 +15,6 @@ const ROLE_REDIRECTS = {
 
 // ─── BRAND PANEL (LEFT) ───────────────────────────────────────────────────────
 function BrandPanel() {
-  const stats = [
-    { value: "12,400+", label: "Animals rescued" },
-    { value: "380+", label: "NGO partners" },
-    { value: "94%", label: "Response rate" },
-  ];
-
   const features = [
     { text: "AI-powered health scan & triage" },
     { text: "Real-time rescue coordination" },
@@ -82,8 +76,8 @@ function BrandPanel() {
               <path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </div>
-          <span style={{ fontSize: "1.15rem", fontWeight: 800, color: "#fff", letterSpacing: "-0.03em" }}>
-            ResQ<span style={{ color: "#38BDF8" }}>Net</span>
+          <span style={{ fontSize: "1.15rem", fontWeight: 800, color: T.textOnAccent, letterSpacing: "-0.03em" }}>
+            ResQ<span style={{ color: T.accent }}>Net</span>
           </span>
         </div>
         <span style={{ fontSize: "0.66rem", fontWeight: 600, color: "rgba(56,189,248,0.55)", letterSpacing: "0.14em", textTransform: "uppercase" }}>
@@ -103,11 +97,11 @@ function BrandPanel() {
           style={{
             fontSize: "clamp(1.4rem, 2.2vw, 1.85rem)",
             fontWeight: 800, lineHeight: 1.25,
-            color: "#fff", marginBottom: "0.75rem", letterSpacing: "-0.025em",
+            color: T.textOnAccent, marginBottom: "0.75rem", letterSpacing: "-0.025em",
           }}
         >
           Every second counts<br />
-          <span style={{ color: "#38BDF8" }}>in a rescue.</span>
+          <span style={{ color: T.accent }}>in a rescue.</span>
         </p>
         <p
           style={{
@@ -136,29 +130,6 @@ function BrandPanel() {
             </div>
           ))}
         </div>
-      </div>
-
-      {/* Stats */}
-      <div style={{ position: "relative", zIndex: 2, display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "0.5rem" }}>
-        {stats.map((s) => (
-          <div
-            key={s.label}
-            style={{
-              background: "rgba(255,255,255,0.05)",
-              backdropFilter: "blur(8px)",
-              border: "1px solid rgba(255,255,255,0.08)",
-              borderRadius: 10,
-              padding: "0.75rem 0.85rem",
-            }}
-          >
-            <div style={{ fontSize: "1.05rem", fontWeight: 800, color: "#fff", letterSpacing: "-0.025em" }}>
-              {s.value}
-            </div>
-            <div style={{ fontSize: "0.66rem", color: "rgba(255,255,255,0.38)", marginTop: 2 }}>
-              {s.label}
-            </div>
-          </div>
-        ))}
       </div>
     </div>
   );
@@ -203,7 +174,7 @@ const AuthInput = forwardRef(({ label, type = "text", placeholder, autoComplete,
         }}
       />
       {error && (
-        <span style={{ fontSize: "0.72rem", color: "#DC2626", marginTop: "0.1rem" }}>{error}</span>
+        <span style={{ fontSize: "0.72rem", color: T.danger, marginTop: "0.1rem" }}>{error}</span>
       )}
     </label>
   );
@@ -289,28 +260,14 @@ export default function Login() {
           style={{
             display: "none",
             alignItems: "center",
-            gap: "0.5rem",
+            gap: "0.65rem",
             marginBottom: "2.5rem",
             alignSelf: "flex-start",
           }}
         >
-          <div
-            style={{
-              width: 30,
-              height: 30,
-              borderRadius: 8,
-              background: "linear-gradient(135deg, #16A056 0%, #0F7A40 100%)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-              <path d="M12 2L3 7v10l9 5 9-5V7L12 2z" stroke="white" strokeWidth="2" strokeLinejoin="round" />
-              <circle cx="12" cy="12" r="3" fill="rgba(255,255,255,0.92)" />
-            </svg>
-          </div>
-          <span style={{ fontSize: "1rem", fontWeight: 700, color: T.text }}>ResQNet</span>
+          <Link to="/" style={{ display: "inline-flex", alignItems: "center", gap: "0.6rem", textDecoration: "none" }}>
+            <span style={{ fontSize: "1.05rem", fontWeight: 700, color: T.text }}>ResQNet</span>
+          </Link>
         </div>
 
         <div style={{ width: "100%", maxWidth: 400 }}>
@@ -440,7 +397,7 @@ export default function Login() {
                   <circle cx="8" cy="8" r="7" stroke="#DC2626" strokeWidth="1.5" />
                   <path d="M8 5v3.5M8 11v.5" stroke="#DC2626" strokeWidth="1.5" strokeLinecap="round" />
                 </svg>
-                <span style={{ fontSize: "0.78rem", color: "#DC2626" }}>{globalError}</span>
+                <span style={{ fontSize: "0.78rem", color: T.danger }}>{globalError}</span>
               </div>
             )}
 
@@ -454,7 +411,7 @@ export default function Login() {
                 borderRadius: 10,
                 border: "none",
                 background: `linear-gradient(135deg, ${T.accent} 0%, ${T.accentDim} 100%)`,
-                color: "#fff",
+                color: T.textOnAccent,
                 fontSize: "0.92rem",
                 fontWeight: 700,
                 cursor: loading ? "not-allowed" : "pointer",

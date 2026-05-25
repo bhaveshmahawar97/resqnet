@@ -19,7 +19,7 @@ import {
   rejectRescueMission,
 } from "../controllers/rescueController.js";
 
-import { validateRequest } from "../middlewares/validateRequest.js";
+import { validateRequest } from "../middleware/validationMiddleware.js";
 import { createRescueSchema, updateRescueStatusSchema } from "../validators/rescueValidator.js";
 
 const router = express.Router();

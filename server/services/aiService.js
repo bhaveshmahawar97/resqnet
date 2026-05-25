@@ -1,15 +1,10 @@
 import { mapProviderError } from "../utils/errors.js";
 import analyzeAnimalImageMock from "./mockAiService.js";
+import { getAiModels } from "../models/registerAi.js";
+import { parsePagination, buildPaginationMeta } from "../utils/pagination.js";
 
 const AI_PROVIDER = "local-mock";
 const VISION_MODEL = "deterministic-mock-v1";
-
-/**
- * Intelligent mock rescue analysis responses.
- * Used when real AI provider fails due to quota, auth, or other issues.
- * Each response is realistic and varied to support testing and demo workflows.
- */
-// No remote AI provider calls: use deterministic local mock implementation
 
 const normalizeSeverity = (value) => {
   const raw = String(value || "medium").toLowerCase().trim();
@@ -29,13 +24,6 @@ const normalizePriority = (value, severity) => {
   return "normal";
 };
 
-/**
- * Get a random intelligent mock response.
- * Provides realistic animal rescue analysis for fallback scenarios.
- */
-// Delegate to mock service implementation in all cases
-
-/** Canonical scan shape returned to the rest of the backend. */
 export const normalizeAnalysis = (parsed) => ({
   animal: String(parsed?.animal || parsed?.species || "unknown").toLowerCase().trim(),
   severity: normalizeSeverity(parsed?.severity),
@@ -50,24 +38,13 @@ export const normalizeAnalysis = (parsed) => ({
   ),
 });
 
-const isValidImageUrl = (imageUrl) => {
-  try {
-    const parsed = new URL(imageUrl);
-    return parsed.protocol === "https:" || parsed.protocol === "http:";
-  } catch {
-    return false;
-  }
-};
-
 export const analyzeAnimalImage = async ({ imageUrl, imageName } = {}) => {
   if (!imageUrl || typeof imageUrl !== "string") {
     throw new Error("Invalid image input provided to analyzeAnimalImage");
   }
 
   try {
-    // Always use deterministic local mock implementation
     const parsed = await analyzeAnimalImageMock({ imageUrl, imageName });
-
     const normalized = normalizeAnalysis(parsed);
 
     return {
@@ -77,10 +54,93 @@ export const analyzeAnimalImage = async ({ imageUrl, imageName } = {}) => {
       usedFallback: false,
     };
   } catch (err) {
-    // If the mock service itself fails (very unlikely), map the error consistently
     console.error("[AI SERVICE] Mock analysis failed", err?.message || err);
     throw mapProviderError(err);
   }
 };
 
-export default analyzeAnimalImage;
+export const persistScan = async ({ user, body, file, effectiveImageUrl, analysisResult, requestId }) => {
+  const AIScan = getAiModels().AIScan;
+  if (!AIScan) {
+    console.warn(`[${requestId}] AIScan model unavailable — skipping persistence`);
+    return null;
+  }
+
+  const recommendations = Array.isArray(analysisResult.recommendations)
+    ? analysisResult.recommendations
+    : analysisResult.recommendation
+      ? [analysisResult.recommendation]
+      : [];
+
+  return AIScan.create({
+    scannedBy: user?._id,
+    relatedRescue: body?.relatedRescue || null,
+    imageUrl: effectiveImageUrl,
+    imagePublicId: file?.filename || "",
+    status: "completed",
+    analysis: analysisResult,
+    predictedSeverity: analysisResult.severity,
+    confidence: analysisResult.confidence,
+    recommendations,
+    provider: analysisResult.provider || "openrouter",
+    providerMetadata: {
+      model: analysisResult.providerModel,
+      usedFallback: Boolean(analysisResult.usedFallback),
+    },
+  });
+};
+
+export const fetchScanHistory = async (userId, query) => {
+  const AIScan = getAiModels().AIScan;
+  if (!AIScan) throw new Error("AI database not initialized");
+
+  const { page, limit, skip } = parsePagination(query, {
+    defaultLimit: 8,
+    maxLimit: 50,
+  });
+
+  const filter = { scannedBy: userId };
+
+  const [scans, total] = await Promise.all([
+    AIScan.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
+    AIScan.countDocuments(filter),
+  ]);
+
+  const normalizedScans = scans.map((scan) => ({
+    scanId: scan._id?.toString(),
+    animal: scan.analysis?.animal || "unknown",
+    severity: scan.predictedSeverity || scan.analysis?.severity || "unknown",
+    condition: scan.analysis?.condition || "",
+    priority: scan.analysis?.priority || "normal",
+    recommendation: scan.recommendations?.[0] || scan.analysis?.recommendation || "",
+    recommendations: scan.recommendations || scan.analysis?.recommendations || [],
+    confidence: scan.confidence ?? scan.analysis?.confidence ?? 0,
+    imageUrl: scan.imageUrl,
+    timestamp: scan.createdAt,
+    status: scan.status,
+    fullAnalysis: scan.analysis || {},
+  }));
+
+  return { scans: normalizedScans, pagination: buildPaginationMeta(page, limit, total) };
+};
+
+export const fetchScannerStats = async () => {
+  const AIScan = getAiModels().AIScan;
+  if (!AIScan) throw new Error("AI database not initialized");
+
+  const [completed, processing, failed, critical, high] = await Promise.all([
+    AIScan.countDocuments({ status: "completed" }),
+    AIScan.countDocuments({ status: "processing" }),
+    AIScan.countDocuments({ status: "failed" }),
+    AIScan.countDocuments({ predictedSeverity: "critical" }),
+    AIScan.countDocuments({ predictedSeverity: "high" }),
+  ]);
+
+  return {
+    totalScans: completed + processing + failed,
+    completed,
+    processing,
+    failed,
+    severityDistribution: { critical, high },
+  };
+};

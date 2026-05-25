@@ -67,7 +67,7 @@ export default function NotificationDropdown({ isOpen, onClose }) {
                 <span
                   style={{
                     background: T.accent,
-                    color: "#fff",
+                    color: T.textOnAccent,
                     fontSize: "0.65rem",
                     fontWeight: 700,
                     padding: "2px 6px",

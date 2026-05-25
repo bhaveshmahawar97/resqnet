@@ -84,7 +84,7 @@ export default function RescueHero({ onRequestRescue, onAIScan }) {
             }}
           />
           <span style={{
-            fontSize: "0.6875rem", fontWeight: 600, color: "#EF4444",
+            fontSize: "0.6875rem", fontWeight: 600, color: T.danger,
             letterSpacing: "0.04em",
           }}>
             Emergency System Live
@@ -106,7 +106,7 @@ export default function RescueHero({ onRequestRescue, onAIScan }) {
           }}
         >
           Every Second{" "}
-          <span style={{ color: "#EF4444" }}>Counts.</span>
+          <span style={{ color: T.danger }}>Counts.</span>
         </motion.h1>
 
         {/* Sub-headline */}

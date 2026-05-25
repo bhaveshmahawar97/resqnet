@@ -1,7 +1,7 @@
 import express from "express";
 import authMiddleware from "../middleware/authMiddleware.js";
 import authorizeRoles from "../middleware/roleMiddleware.js";
-import { validateRequest } from "../middlewares/validateRequest.js";
+import { validateRequest } from "../middleware/validationMiddleware.js";
 import {
   createAdoptionListingSchema,
   createAdoptionApplicationSchema,

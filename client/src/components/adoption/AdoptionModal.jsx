@@ -111,7 +111,7 @@ export default function AdoptionModal({ animal, onClose }) {
                     display: "inline-block",
                     fontSize: "0.6rem",
                     fontWeight: 700,
-                    color: "#fff",
+                    color: T.textOnAccent,
                     background: animal.status === "Available" ? "#16A056" : animal.status === "In Foster" ? "#F59E0B" : "#3B82F6",
                     padding: "0.15rem 0.6rem",
                     borderRadius: 20,
@@ -235,7 +235,7 @@ export default function AdoptionModal({ animal, onClose }) {
                     style={{ borderColor: errors.message ? "#EF4444" : undefined }}
                     disabled={submitting}
                   />
-                  {errors.message && <div style={{ color: "#EF4444", fontSize: "0.72rem", marginTop: 4 }}>{errors.message.message}</div>}
+                  {errors.message && <div style={{ color: T.danger, fontSize: "0.72rem", marginTop: 4 }}>{errors.message.message}</div>}
                 </div>
 
                 <div>
@@ -247,7 +247,7 @@ export default function AdoptionModal({ animal, onClose }) {
                     style={{ borderColor: errors.experience ? "#EF4444" : undefined }}
                     disabled={submitting}
                   />
-                  {errors.experience && <div style={{ color: "#EF4444", fontSize: "0.72rem", marginTop: 4 }}>{errors.experience.message}</div>}
+                  {errors.experience && <div style={{ color: T.danger, fontSize: "0.72rem", marginTop: 4 }}>{errors.experience.message}</div>}
                 </div>
 
                 <div>
@@ -259,7 +259,7 @@ export default function AdoptionModal({ animal, onClose }) {
                     style={{ borderColor: errors.livingEnvironment ? "#EF4444" : undefined }}
                     disabled={submitting}
                   />
-                  {errors.livingEnvironment && <div style={{ color: "#EF4444", fontSize: "0.72rem", marginTop: 4 }}>{errors.livingEnvironment.message}</div>}
+                  {errors.livingEnvironment && <div style={{ color: T.danger, fontSize: "0.72rem", marginTop: 4 }}>{errors.livingEnvironment.message}</div>}
                 </div>
 
                 <div style={{ display: "flex", gap: "0.85rem", flexWrap: "wrap" }}>
@@ -272,7 +272,7 @@ export default function AdoptionModal({ animal, onClose }) {
                       style={{ borderColor: errors.contactInfo ? "#EF4444" : undefined }}
                       disabled={submitting}
                     />
-                    {errors.contactInfo && <div style={{ color: "#EF4444", fontSize: "0.72rem", marginTop: 4 }}>{errors.contactInfo.message}</div>}
+                    {errors.contactInfo && <div style={{ color: T.danger, fontSize: "0.72rem", marginTop: 4 }}>{errors.contactInfo.message}</div>}
                   </div>
                   <div style={{ flex: "1 1 calc(50% - 0.425rem)" }}>
                     <input
@@ -283,13 +283,13 @@ export default function AdoptionModal({ animal, onClose }) {
                       style={{ borderColor: errors.address ? "#EF4444" : undefined }}
                       disabled={submitting}
                     />
-                    {errors.address && <div style={{ color: "#EF4444", fontSize: "0.72rem", marginTop: 4 }}>{errors.address.message}</div>}
+                    {errors.address && <div style={{ color: T.danger, fontSize: "0.72rem", marginTop: 4 }}>{errors.address.message}</div>}
                   </div>
                 </div>
               </div>
 
               {!success && feedback && (
-                <p style={{ fontSize: "0.85rem", color: "#EF4444", marginBottom: "0.75rem", padding: "0.5rem", background: "rgba(239, 68, 68, 0.1)", borderRadius: 6 }}>
+                <p style={{ fontSize: "0.85rem", color: T.danger, marginBottom: "0.75rem", padding: "0.5rem", background: "rgba(239, 68, 68, 0.1)", borderRadius: 6 }}>
                   {feedback}
                 </p>
               )}

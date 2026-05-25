@@ -185,7 +185,7 @@ export default function VolunteerGrid() {
                   <div>
                     <div style={{ fontWeight: 800, fontSize: "1rem", color: T.text }}>{profileModal.name}</div>
                     <div style={{ fontSize: "0.78rem", color: T.textMuted }}>{profileModal.role}</div>
-                    <div style={{ fontSize: "0.72rem", color: "#F59E0B", marginTop: 2 }}>⭐ {profileModal.rating} rating • {profileModal.cases} rescues</div>
+                    <div style={{ fontSize: "0.72rem", color: T.warning, marginTop: 2 }}>⭐ {profileModal.rating} rating • {profileModal.cases} rescues</div>
                   </div>
                 </div>
                 <button

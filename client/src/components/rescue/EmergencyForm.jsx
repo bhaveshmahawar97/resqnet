@@ -225,7 +225,7 @@ export default function EmergencyForm({ onSuccess }) {
                 borderRadius: 10,
                 background: "rgba(239, 68, 68, 0.1)",
                 border: "1px solid rgba(239, 68, 68, 0.3)",
-                color: "#DC2626",
+                color: T.danger,
                 fontSize: "0.85rem",
                 marginBottom: "1rem",
               }}
@@ -294,7 +294,7 @@ export default function EmergencyForm({ onSuccess }) {
                         top: 4,
                         right: 4,
                         background: "rgba(0,0,0,0.6)",
-                        color: "#fff",
+                        color: T.textOnAccent,
                         border: "none",
                         borderRadius: "50%",
                         width: 24,
@@ -350,7 +350,7 @@ export default function EmergencyForm({ onSuccess }) {
                     </option>
                   ))}
                 </select>
-                {errors.animalType && <div style={{ color: "#EF4444", fontSize: "0.72rem", marginTop: 4 }}>{errors.animalType.message}</div>}
+                {errors.animalType && <div style={{ color: T.danger, fontSize: "0.72rem", marginTop: 4 }}>{errors.animalType.message}</div>}
               </div>
 
               {/* Breed */}
@@ -381,7 +381,7 @@ export default function EmergencyForm({ onSuccess }) {
                 className="rq-textarea"
                 style={{ borderColor: errors.condition ? "#EF4444" : undefined, opacity: loading ? 0.6 : 1 }}
               />
-              {errors.condition && <div style={{ color: "#EF4444", fontSize: "0.72rem", marginTop: 4 }}>{errors.condition.message}</div>}
+              {errors.condition && <div style={{ color: T.danger, fontSize: "0.72rem", marginTop: 4 }}>{errors.condition.message}</div>}
             </div>
 
             {/* Severity level */}
@@ -417,7 +417,7 @@ export default function EmergencyForm({ onSuccess }) {
                   </motion.div>
                 ))}
               </div>
-              {errors.severity && <div style={{ color: "#EF4444", fontSize: "0.72rem", marginTop: 4 }}>{errors.severity.message}</div>}
+              {errors.severity && <div style={{ color: T.danger, fontSize: "0.72rem", marginTop: 4 }}>{errors.severity.message}</div>}
             </div>
 
             {/* Location + Contact */}
@@ -437,7 +437,7 @@ export default function EmergencyForm({ onSuccess }) {
                   className="rq-input"
                   style={{ borderColor: errors.address ? "#EF4444" : undefined, opacity: loading ? 0.6 : 1 }}
                 />
-                {errors.address && <div style={{ color: "#EF4444", fontSize: "0.72rem", marginTop: 4 }}>{errors.address.message}</div>}
+                {errors.address && <div style={{ color: T.danger, fontSize: "0.72rem", marginTop: 4 }}>{errors.address.message}</div>}
               </div>
               <div>
                 <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: T.textSub, marginBottom: "0.4rem", letterSpacing: "0.04em" }}>
@@ -449,7 +449,7 @@ export default function EmergencyForm({ onSuccess }) {
                   className="rq-input"
                   style={{ borderColor: errors.contactPhone ? "#EF4444" : undefined, opacity: loading ? 0.6 : 1 }}
                 />
-                {errors.contactPhone && <div style={{ color: "#EF4444", fontSize: "0.72rem", marginTop: 4 }}>{errors.contactPhone.message}</div>}
+                {errors.contactPhone && <div style={{ color: T.danger, fontSize: "0.72rem", marginTop: 4 }}>{errors.contactPhone.message}</div>}
               </div>
             </div>
             <RescueLocationPicker
@@ -538,7 +538,7 @@ export default function EmergencyForm({ onSuccess }) {
                     borderRadius: 10,
                     border: "none",
                     background: "linear-gradient(135deg, #EF4444, #DC2626)",
-                    color: "#fff",
+                    color: T.textOnAccent,
                     fontSize: "1rem",
                     fontWeight: 700,
                     cursor: loading ? "default" : "pointer",

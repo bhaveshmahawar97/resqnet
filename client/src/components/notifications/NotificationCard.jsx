@@ -3,7 +3,7 @@ import { timeAgo } from "../../utils/dateUtils";
 import { useT } from "../../context/ThemeContext";
 
 const priorityConfig = {
-  critical: { color: "#EF4444", icon: "🚨" },
+  critical: { color: "var(--danger)", icon: "🚨" },
   high: { color: "#F97316", icon: "⚠️" },
   medium: { color: "#3B82F6", icon: "ℹ️" },
   low: { color: "#6B7280", icon: "🔔" },

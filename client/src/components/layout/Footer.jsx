@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { useT } from "../../context/ThemeContext";
+import logoMain from "../../assets/logos/logo-main.png";
 
 const FOOTER_LINKS = {
   Platform: [
@@ -59,10 +60,12 @@ export default function Footer() {
   const { T } = useT();
 
   const linkStyle = {
-    fontSize: "0.8rem",
-    color: "rgba(255,255,255,0.38)",
+    fontSize: "0.75rem",
+    color: "rgba(255,255,255,0.35)",
     textDecoration: "none",
-    transition: "color 0.15s ease",
+    transition: "color 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)",
+    fontWeight: 400,
+    letterSpacing: "-0.003em",
   };
 
   return (
@@ -87,68 +90,83 @@ export default function Footer() {
           className="rq-footer-grid"
           style={{
             display: "grid",
-            gridTemplateColumns: "2fr 1fr 1fr 1fr",
-            gap: "clamp(1.5rem, 3vw, 2.5rem)",
-            marginBottom: "clamp(2rem, 4vw, 3.5rem)",
+            gridTemplateColumns: "clamp(200px, 30%, 300px) repeat(auto-fit, minmax(140px, 1fr))",
+            gap: "clamp(2rem, 5vw, 3rem)",
+            marginBottom: "clamp(2.5rem, 5vw, 3.5rem)",
           }}
         >
           {/* Brand column */}
           <div>
-            <div style={{ display: "flex", alignItems: "center", gap: "0.55rem", marginBottom: "0.875rem" }}>
-              <div
+            {/* Premium logo branding */}
+            <div style={{ marginBottom: "1.25rem" }}>
+              <img
+                src={logoMain}
+                alt="ResQNet"
                 style={{
-                  width: 28, height: 28, borderRadius: 7,
-                  background: "linear-gradient(135deg, #1D6FA4 0%, #38BDF8 100%)",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  flexShrink: 0,
+                  height: "clamp(84px, 15vw, 120px)",
+                  width: "auto",
+                  display: "block",
+                  objectFit: "contain",
+                  transition: "opacity 0.25s ease, transform 0.25s ease",
+                  cursor: "pointer",
                 }}
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                  <path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </div>
-              <span style={{ fontSize: "1rem", fontWeight: 800, color: "#fff", letterSpacing: "-0.02em" }}>
-                ResQ<span style={{ color: "#38BDF8" }}>Net</span>
-              </span>
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.opacity = "0.85";
+                  e.currentTarget.style.transform = "translateY(-1px)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.opacity = "1";
+                  e.currentTarget.style.transform = "translateY(0)";
+                }}
+              />
             </div>
 
             <p
               style={{
-                fontSize: "0.78rem",
-                color: "rgba(255,255,255,0.35)",
-                lineHeight: 1.7,
-                marginBottom: "1.25rem",
-                maxWidth: 240,
+                fontSize: "0.75rem",
+                color: "rgba(255,255,255,0.32)",
+                lineHeight: 1.65,
+                marginBottom: "1.5rem",
+                maxWidth: 260,
+                fontWeight: 400,
+                letterSpacing: "-0.003em",
               }}
             >
               AI-powered animal rescue coordination platform connecting NGOs, veterinary clinics, and volunteers across India.
             </p>
 
-            {/* Social links */}
-            <div style={{ display: "flex", gap: "0.4rem" }}>
+            {/* Social links - refined spacing */}
+            <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
               {SOCIAL.map((s) => (
                 <a
                   key={s.label}
                   href="#"
                   aria-label={s.label}
                   style={{
-                    width: 30, height: 30, borderRadius: 7,
-                    border: "1px solid rgba(255,255,255,0.08)",
-                    background: "rgba(255,255,255,0.03)",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    color: "rgba(255,255,255,0.35)",
-                    transition: "all 0.15s ease",
+                    width: 32,
+                    height: 32,
+                    borderRadius: 6,
+                    border: "1px solid rgba(255,255,255,0.06)",
+                    background: "rgba(255,255,255,0.02)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "rgba(255,255,255,0.3)",
+                    transition: "all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)",
                     textDecoration: "none",
+                    cursor: "pointer",
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.background = "rgba(255,255,255,0.08)";
-                    e.currentTarget.style.color = "#fff";
-                    e.currentTarget.style.borderColor = "rgba(255,255,255,0.15)";
+                    e.currentTarget.style.background = "rgba(56,189,248,0.08)";
+                    e.currentTarget.style.color = "#38BDF8";
+                    e.currentTarget.style.borderColor = "rgba(56,189,248,0.2)";
+                    e.currentTarget.style.transform = "translateY(-2px)";
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.background = "rgba(255,255,255,0.03)";
-                    e.currentTarget.style.color = "rgba(255,255,255,0.35)";
-                    e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)";
+                    e.currentTarget.style.background = "rgba(255,255,255,0.02)";
+                    e.currentTarget.style.color = "rgba(255,255,255,0.3)";
+                    e.currentTarget.style.borderColor = "rgba(255,255,255,0.06)";
+                    e.currentTarget.style.transform = "translateY(0)";
                   }}
                 >
                   {s.icon}
@@ -162,24 +180,30 @@ export default function Footer() {
             <div key={section}>
               <div
                 style={{
-                  fontSize: "0.6875rem",
-                  fontWeight: 700,
-                  letterSpacing: "0.1em",
+                  fontSize: "0.65rem",
+                  fontWeight: 600,
+                  letterSpacing: "0.12em",
                   textTransform: "uppercase",
-                  color: "rgba(255,255,255,0.5)",
-                  marginBottom: "0.875rem",
+                  color: "rgba(255,255,255,0.42)",
+                  marginBottom: "1rem",
+                  fontVariant: "small-caps",
+                  opacity: 0.9,
                 }}
               >
                 {section}
               </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.625rem" }}>
                 {items.map((item) => (
                   <Link
                     key={item.label}
                     to={item.to}
                     style={linkStyle}
-                    onMouseEnter={(e) => e.target.style.color = "rgba(255,255,255,0.75)"}
-                    onMouseLeave={(e) => e.target.style.color = "rgba(255,255,255,0.38)"}
+                    onMouseEnter={(e) => {
+                      e.target.style.color = "rgba(255,255,255,0.65)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.color = "rgba(255,255,255,0.35)";
+                    }}
                   >
                     {item.label}
                   </Link>
@@ -192,28 +216,31 @@ export default function Footer() {
         {/* Bottom bar */}
         <div
           style={{
-            borderTop: "1px solid rgba(255,255,255,0.05)",
-            padding: "1.25rem 0",
+            borderTop: "1px solid rgba(255,255,255,0.04)",
+            padding: "1.5rem 0",
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
             flexWrap: "wrap",
-            gap: "0.75rem",
+            gap: "1rem",
           }}
         >
-          <span style={{ fontSize: "0.72rem", color: "rgba(255,255,255,0.22)" }}>
-            © {new Date().getFullYear()} ResQNet Technologies Pvt. Ltd. — All rights reserved.
+          <span style={{ fontSize: "0.7rem", color: "rgba(255,255,255,0.2)", letterSpacing: "-0.003em", fontWeight: 400 }}>
+            © {new Date().getFullYear()} ResQNet. All rights reserved.
           </span>
-          <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
             <span
               style={{
-                width: 5, height: 5, borderRadius: "50%",
+                width: 6,
+                height: 6,
+                borderRadius: "50%",
                 background: "#10B981",
                 display: "inline-block",
                 animation: "rq-pulse-dot 3s ease-in-out infinite",
+                boxShadow: "0 0 8px rgba(16, 185, 129, 0.4)",
               }}
             />
-            <span style={{ fontSize: "0.68rem", color: "rgba(255,255,255,0.25)" }}>All systems operational</span>
+            <span style={{ fontSize: "0.7rem", color: "rgba(255,255,255,0.22)", letterSpacing: "-0.003em", fontWeight: 400 }}>Operational</span>
           </div>
         </div>
       </div>

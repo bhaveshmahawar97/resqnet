@@ -102,7 +102,7 @@ export default function ScannerUpload({
               borderRadius: 10,
               border: "none",
               background: T.accent,
-              color: "#fff",
+              color: T.textOnAccent,
               fontWeight: 700,
               cursor: "pointer",
               fontFamily: "inherit",
@@ -160,7 +160,7 @@ export default function ScannerUpload({
         )}
 
         {error && (
-          <div style={{ color: "#DC2626", fontSize: "0.92rem", marginTop: "0.25rem" }}>
+          <div style={{ color: T.danger, fontSize: "0.92rem", marginTop: "0.25rem" }}>
             {error}
           </div>
         )}

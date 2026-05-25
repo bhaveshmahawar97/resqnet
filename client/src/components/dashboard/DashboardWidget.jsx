@@ -142,7 +142,7 @@ export default function DashboardWidget({ widget, onAction }) {
       );
 
     default:
-      return wrapWithCard(<div style={{ padding: 20, color: "#DC2626" }}>Unknown widget type: {type}</div>);
+      return wrapWithCard(<div style={{ padding: 20, color: T.danger }}>Unknown widget type: {type}</div>);
   }
 }
 
@@ -215,7 +215,7 @@ function VolunteerRow({ vol, onAssign, onView, T }) {
         <div style={{ fontSize: "0.67rem", color: T.textMuted }}>{vol.city}</div>
       </div>
       <StatusBadge status={vol.availability || "active"} />
-      <button onClick={(e) => { e.stopPropagation(); onAssign(vol); }} style={{ padding: "4px 10px", borderRadius: 6, background: T.accent, border: "none", color: "#fff", fontSize: "0.7rem", fontWeight: 700, cursor: "pointer" }}>
+      <button onClick={(e) => { e.stopPropagation(); onAssign(vol); }} style={{ padding: "4px 10px", borderRadius: 6, background: T.accent, border: "none", color: T.textOnAccent, fontSize: "0.7rem", fontWeight: 700, cursor: "pointer" }}>
         Assign
       </button>
     </div>
@@ -236,7 +236,7 @@ function AdoptionApplicationRow({ app, onAction, T }) {
       </div>
       {["pending", "interview_scheduled"].includes(app.status) && (
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-          <button onClick={() => onAction("approve_app", app.id)} style={{ padding: "7px 14px", borderRadius: 8, border: "none", background: T.accent, color: "#fff", cursor: "pointer", fontWeight: 700, fontSize: "0.76rem" }}>Approve</button>
+          <button onClick={() => onAction("approve_app", app.id)} style={{ padding: "7px 14px", borderRadius: 8, border: "none", background: T.accent, color: T.textOnAccent, cursor: "pointer", fontWeight: 700, fontSize: "0.76rem" }}>Approve</button>
           <button onClick={() => onAction("reject_app", app.id)} style={{ padding: "7px 14px", borderRadius: 8, border: `1px solid ${T.border}`, background: T.bgAlt, color: T.text, cursor: "pointer", fontWeight: 700, fontSize: "0.76rem" }}>Reject</button>
         </div>
       )}

@@ -202,7 +202,7 @@ export default function AIScanner({ id }) {
                         {i === scanStep && (
                           <motion.div animate={{ rotate: 360 }} transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }} style={{ width: 8, height: 8, borderRadius: "50%", border: `1.5px solid ${T.accent}`, borderTop: "1.5px solid transparent" }} />
                         )}
-                        {i < scanStep && <span style={{ fontSize: "0.6rem", color: "#fff" }}>✓</span>}
+                        {i < scanStep && <span style={{ fontSize: "0.6rem", color: T.textOnAccent }}>✓</span>}
                       </div>
                       <span style={{ fontSize: "0.78rem", color: i <= scanStep ? T.text : T.textMuted, fontWeight: i === scanStep ? 600 : 400, transition: "color 0.3s" }}>
                         {s.label}

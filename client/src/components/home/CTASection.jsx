@@ -164,7 +164,7 @@ export default function CTASection() {
                   variant={card.accent ? "secondary" : card.variant}
                   size="sm"
                   fullWidth
-                  style={card.accent ? { background: "rgba(255,255,255,0.18)", color: "#fff", border: "1px solid rgba(255,255,255,0.25)" } : {}}
+                  style={card.accent ? { background: "rgba(255,255,255,0.18)", color: T.textOnAccent, border: "1px solid rgba(255,255,255,0.25)" } : {}}
                 >
                   {card.label}
                   <svg width="12" height="12" viewBox="0 0 12 12" fill="none">

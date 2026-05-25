@@ -35,7 +35,7 @@ export function DashboardHeader({ role, userName }) {
             onClick={() => navigate("/rescue")}
             style={{
               padding: "0.6rem 1.2rem", borderRadius: "var(--radius-md)",
-              background: T.accent, border: "none", color: "#fff",
+              background: T.accent, border: "none", color: T.textOnAccent,
               fontSize: "var(--text-sm)", fontWeight: 700, cursor: "pointer",
               display: "flex", alignItems: "center", gap: "0.4rem",
             }}

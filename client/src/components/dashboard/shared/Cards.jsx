@@ -85,7 +85,7 @@ export function RescueCaseRow({ rescue, onView, onAssign, showAssign = false }) 
           onClick={(e) => { e.stopPropagation(); onAssign?.(rescue); }}
           style={{
             padding: "5px 12px", borderRadius: "var(--radius-sm)",
-            background: T.accent, border: "none", color: "#fff",
+            background: T.accent, border: "none", color: T.textOnAccent,
             fontSize: "var(--text-xs)", fontWeight: 700,
             cursor: "pointer", flexShrink: 0,
           }}

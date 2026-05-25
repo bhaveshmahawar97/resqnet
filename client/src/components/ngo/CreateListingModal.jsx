@@ -14,7 +14,7 @@ function Field({ label, error, children }) {
     <div style={{ display: "grid", gap: 6 }}>
       <label style={{ fontSize: "0.76rem", fontWeight: 700, color: T.textMuted }}>{label}</label>
       {children}
-      {error && <div style={{ color: "#EF4444", fontSize: "0.72rem" }}>{error}</div>}
+      {error && <div style={{ color: T.danger, fontSize: "0.72rem" }}>{error}</div>}
     </div>
   );
 }

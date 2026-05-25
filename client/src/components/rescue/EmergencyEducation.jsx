@@ -11,7 +11,7 @@ const GUIDES = [
     icon: "🚗",
     title: "Road Accident",
     subtitle: "Hit-and-run injuries in animals",
-    color: "#EF4444",
+    color: T.danger,
     summary: "Road accidents cause severe trauma in animals. Quick assessment and safe immobilization can save a life.",
     steps: [
       "Ensure your own safety first — stay off the road",
@@ -189,7 +189,7 @@ export default function EmergencyEducation() {
                       </div>
 
                       <div style={{ padding: "0.75rem", borderRadius: 8, background: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.2)", marginBottom: "1rem" }}>
-                        <div style={{ fontSize: "0.7rem", fontWeight: 700, color: "#EF4444", letterSpacing: "0.1em", marginBottom: "0.4rem" }}>⚠ WARNINGS</div>
+                        <div style={{ fontSize: "0.7rem", fontWeight: 700, color: T.danger, letterSpacing: "0.1em", marginBottom: "0.4rem" }}>⚠ WARNINGS</div>
                         {guide.warnings.map((w, wi) => (
                           <div key={wi} style={{ fontSize: "0.78rem", color: T.text, padding: "0.2rem 0" }}>• {w}</div>
                         ))}
@@ -248,7 +248,7 @@ export default function EmergencyEducation() {
                 ))}
               </div>
               <div style={{ padding: "1rem", borderRadius: 10, background: "rgba(239,68,68,0.07)", border: "1px solid rgba(239,68,68,0.2)" }}>
-                <div style={{ fontSize: "0.7rem", fontWeight: 700, color: "#EF4444", letterSpacing: "0.1em", marginBottom: "0.5rem" }}>⚠ CRITICAL WARNINGS</div>
+                <div style={{ fontSize: "0.7rem", fontWeight: 700, color: T.danger, letterSpacing: "0.1em", marginBottom: "0.5rem" }}>⚠ CRITICAL WARNINGS</div>
                 {modalGuide.warnings.map((w, wi) => (
                   <div key={wi} style={{ fontSize: "0.82rem", color: T.text, padding: "0.2rem 0" }}>• {w}</div>
                 ))}

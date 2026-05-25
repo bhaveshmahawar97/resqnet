@@ -7,6 +7,7 @@ import useViewport from "../../hooks/useViewport";
 import Button from "../ui/Button";
 import ThemeToggle from "../ui/ThemeToggle";
 import logo from "../../assets/logos/logo-main.png";
+ 
 import { ROUTE_LINKS } from "../../routes/routesConfig";
 import { useNotification } from "../../context/NotificationContext";
 import NotificationDropdown from "../notifications/NotificationDropdown";
@@ -94,9 +95,9 @@ export default function Navbar() {
               src={logo}
               alt="ResQNet"
               style={{
-                height: vp.mobile ? 34 : 38,
+                height: vp.mobile ? 72 : 96,
                 width: "auto",
-                maxWidth: "11rem",
+                maxWidth: "24rem",
                 objectFit: "contain",
                 display: "block",
               }}
@@ -193,7 +194,7 @@ export default function Navbar() {
                               top: -2,
                               right: -2,
                               background: T.accent,
-                              color: "#fff",
+                              color: T.textOnAccent,
                               fontSize: "0.6rem",
                               fontWeight: 700,
                               minWidth: 16,
@@ -242,7 +243,7 @@ export default function Navbar() {
                             width: 22, height: 22, borderRadius: "50%",
                             background: T.gradAccent || T.accent,
                             display: "flex", alignItems: "center", justifyContent: "center",
-                            color: "#fff", fontSize: "0.65rem", fontWeight: 700, flexShrink: 0,
+                            color: T.textOnAccent, fontSize: "0.65rem", fontWeight: 700, flexShrink: 0,
                           }}
                         >
                           {name?.[0]?.toUpperCase() || "U"}
@@ -467,7 +468,7 @@ export default function Navbar() {
                     style={{
                       flex: 1, padding: "0.65rem", borderRadius: 8,
                       border: "none", background: T.accent,
-                      color: "#fff", fontSize: "0.85rem", fontWeight: 700,
+                      color: T.textOnAccent, fontSize: "0.85rem", fontWeight: 700,
                       cursor: "pointer", fontFamily: "inherit",
                     }}
                   >

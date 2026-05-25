@@ -10,7 +10,7 @@ const PRIORITIES = [
     level: "Critical",
     code: "critical",
     emoji: "🔴",
-    color: "#EF4444",
+    color: T.danger,
     bgLight: "rgba(239,68,68,0.08)",
     border: "rgba(239,68,68,0.3)",
     desc: "Life-threatening condition requiring immediate intervention within minutes.",

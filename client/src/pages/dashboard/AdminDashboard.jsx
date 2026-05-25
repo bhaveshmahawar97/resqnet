@@ -129,9 +129,9 @@ export default function AdminDashboard() {
                 </div>
               ))}
               {modal.data.rejectedBy?.length > 0 && (
-                <div style={{ gridColumn: "1 / -1", background: T.bgAlt, borderRadius: 8, padding: "9px 11px", borderLeft: "3px solid #DC2626" }}>
+                <div style={{ gridColumn: "1 / -1", background: T.bgAlt, borderRadius: 8, padding: "9px 11px", borderLeft: `3px solid ${T.danger}` }}>
                   <div style={{ fontSize: "0.58rem", color: T.textMuted, textTransform: "uppercase" }}>Rejections</div>
-                  <div style={{ fontSize: "0.78rem", fontWeight: 700, color: "#DC2626", marginTop: 2 }}>Rejected by {modal.data.rejectedBy.length} NGO(s)</div>
+                  <div style={{ fontSize: "0.78rem", fontWeight: 700, color: T.danger, marginTop: 2 }}>Rejected by {modal.data.rejectedBy.length} NGO(s)</div>
                 </div>
               )}
               {["pending", "rejected"].includes(modal.data.status) && (
@@ -140,7 +140,7 @@ export default function AdminDashboard() {
                     type="button"
                     disabled={assignLoading}
                     onClick={() => handleAutoAssign(modal.data.id)}
-                    style={{ flex: 1, padding: "10px", borderRadius: 8, background: T.accent, border: "none", color: "#fff", fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}
+                    style={{ flex: 1, padding: "10px", borderRadius: 8, background: T.accent, border: "none", color: T.textOnAccent, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}
                   >
                     {assignLoading ? "Assigning..." : "Auto-Assign NGO"}
                   </button>

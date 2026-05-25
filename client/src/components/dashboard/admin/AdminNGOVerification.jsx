@@ -62,7 +62,7 @@ export default function AdminNGOVerification() {
   };
 
   if (loading) return <LoadingState message="Loading verification queue..." minHeight="300px" />;
-  if (error) return <div style={{ color: "#DC2626", padding: 20 }}>{error}</div>;
+  if (error) return <div style={{ color: T.danger, padding: 20 }}>{error}</div>;
 
   return (
     <div>
@@ -97,7 +97,7 @@ export default function AdminNGOVerification() {
                     📄 View Document
                   </a>
                 ) : (
-                  <span style={{ fontSize: "0.8rem", color: "#DC2626", fontWeight: 600, background: "#FEE2E2", padding: "4px 8px", borderRadius: 4 }}>
+                  <span style={{ fontSize: "0.8rem", color: T.danger, fontWeight: 600, background: T.dangerPale, padding: "4px 8px", borderRadius: 4 }}>
                     No Document Attached
                   </span>
                 )}
@@ -107,7 +107,7 @@ export default function AdminNGOVerification() {
               <div style={{ display: "flex", gap: 10, flexWrap: "wrap", borderTop: `1px solid ${T.border}`, paddingTop: 16 }}>
                 <button
                   onClick={() => { setSelectedNgo(ngo); setActionType("approved"); }}
-                  style={{ padding: "0.6rem 1.2rem", background: "#16A34A", color: "#fff", border: "none", borderRadius: 6, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}
+                  style={{ padding: "0.6rem 1.2rem", background: "#16A34A", color: T.textOnAccent, border: "none", borderRadius: 6, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}
                 >
                   Approve
                 </button>
@@ -123,7 +123,7 @@ export default function AdminNGOVerification() {
 
                 <button
                   onClick={() => { setSelectedNgo(ngo); setActionType("rejected"); }}
-                  style={{ padding: "0.6rem 1.2rem", background: "transparent", color: "#DC2626", border: "1px solid #DC2626", borderRadius: 6, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}
+                  style={{ padding: "0.6rem 1.2rem", background: "transparent", color: T.danger, border: "1px solid #DC2626", borderRadius: 6, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}
                 >
                   Reject...
                 </button>
@@ -172,7 +172,7 @@ export default function AdminNGOVerification() {
                   onClick={handleAction}
                   disabled={actionLoading || (actionType === "rejected" && !reason.trim())}
                   style={{
-                    padding: "0.7rem 1.5rem", background: actionType === "approved" ? "#16A34A" : "#DC2626", color: "#fff",
+                    padding: "0.7rem 1.5rem", background: actionType === "approved" ? "#16A34A" : "#DC2626", color: T.textOnAccent,
                     border: "none", borderRadius: 8, fontWeight: 700, cursor: actionLoading ? "wait" : "pointer", fontFamily: "inherit",
                     opacity: (actionType === "rejected" && !reason.trim()) ? 0.5 : 1
                   }}

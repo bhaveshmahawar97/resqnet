@@ -237,7 +237,7 @@ export default function NGORegistrationForm() {
                 exit={{ opacity: 0, y: -10 }}
                 style={{
                   padding: "1rem",
-                  background: "#FEE2E2",
+                  background: T.dangerPale,
                   border: "1px solid #FCA5A5",
                   borderRadius: 10,
                   marginBottom: "1.5rem",
