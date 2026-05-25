@@ -6,6 +6,8 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import helmet from "helmet";
 import morgan from "morgan";
+import mongoSanitize from "express-mongo-sanitize";
+import xss from "xss-clean";
 
 import { CORE_DB_NAME, AI_DB_NAME, isCoreConnected, isAiConnected } from "./config/database.js";
 import { CORE_COLLECTIONS, AI_COLLECTIONS } from "./models/index.js";
@@ -57,6 +59,23 @@ if (process.env.NODE_ENV !== "production") {
 
 // Security Middlewares
 app.use(helmet());
+// Fix for Express 5: req.query is a getter, so express-mongo-sanitize crashes when trying to mutate it.
+// We redefine it as a writable property before applying the sanitize middleware.
+app.use((req, res, next) => {
+  if (req.query) {
+    const originalQuery = req.query;
+    Object.defineProperty(req, 'query', {
+      value: originalQuery,
+      writable: true,
+      configurable: true,
+      enumerable: true
+    });
+  }
+  next();
+});
+
+app.use(mongoSanitize());
+app.use(xss());
 
 // Apply rate limiter to all /api routes
 app.use("/api", apiLimiter);
