@@ -10,6 +10,10 @@ export const useToast = () => {
 export function ToastProvider({ children }) {
   const [toasts, setToasts] = useState([]);
 
+  const removeToast = useCallback((id) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  }, []);
+
   const addToast = useCallback((message, type = "info") => {
     const id = Date.now() + Math.random().toString(36).substring(2, 9);
     setToasts((prev) => [...prev, { id, message, type }]);
@@ -17,11 +21,7 @@ export function ToastProvider({ children }) {
     setTimeout(() => {
       removeToast(id);
     }, 5000);
-  }, []);
-
-  const removeToast = useCallback((id) => {
-    setToasts((prev) => prev.filter((t) => t.id !== id));
-  }, []);
+  }, [removeToast]);
 
   useEffect(() => {
     const handleToastEvent = (e) => {

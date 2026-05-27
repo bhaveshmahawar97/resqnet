@@ -8,8 +8,20 @@ export const ngoRegistrationSchema = z.object({
   city: z.string().trim().min(2, "City is required"),
   state: z.string().trim().min(2, "State is required"),
   pincode: z.string().optional(),
-  latitude: z.union([z.string(), z.number()]).optional().transform(v => v === "" ? undefined : Number(v)),
-  longitude: z.union([z.string(), z.number()]).optional().transform(v => v === "" ? undefined : Number(v)),
+  latitude: z.union([z.string(), z.number()])
+    .optional()
+    .transform((v) => {
+      if (v === "" || v === null || v === undefined) return undefined;
+      const n = Number(v);
+      return Number.isFinite(n) ? n : undefined;
+    }),
+  longitude: z.union([z.string(), z.number()])
+    .optional()
+    .transform((v) => {
+      if (v === "" || v === null || v === undefined) return undefined;
+      const n = Number(v);
+      return Number.isFinite(n) ? n : undefined;
+    }),
   registrationNumber: z.string().optional(),
   ngoType: z.union([z.string(), z.array(z.string())]).optional(),
   description: z.string().optional(),

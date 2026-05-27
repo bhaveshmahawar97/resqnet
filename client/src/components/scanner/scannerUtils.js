@@ -11,7 +11,7 @@ export const SEVERITY_CONFIG = {
 };
 
 export const VALID_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
-export const MAX_UPLOAD_BYTES = 5 * 1024 * 1024;
+export const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
 
 export const formatTime = (value) => {
   if (!value) return "Unknown";
@@ -63,7 +63,7 @@ export const validateImageFile = (file) => {
   if (file.size > MAX_UPLOAD_BYTES) {
     return {
       valid: false,
-      error: "Image too large. Please use a file smaller than 12 MB.",
+      error: "Image too large. Please use a file smaller than 10 MB.",
     };
   }
 

@@ -101,7 +101,7 @@ export default function NGOPreviewSection() {
 
               return (
                 <div
-                  key={ngo._id || name}
+                  key={ngo.id || ngo._id || name}
                   style={{
                     padding: "1.125rem",
                     background: T.bgCard,

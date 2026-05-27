@@ -16,7 +16,7 @@ export const validateRequest = (schema, source = "body") => {
     } catch (error) {
       if (error instanceof ZodError) {
         // Map Zod errors to a readable array of messages
-        const errorMessages = error.errors.map((err) => `${err.path.join(".")}: ${err.message}`);
+        const errorMessages = error.issues.map((err) => `${err.path?.join(".") || "Field"}: ${err.message}`);
         return sendError(res, {
           status: 400,
           message: "Validation failed",

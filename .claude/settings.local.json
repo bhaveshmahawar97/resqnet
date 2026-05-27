@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls ~/.claude/projects/ 2>/dev/null | head -20)",
+      "Read(//c/Users/hp935/.claude/projects/**)"
+    ]
+  }
+}

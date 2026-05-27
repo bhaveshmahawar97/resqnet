@@ -101,14 +101,15 @@ export default function AdminDashboard() {
           </div>
           <div className="dashboard-main">
             {!vp.desktop && (
-              <DashboardSectionTabs sections={config.sections} activeSection={section} onSection={setSection} />
+              <DashboardSectionTabs sections={config?.sections || []} activeSection={section} onSection={setSection} />
             )}
             <AnimatePresence mode="wait">
               <motion.div key={section} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.22 }} style={{ display: "grid", gap: 16 }}>
-                {config.widgets[section]?.map(widget => (
+                {config?.widgets?.[section]?.map(widget => (
                   <DashboardWidget key={widget.id} widget={widget} onAction={handleAction} />
                 ))}
               </motion.div>
+
             </AnimatePresence>
           </div>
         </div>

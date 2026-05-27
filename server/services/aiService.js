@@ -1,10 +1,9 @@
 import { mapProviderError } from "../utils/errors.js";
-import analyzeAnimalImageMock from "./mockAiService.js";
 import { getAiModels } from "../models/registerAi.js";
 import { parsePagination, buildPaginationMeta } from "../utils/pagination.js";
+import { analyzeAnimalImage as analyzeClaudeImage } from "./claudeService.js";
 
-const AI_PROVIDER = "local-mock";
-const VISION_MODEL = "deterministic-mock-v1";
+const AI_PROVIDER = "freemodel-claude";
 
 const normalizeSeverity = (value) => {
   const raw = String(value || "medium").toLowerCase().trim();
@@ -24,13 +23,27 @@ const normalizePriority = (value, severity) => {
   return "normal";
 };
 
+const parseConfidence = (value) => {
+  if (Number.isFinite(value)) {
+    return Math.min(100, Math.max(0, Math.round(value)));
+  }
+
+  const normalized = String(value || "").replace(/[^0-9]/g, "");
+  if (!normalized) {
+    return 0;
+  }
+
+  const parsed = parseInt(normalized, 10);
+  return Number.isFinite(parsed) ? Math.min(100, Math.max(0, parsed)) : 0;
+};
+
 export const normalizeAnalysis = (parsed) => ({
-  animal: String(parsed?.animal || parsed?.species || "unknown").toLowerCase().trim(),
+  animal: String(parsed?.animal || parsed?.species || parsed?.animalType || "unknown").toLowerCase().trim(),
   severity: normalizeSeverity(parsed?.severity),
-  condition: String(parsed?.condition || "").trim(),
+  condition: String(parsed?.condition || parsed?.visibleCondition || "").trim(),
   priority: normalizePriority(parsed?.priority, parsed?.severity),
   recommendation: String(
-    parsed?.recommendation || parsed?.recommendation_text || parsed?.action || ""
+    parsed?.recommendation || parsed?.action || parsed?.recommendation_text || ""
   ).trim(),
   confidence: Math.min(
     100,
@@ -44,17 +57,30 @@ export const analyzeAnimalImage = async ({ imageUrl, imageName } = {}) => {
   }
 
   try {
-    const parsed = await analyzeAnimalImageMock({ imageUrl, imageName });
-    const normalized = normalizeAnalysis(parsed);
+    const result = await analyzeClaudeImage({ imageUrl, imageName });
+    const recommendations = Array.isArray(result.recommendations)
+      ? result.recommendations
+      : Array.isArray(result.actions)
+      ? result.actions
+      : result.recommendations
+      ? String(result.recommendations).split(/\r?\n|;/).map((item) => item.trim()).filter(Boolean)
+      : [];
 
     return {
-      ...normalized,
+      animal: String(result.animal || result.animalType || result.species || "unknown").trim(),
+      severity: normalizeSeverity(result.severity),
+      condition: String(result.condition || result.visibleCondition || "").trim(),
+      priority: normalizePriority(result.priority, result.severity),
+      recommendation: String(result.recommendation || recommendations[0] || "").trim(),
+      recommendations,
+      confidence: parseConfidence(result.confidence),
+      veterinaryAttention: String(result.veterinaryAttention || result.veterinaryAttentionRecommendation || "").trim(),
       provider: AI_PROVIDER,
-      providerModel: VISION_MODEL,
+      providerModel: result.providerModel || "claude-2.1",
       usedFallback: false,
     };
   } catch (err) {
-    console.error("[AI SERVICE] Mock analysis failed", err?.message || err);
+    console.error("[AI SERVICE] Claude analysis failed", err?.message || err);
     throw mapProviderError(err);
   }
 };

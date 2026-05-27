@@ -1,4 +1,4 @@
-import { NGO } from "../models/index.js";
+import { NGO, User } from "../models/index.js";
 
 export const createNgo = async (data) => {
   const { email, registrationNumber } = data;
@@ -15,7 +15,11 @@ export const createNgo = async (data) => {
     }
   }
 
-  const ngo = new NGO({
+  // Sanitize coordinates: only include finite numbers
+  const latitude = Number.isFinite(Number(data.latitude)) ? Number(data.latitude) : undefined;
+  const longitude = Number.isFinite(Number(data.longitude)) ? Number(data.longitude) : undefined;
+
+  const ngoPayload = {
     ...data,
     email: email.toLowerCase(),
     phone: data.phone.trim(),
@@ -24,7 +28,12 @@ export const createNgo = async (data) => {
     documents: data.documents || {},
     verificationStatus: "pending",
     verified: false,
-  });
+  };
+
+  if (latitude !== undefined) ngoPayload.latitude = latitude;
+  if (longitude !== undefined) ngoPayload.longitude = longitude;
+
+  const ngo = new NGO(ngoPayload);
 
   await ngo.save();
   return ngo;
@@ -96,6 +105,40 @@ export const verifyNgoStatus = async (id, status, notes, adminId) => {
   ngo.verifiedBy = adminId;
 
   await ngo.save();
+  // If NGO approved, propagate verification to the User record (if any)
+  try {
+    if (status === "approved") {
+      // Link NGO details into the user's ngoProfile so middleware and UI work
+      await User.findOneAndUpdate(
+        { email: ngo.email.toLowerCase() },
+        {
+          role: "ngo",
+          ngoProfile: {
+            organizationName: ngo.organizationName || "",
+            city: ngo.city || "",
+            latitude: ngo.latitude ?? null,
+            longitude: ngo.longitude ?? null,
+            registrationId: ngo.registrationNumber || ngo.registrationId || "",
+            serviceAreas: ngo.serviceAreas || [],
+            description: ngo.description || "",
+            website: ngo.website || "",
+            verified: true,
+          },
+        },
+        { new: true }
+      );
+    } else if (status === "rejected") {
+      // mark any matching user ngoProfile as unverified
+      await User.findOneAndUpdate(
+        { email: ngo.email.toLowerCase() },
+        { $set: { "ngoProfile.verified": false } },
+        { new: true }
+      );
+    }
+  } catch (err) {
+    // non-fatal: log and continue (controller will still return success)
+    console.error("Failed to sync NGO verification to user record:", err.message || err);
+  }
   return ngo;
 };
 

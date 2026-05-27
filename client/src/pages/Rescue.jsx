@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import RescueHero from "../components/rescue/RescueHero";
-import EmergencyStats from "../components/rescue/EmergencyStats";
 import EmergencyForm from "../components/rescue/EmergencyForm";
 import AIScanner from "../components/rescue/AIScanner";
 import RescueModal from "../components/rescue/RescueModal";
@@ -14,10 +13,6 @@ export default function Rescue() {
   const [modalOpen, setModalOpen] = useState(false);
   const [rescueId, setRescueId] = useState(generateRescueId());
   const navigate = useNavigate();
-
-  const handleRequestRescue = () => {
-    navigate("#emergency-form");
-  };
 
   const closeRescueModal = () => {
     setModalOpen(false);
@@ -35,12 +30,8 @@ export default function Rescue() {
   return (
     <>
       <main style={{ width: "100%", overflowX: "hidden" }}>
-        <RescueHero
-          onRequestRescue={handleRequestRescue}
-          onAIScan={() => navigate("#ai-scanner")}
-        />
+        <RescueHero onAIScan={() => navigate("#ai-scanner")} />
 
-        <EmergencyStats />
         <EmergencyForm onSuccess={handleFormSuccess} />
         <AIScanner id="ai-scanner" />
       </main>

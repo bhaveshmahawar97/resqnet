@@ -156,7 +156,7 @@ export const fetchDashboardData = async (user) => {
   else if (role === "ngo") {
     const ngoRaw = await NGO.findOne({ email: user.email }).lean();
     if (!ngoRaw) {
-      throw new Error("NGO_NOT_FOUND");
+      return { requiresVerification: true, profile: null };
     }
 
     if (ngoRaw.verificationStatus !== "approved") {

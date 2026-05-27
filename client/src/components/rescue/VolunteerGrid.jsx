@@ -162,7 +162,8 @@ export default function VolunteerGrid() {
         </div>
       </div>
 
-         {profileModal && (
+      <AnimatePresence>
+        {profileModal && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}

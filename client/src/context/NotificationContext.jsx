@@ -11,7 +11,7 @@ export function NotificationProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   const fetchNotifications = useCallback(async () => {
-    if (!user) return;
+    if (!user || !localStorage.getItem("token")) return;
     try {
       const [notifsRes, unreadRes] = await Promise.all([
         api.get("/notifications?limit=20"),

@@ -20,6 +20,7 @@ import notificationRoutes from "./routes/notifications.js";
 import ngoRoutes from "./routes/ngos.js";
 import dashboardRoutes from "./routes/dashboard.js";
 import reportRoutes from "./routes/reportRoutes.js";
+import scannerRoutes from "./routes/aiScannerRoutes.js";
 
 import { globalErrorHandler, notFoundHandler } from "./middleware/errorMiddleware.js";
 import { apiLimiter } from "./middleware/rateLimiter.js";
@@ -119,6 +120,7 @@ app.get("/api/health", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/rescue", rescueRoutes);
 app.use("/api/ai", aiRoutes);
+app.use("/api/scanner", scannerRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/adoption", adoptionRoutes);
 app.use("/api/notifications", notificationRoutes);

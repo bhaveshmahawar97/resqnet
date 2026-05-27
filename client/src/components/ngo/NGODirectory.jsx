@@ -174,7 +174,7 @@ export default function NGODirectory() {
             <EmptyState icon="🔍" title="No NGOs Found" message="No NGOs match your filters. Try a different search." minHeight="250px" />
           ) : (
             <motion.div key="grid" layout style={{ display: "flex", gap: "clamp(0.65rem, 1.5vw, 1rem)", flexWrap: "wrap" }}>
-              {visible.map((n, i) => <NgoCard key={n.id || n._id || n.name} ngo={n} i={i % 6} />)}
+              {visible.map((n, i) => <NgoCard key={`${n.id || n._id || n.name || 'ngo'}-${i}`} ngo={n} i={i % 6} />)}
             </motion.div>
           )}
         </AnimatePresence>

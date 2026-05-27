@@ -56,7 +56,7 @@ export const uploadToCloudinary = async (file) => {
 };
 
 const normalizeScanResponse = (payload) => {
-  const scan = payload?.data || {};
+  const scan = payload?.analysis || payload?.data || payload || {};
   const rawRecommendations = scan.recommendations || scan.fullAnalysis?.recommendations || [];
   const normalizedRecommendations = Array.isArray(rawRecommendations)
     ? rawRecommendations.filter((item) => Boolean(item)).map(String)
@@ -85,7 +85,7 @@ const normalizeScanResponse = (payload) => {
 export const scanAnimal = async (imageUrl, imageName) => {
   const payload = { imageUrl };
   if (imageName) payload.imageName = imageName;
-  const response = await api.post("/ai/scan", payload);
+  const response = await api.post("/scanner/analyze", payload);
   return normalizeScanResponse(response.data);
 };
 

@@ -388,18 +388,18 @@ export const RescueProvider = ({ children }) => {
   useEffect(() => {
     if (!user) return;
 
+    const isOperationalNGO = user.role === "ngo" && user.ngoProfile?.verified;
+    const isOperationalOther = ["volunteer", "admin"].includes(user.role);
+    const isOperational = isOperationalNGO || isOperationalOther;
+
     // Load user's rescues
     if (["user", "ngo", "volunteer", "admin"].includes(user.role)) {
       handleFetchMyRescues();
     }
 
-    // Load all rescues for operational roles
-    if (["ngo", "volunteer", "admin"].includes(user.role)) {
+    // Load operational rescues
+    if (isOperational) {
       handleFetchAllRescues();
-    }
-
-    // Load critical rescues for operational roles
-    if (["ngo", "volunteer", "admin"].includes(user.role)) {
       handleFetchCriticalRescues();
       handleFetchAssignedRescues();
     }

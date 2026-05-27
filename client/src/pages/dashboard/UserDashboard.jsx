@@ -67,7 +67,7 @@ export default function UserDashboard() {
 
           <div className="dashboard-main">
             {!vp.desktop && (
-              <DashboardSectionTabs sections={config.sections} activeSection={section} onSection={setSection} />
+              <DashboardSectionTabs sections={config?.sections || []} activeSection={section} onSection={setSection} />
             )}
 
             <AnimatePresence mode="wait">
@@ -79,7 +79,7 @@ export default function UserDashboard() {
                 transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
                 style={{ display: "grid", gap: 16 }}
               >
-                {config.widgets[section]?.map(widget => (
+                {config?.widgets?.[section]?.map(widget => (
                   <DashboardWidget key={widget.id} widget={widget} onAction={handleAction} />
                 ))}
               </motion.div>

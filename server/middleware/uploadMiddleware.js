@@ -4,12 +4,20 @@ import cloudinary, { isCloudinaryConfigured } from "../config/cloudinary.js";
 const UPLOAD_FOLDER = "resqnet/rescues";
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const MAX_FILES = 6;
+const SCANNER_MAX_FILE_SIZE = 10 * 1024 * 1024;
 
 const allowedMimeTypes = [
   "image/jpeg",
   "image/jpg",
   "image/png",
   "application/pdf",
+];
+
+const scannerAllowedMimeTypes = [
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+  "image/webp",
 ];
 
 /**
@@ -93,6 +101,11 @@ const storage = new CloudinaryStorage({
   params: { folder: UPLOAD_FOLDER },
 });
 
+const scannerStorage = new CloudinaryStorage({
+  cloudinary,
+  params: { folder: "resqnet/scanner" },
+});
+
 const fileFilter = (req, file, cb) => {
   if (allowedMimeTypes.includes(file.mimetype)) {
     cb(null, true);
@@ -109,6 +122,58 @@ const upload = multer({
     files: MAX_FILES,
   },
 });
+
+const scannerFileFilter = (req, file, cb) => {
+  if (scannerAllowedMimeTypes.includes(file.mimetype)) {
+    cb(null, true);
+    return;
+  }
+  cb(new Error("Unsupported file type. Upload JPEG, PNG, or WebP images."), false);
+};
+
+const scannerUpload = multer({
+  storage: scannerStorage,
+  fileFilter: scannerFileFilter,
+  limits: {
+    fileSize: SCANNER_MAX_FILE_SIZE,
+    files: 1,
+  },
+});
+
+/**
+ * Upload middleware for scanner image analysis endpoints.
+ */
+export const handleScannerUpload = (req, res, next) => {
+  scannerUpload.single("image")(req, res, (err) => {
+    if (!err) {
+      if (process.env.NODE_ENV !== "production") {
+        console.log("SCANNER UPLOAD PARSE:", {
+          bodyKeys: Object.keys(req.body || {}),
+          filePresent: Boolean(req.file),
+        });
+      }
+      return next();
+    }
+
+    console.error("SCANNER UPLOAD MIDDLEWARE ERROR:", err);
+
+    if (err instanceof multer.MulterError) {
+      const message =
+        err.code === "LIMIT_FILE_SIZE"
+          ? "Image too large. Maximum size is 10MB."
+          : err.code === "LIMIT_FILE_COUNT"
+          ? `Maximum ${MAX_FILES} images allowed.`
+          : err.message;
+
+      return res.status(400).json({ success: false, message });
+    }
+
+    return res.status(400).json({
+      success: false,
+      message: err.message || "Image upload failed",
+    });
+  });
+};
 
 /**
  * Wraps multer so upload errors return 400 JSON instead of unhandled 500s.

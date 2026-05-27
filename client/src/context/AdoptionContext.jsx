@@ -86,8 +86,9 @@ export function AdoptionProvider({ children }) {
 
   useEffect(() => {
     if (!user) return;
+    const isOperationalNGO = user.role === "ngo" && user.ngoProfile?.verified;
     if (user.role === "user" || user.role === "admin") loadMyApplications();
-    if (user.role === "ngo" || user.role === "admin") loadIncomingApplications();
+    if (isOperationalNGO || user.role === "admin") loadIncomingApplications();
   }, [user, loadMyApplications, loadIncomingApplications]);
 
   return (

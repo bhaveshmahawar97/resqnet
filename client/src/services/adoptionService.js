@@ -2,7 +2,7 @@ import { fetchJSON } from "./api";
 
 export async function getAdoptions({ limit = 6 } = {}) {
   const q = limit ? `?limit=${limit}` : "";
-  return fetchJSON(`/api/adoptions${q}`);
+  return fetchJSON(`/api/adoption${q}`);
 }
 import api from "./api";
 import { getApiErrorMessage } from "../utils/apiErrors";

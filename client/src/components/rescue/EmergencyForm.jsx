@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -8,82 +8,80 @@ import { useT } from "../../context/ThemeContext";
 import { useAuth } from "../../context/AuthContext";
 import { useRescue } from "../../context/RescueContext";
 import useViewport from "../../hooks/useViewport";
-import Label from "../ui/Label";
-import { vFadeUp } from "../../animations/variants";
-import { getCurrentPosition } from "../../utils/geo";
-import RescueLocationPicker from "../maps/RescueLocationPicker";
+import { getCurrentPosition, reverseGeocode } from "../../utils/geo";
 
 const ANIMAL_TYPES = ["Dog", "Cat", "Bird", "Cow", "Horse", "Monkey", "Rabbit", "Snake", "Deer", "Other"];
-const EMERGENCY_LEVELS = [
-  { value: "critical", label: "🔴 Critical", desc: "Life-threatening, needs immediate help" },
-  { value: "high", label: "🟠 High", desc: "Serious injury, urgent care needed" },
-  { value: "medium", label: "🟡 Medium", desc: "Injured but stable condition" },
-  { value: "low", label: "🟢 Low", desc: "Needs care but not immediate danger" },
+const SEVERITY_LEVELS = [
+  { value: "critical", label: "Critical", color: "#DC2626" },
+  { value: "high",     label: "High",     color: "#EA580C" },
+  { value: "medium",   label: "Medium",   color: "#CA8A04" },
+  { value: "low",      label: "Low",      color: "#16A34A" },
 ];
+
+const LOADING_STEPS = [
+  "Validating emergency data…",
+  "Connecting to rescue network…",
+  "Creating rescue request…",
+  "Notifying NGOs & volunteers…",
+];
+
+function FieldLabel({ children, required }) {
+  const { T } = useT();
+  return (
+    <label
+      style={{
+        display: "block",
+        fontSize: "0.7rem",
+        fontWeight: 700,
+        color: T.textMuted,
+        marginBottom: "0.35rem",
+        letterSpacing: "0.06em",
+        textTransform: "uppercase",
+      }}
+    >
+      {children}
+      {required && <span style={{ color: T.danger, marginLeft: 3 }}>*</span>}
+    </label>
+  );
+}
 
 export default function EmergencyForm({ onSuccess }) {
   const { T } = useT();
   const vp = useViewport();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { createRescue, loading: rescueLoading, error: rescueError } = useRescue();
+  const { createRescue } = useRescue();
 
   const fileRef = useRef();
-  
-  const {
-    register,
-    handleSubmit,
-    setValue,
-    watch,
-    reset,
-    formState: { errors },
-  } = useForm({
+
+  const { register, handleSubmit, setValue, watch, reset, formState: { errors } } = useForm({
     resolver: zodResolver(reportRescueSchema),
     defaultValues: {
-      animalType: "",
-      breed: "",
-      condition: "",
-      severity: "",
-      address: "",
-      city: "",
-      state: "",
-      latitude: undefined,
-      longitude: undefined,
-      contactPhone: "",
-      notes: "",
+      animalType: "", breed: "", condition: "", severity: "",
+      address: "", city: "", state: "",
+      latitude: undefined, longitude: undefined,
+      contactPhone: "", notes: "",
     },
   });
 
   const severity = watch("severity");
-  const address = watch("address");
-  const city = watch("city");
-  const state = watch("state");
-  const latitude = watch("latitude");
-  const longitude = watch("longitude");
 
   const [imagePreview, setImagePreview] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [locLoading, setLocLoading] = useState(false);
   const [step, setStep] = useState(0);
   const [successMsg, setSuccessMsg] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
-
-  const LOADING_STEPS = [
-    "Validating emergency data…",
-    "Connecting to rescue network…",
-    "Creating rescue request…",
-    "Notifying NGOs & volunteers…",
-  ];
 
   const handleImage = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (file.size > 5 * 1024 * 1024) {
-      setErrorMsg("Image too large. Max 5MB per file.");
+      setErrorMsg("Image too large. Max 5MB.");
       return;
     }
-    const allowed = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
-    if (!allowed.includes(file.type)) {
+    if (!["image/jpeg", "image/jpg", "image/png", "image/webp"].includes(file.type)) {
       setErrorMsg("Unsupported image type.");
       return;
     }
@@ -94,17 +92,32 @@ export default function EmergencyForm({ onSuccess }) {
     setSelectedFile(file);
   };
 
-  const handleLocationChange = (location) => {
-    if (location.address) setValue("address", location.address, { shouldValidate: true });
-    if (location.city) setValue("city", location.city);
-    if (location.state) setValue("state", location.state);
-    if (location.latitude !== undefined) setValue("latitude", location.latitude);
-    if (location.longitude !== undefined) setValue("longitude", location.longitude);
+  const fetchLocation = async () => {
+    if (locLoading || loading) return;
+    setLocLoading(true);
+    setErrorMsg("");
+    try {
+      const pos = await getCurrentPosition();
+      const place = await reverseGeocode(pos).catch(() => null);
+      if (place?.address || place?.displayName) {
+        setValue("address", place.address || place.displayName || "", { shouldValidate: true });
+        setValue("city", place.city || "");
+        setValue("state", place.state || "");
+      }
+      if (pos?.latitude && pos?.longitude) {
+        setValue("latitude", pos.latitude);
+        setValue("longitude", pos.longitude);
+      }
+    } catch {
+      setErrorMsg("Unable to fetch location. Allow location access and try again.");
+    } finally {
+      setLocLoading(false);
+    }
   };
 
   const onSubmit = async (data) => {
     if (!user) {
-      setErrorMsg("Please log in to submit a rescue request");
+      setErrorMsg("Please log in to submit a rescue request.");
       setTimeout(() => navigate("/login"), 1500);
       return;
     }
@@ -115,13 +128,7 @@ export default function EmergencyForm({ onSuccess }) {
     setStep(0);
 
     const interval = setInterval(() => {
-      setStep((s) => {
-        if (s >= LOADING_STEPS.length - 1) {
-          clearInterval(interval);
-          return s;
-        }
-        return s + 1;
-      });
+      setStep((s) => (s >= LOADING_STEPS.length - 1 ? s : s + 1));
     }, 700);
 
     const description = data.notes?.trim()
@@ -151,405 +158,417 @@ export default function EmergencyForm({ onSuccess }) {
       }
     }
 
-    if (selectedFile) {
-      formData.append("images", selectedFile);
-    }
+    if (selectedFile) formData.append("images", selectedFile);
 
     const result = await createRescue(formData);
-
     clearInterval(interval);
 
     if (result.success) {
-      setSuccessMsg("✅ Rescue request submitted successfully!");
+      setSuccessMsg("Rescue request submitted successfully.");
       setTimeout(() => {
         setLoading(false);
         reset();
         setImagePreview(null);
         setSelectedFile(null);
         onSuccess?.(result.data);
-      }, 1200);
+      }, 1000);
     } else {
       setLoading(false);
-      setErrorMsg(result.message || "Failed to submit rescue request");
+      setErrorMsg(result.message || "Failed to submit rescue request.");
     }
   };
+
+  const fieldErr = (k) => errors[k]?.message;
 
   return (
     <section
       id="emergency-form"
-      style={{ width: "100%", padding: "clamp(3.5rem, 8vw, 6rem) 0", background: T.bg, position: "relative" }}
+      style={{ width: "100%", padding: vp.mobile ? "1.25rem 0 2rem" : "1.75rem 0 2.5rem", background: T.bg }}
     >
-      <div style={{ width: "100%", maxWidth: "1240px", margin: "0 auto", padding: "0 clamp(1.25rem, 4vw, 3.5rem)" }}>
-        <motion.div
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true }}
-          variants={vFadeUp}
-          style={{ textAlign: "center", marginBottom: "clamp(2rem, 5vw, 3.5rem)" }}
-        >
-          <Label color="#EF4444">Emergency Report</Label>
-          <h2
-            style={{
-              fontSize: "clamp(1.6rem, 4vw, 2.8rem)",
-              fontWeight: 800,
-              letterSpacing: "-0.035em",
-              color: T.text,
-              margin: "0 0 0.75rem",
-            }}
-          >
-            Report an Animal Emergency
-          </h2>
-          <p style={{ color: T.textSub, fontSize: "clamp(0.88rem, 2vw, 1rem)", maxWidth: 520, margin: "0 auto", lineHeight: 1.7 }}>
-            Fill in the details below. Your rescue request is immediately sent to our network of NGOs and volunteers.
-          </p>
-        </motion.div>
+      <div style={{ width: "100%", maxWidth: 1120, margin: "0 auto", padding: vp.mobile ? "0 1rem" : "0 clamp(1.25rem, 3vw, 2.5rem)" }}>
+        {/* Slim header — single row, no decorative copy */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "0.5rem", marginBottom: "0.85rem" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
+            <motion.span
+              animate={{ opacity: [1, 0.3, 1] }}
+              transition={{ duration: 1.5, repeat: Infinity }}
+              style={{ width: 8, height: 8, borderRadius: "50%", background: T.danger, flexShrink: 0 }}
+            />
+            <h2 style={{ fontSize: "1.05rem", fontWeight: 700, color: T.text, margin: 0, letterSpacing: "-0.01em" }}>
+              Emergency Intake
+            </h2>
+            <span style={{ fontSize: "0.72rem", color: T.textMuted, fontWeight: 500 }}>
+              · Submits to nearest NGO & volunteer network
+            </span>
+          </div>
+        </div>
 
         <motion.div
-          initial={{ opacity: 0, y: 24 }}
+          initial={{ opacity: 0, y: 12 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.7 }}
+          transition={{ duration: 0.35 }}
           className="rq-form-card"
-          style={{
-            maxWidth: 720,
-            margin: "0 auto",
-          }}
+          style={{ padding: vp.mobile ? "1rem" : "1.25rem 1.5rem" }}
         >
-          {/* Error message */}
           {errorMsg && (
-            <motion.div
-              initial={{ opacity: 0, y: -8 }}
-              animate={{ opacity: 1, y: 0 }}
+            <div
+              role="alert"
               style={{
-                padding: "0.75rem 1rem",
-                borderRadius: 10,
-                background: "rgba(239, 68, 68, 0.1)",
-                border: "1px solid rgba(239, 68, 68, 0.3)",
+                padding: "0.55rem 0.85rem",
+                borderRadius: 8,
+                background: "rgba(239,68,68,0.08)",
+                border: "1px solid rgba(239,68,68,0.3)",
                 color: T.danger,
-                fontSize: "0.85rem",
-                marginBottom: "1rem",
+                fontSize: "0.82rem",
+                marginBottom: "0.85rem",
               }}
             >
               {errorMsg}
-            </motion.div>
+            </div>
           )}
-
-          {/* Success message */}
           {successMsg && (
-            <motion.div
-              initial={{ opacity: 0, y: -8 }}
-              animate={{ opacity: 1, y: 0 }}
+            <div
+              role="status"
               style={{
-                padding: "0.75rem 1rem",
-                borderRadius: 10,
-                background: "rgba(34, 197, 94, 0.1)",
-                border: "1px solid rgba(34, 197, 94, 0.3)",
+                padding: "0.55rem 0.85rem",
+                borderRadius: 8,
+                background: "rgba(34,197,94,0.08)",
+                border: "1px solid rgba(34,197,94,0.3)",
                 color: "#16A34A",
-                fontSize: "0.85rem",
-                marginBottom: "1rem",
+                fontSize: "0.82rem",
+                marginBottom: "0.85rem",
               }}
             >
               {successMsg}
-            </motion.div>
+            </div>
           )}
 
-          {/* Form wrapper */}
           <form onSubmit={handleSubmit(onSubmit)}>
-            {/* Image upload */}
-            <div style={{ marginBottom: "1.5rem" }}>
-              <div
-                onClick={() => !loading && fileRef.current?.click()}
-                className="rq-upload-zone"
-                style={{
-                  cursor: loading ? "default" : "pointer",
-                  background: imagePreview ? "transparent" : undefined,
-                  opacity: loading ? 0.6 : 1,
-                }}
-              >
-                <input
-                  ref={fileRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImage}
-                  style={{ display: "none" }}
-                  disabled={loading}
-                />
-                {imagePreview ? (
-                  <div style={{ position: "relative" }}>
-                    <img
-                      src={imagePreview}
-                      alt="Animal preview"
-                      style={{ maxHeight: 200, borderRadius: 8, margin: "0 auto", objectFit: "contain" }}
-                    />
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setImagePreview(null);
-                        setSelectedFile(null);
-                      }}
-                      disabled={loading}
-                      style={{
-                        position: "absolute",
-                        top: 4,
-                        right: 4,
-                        background: "rgba(0,0,0,0.6)",
-                        color: T.textOnAccent,
-                        border: "none",
-                        borderRadius: "50%",
-                        width: 24,
-                        height: 24,
-                        cursor: loading ? "default" : "pointer",
-                        fontSize: "0.75rem",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
-                    >
-                      ✕
-                    </button>
-                  </div>
-                ) : (
-                  <>
-                    <div style={{ fontSize: "2rem", marginBottom: "0.5rem" }}>📷</div>
-                    <div style={{ fontSize: "0.88rem", color: T.textSub, fontWeight: 600 }}>
-                      Upload Animal Photo
-                    </div>
-                    <div style={{ fontSize: "0.75rem", color: T.textMuted, marginTop: 4 }}>
-                      Click or drag — helps rescuers prepare
-                    </div>
-                  </>
-                )}
-              </div>
-            </div>
-
-            {/* Grid fields */}
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: vp.mobile ? "1fr" : "1fr 1fr",
-                gap: "1rem",
-                marginBottom: "1rem",
+                gridTemplateColumns: vp.mobile ? "1fr" : "minmax(0, 1.85fr) minmax(220px, 1fr)",
+                gap: vp.mobile ? "0.85rem" : "1.25rem",
               }}
             >
-              {/* Animal Type */}
-              <div>
-                <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: T.textSub, marginBottom: "0.4rem", letterSpacing: "0.04em" }}>
-                  ANIMAL TYPE *
-                </label>
-                <select
-                  disabled={loading}
-                  {...register("animalType")}
-                  className="rq-input"
-                  style={{ borderColor: errors.animalType ? "#EF4444" : undefined, opacity: loading ? 0.6 : 1 }}
-                >
-                  <option value="">Select type…</option>
-                  {ANIMAL_TYPES.map((t) => (
-                    <option key={t} value={t}>
-                      {t}
-                    </option>
-                  ))}
-                </select>
-                {errors.animalType && <div style={{ color: T.danger, fontSize: "0.72rem", marginTop: 4 }}>{errors.animalType.message}</div>}
-              </div>
+              {/* ── LEFT: fields ── */}
+              <div style={{ display: "grid", gap: "0.85rem", minWidth: 0 }}>
+                {/* Animal Type + Breed */}
+                <div style={{ display: "grid", gridTemplateColumns: vp.mobile ? "1fr" : "1fr 1fr", gap: "0.85rem" }}>
+                  <div>
+                    <FieldLabel required>Animal Type</FieldLabel>
+                    <select
+                      {...register("animalType")}
+                      disabled={loading}
+                      className="rq-input"
+                      style={{ borderColor: errors.animalType ? T.danger : undefined }}
+                    >
+                      <option value="">Select type…</option>
+                      {ANIMAL_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
+                    </select>
+                    {fieldErr("animalType") && <div className="rq-field-error">{fieldErr("animalType")}</div>}
+                  </div>
+                  <div>
+                    <FieldLabel>Breed</FieldLabel>
+                    <input
+                      {...register("breed")}
+                      placeholder="e.g. Labrador, Indie"
+                      disabled={loading}
+                      className="rq-input"
+                    />
+                  </div>
+                </div>
 
-              {/* Breed */}
-              <div>
-                <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: T.textSub, marginBottom: "0.4rem", letterSpacing: "0.04em" }}>
-                  BREED (OPTIONAL)
-                </label>
-                <input
-                  {...register("breed")}
-                  placeholder="e.g. Labrador, Indie…"
-                  disabled={loading}
-                  className="rq-input"
-                  style={{ opacity: loading ? 0.6 : 1 }}
-                />
-              </div>
-            </div>
+                {/* Condition */}
+                <div>
+                  <FieldLabel required>Condition / Injury</FieldLabel>
+                  <textarea
+                    {...register("condition")}
+                    placeholder="Wounds, behavior, posture — what you observe"
+                    rows={2}
+                    disabled={loading}
+                    className="rq-textarea"
+                    style={{ minHeight: 64, borderColor: errors.condition ? T.danger : undefined }}
+                  />
+                  {fieldErr("condition") && <div className="rq-field-error">{fieldErr("condition")}</div>}
+                </div>
 
-            {/* Condition description */}
-            <div style={{ marginBottom: "1rem" }}>
-              <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: T.textSub, marginBottom: "0.4rem", letterSpacing: "0.04em" }}>
-                CONDITION / INJURY *
-              </label>
-              <textarea
-                {...register("condition")}
-                placeholder="Describe what you observe — wounds, behavior, posture…"
-                rows={3}
-                disabled={loading}
-                className="rq-textarea"
-                style={{ borderColor: errors.condition ? "#EF4444" : undefined, opacity: loading ? 0.6 : 1 }}
-              />
-              {errors.condition && <div style={{ color: T.danger, fontSize: "0.72rem", marginTop: 4 }}>{errors.condition.message}</div>}
-            </div>
-
-            {/* Severity level */}
-            <div style={{ marginBottom: "1rem" }}>
-              <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: T.textSub, marginBottom: "0.6rem", letterSpacing: "0.04em" }}>
-                SEVERITY *
-              </label>
-              <div style={{ display: "grid", gridTemplateColumns: vp.mobile ? "1fr 1fr" : "repeat(4, 1fr)", gap: "0.6rem" }}>
-                {EMERGENCY_LEVELS.map(({ value, label, desc }) => (
-                  <motion.div
-                    key={value}
-                    whileHover={!loading ? { scale: 1.02 } : {}}
-                    whileTap={!loading ? { scale: 0.97 } : {}}
-                    onClick={() => {
-                      if (!loading) {
-                        setValue("severity", value, { shouldValidate: true });
-                      }
-                    }}
+                {/* Severity pills */}
+                <div>
+                  <FieldLabel required>Severity</FieldLabel>
+                  <div
+                    role="radiogroup"
                     style={{
-                      padding: "0.75rem",
-                      borderRadius: 10,
-                      border: `1.5px solid ${severity === value ? T.accent : T.border}`,
-                      background: severity === value ? T.accentPale : T.bgCard,
-                      cursor: loading ? "default" : "pointer",
-                      transition: "all 0.2s",
-                      opacity: loading ? 0.6 : 1,
+                      display: "grid",
+                      gridTemplateColumns: "repeat(4, 1fr)",
+                      gap: "0.4rem",
                     }}
                   >
-                    <div style={{ fontSize: "0.82rem", fontWeight: 700, color: T.text, marginBottom: 3 }}>
-                      {label}
-                    </div>
-                    <div style={{ fontSize: "0.68rem", color: T.textMuted, lineHeight: 1.4 }}>{desc}</div>
-                  </motion.div>
-                ))}
-              </div>
-              {errors.severity && <div style={{ color: T.danger, fontSize: "0.72rem", marginTop: 4 }}>{errors.severity.message}</div>}
-            </div>
+                    {SEVERITY_LEVELS.map(({ value, label, color }) => {
+                      const active = severity === value;
+                      return (
+                        <button
+                          key={value}
+                          type="button"
+                          role="radio"
+                          aria-checked={active}
+                          disabled={loading}
+                          onClick={() => setValue("severity", value, { shouldValidate: true })}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            gap: 6,
+                            padding: "0.55rem 0.5rem",
+                            borderRadius: 8,
+                            border: `1.5px solid ${active ? color : T.border}`,
+                            background: active ? `${color}14` : T.bgCard,
+                            color: active ? color : T.text,
+                            cursor: loading ? "default" : "pointer",
+                            fontSize: "0.8rem",
+                            fontWeight: 700,
+                            transition: "all 0.15s ease",
+                            fontFamily: "inherit",
+                          }}
+                        >
+                          <span style={{ width: 8, height: 8, borderRadius: "50%", background: color }} />
+                          {label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {fieldErr("severity") && <div className="rq-field-error">{fieldErr("severity")}</div>}
+                </div>
 
-            {/* Location + Contact */}
-            <div style={{ display: "grid", gridTemplateColumns: vp.mobile ? "1fr" : "1fr 1fr", gap: "1rem", marginBottom: "1rem" }}>
-              <div>
-                <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: T.textSub, marginBottom: "0.4rem", letterSpacing: "0.04em" }}>
-                  LOCATION *
-                </label>
-                <input
-                  {...register("address")}
-                  onChange={(e) => {
-                    setValue("address", e.target.value, { shouldValidate: true });
-                    setValue("latitude", undefined);
-                    setValue("longitude", undefined);
-                  }}
-                  placeholder="Street, landmark, city…"
-                  className="rq-input"
-                  style={{ borderColor: errors.address ? "#EF4444" : undefined, opacity: loading ? 0.6 : 1 }}
-                />
-                {errors.address && <div style={{ color: T.danger, fontSize: "0.72rem", marginTop: 4 }}>{errors.address.message}</div>}
-              </div>
-              <div>
-                <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: T.textSub, marginBottom: "0.4rem", letterSpacing: "0.04em" }}>
-                  CONTACT NUMBER *
-                </label>
-                <input
-                  {...register("contactPhone")}
-                  placeholder="+91 XXXXX XXXXX"
-                  className="rq-input"
-                  style={{ borderColor: errors.contactPhone ? "#EF4444" : undefined, opacity: loading ? 0.6 : 1 }}
-                />
-                {errors.contactPhone && <div style={{ color: T.danger, fontSize: "0.72rem", marginTop: 4 }}>{errors.contactPhone.message}</div>}
-              </div>
-            </div>
-            <RescueLocationPicker
-              value={{
-                address: address || "",
-                city: city || "",
-                state: state || "",
-                latitude: latitude,
-                longitude: longitude,
-              }}
-              onChange={handleLocationChange}
-            />
+                {/* Address + GPS button */}
+                <div>
+                  <FieldLabel required>Location</FieldLabel>
+                  <div style={{ display: "flex", gap: "0.5rem", alignItems: "stretch" }}>
+                    <input
+                      {...register("address")}
+                      onChange={(e) => {
+                        setValue("address", e.target.value, { shouldValidate: true });
+                        setValue("latitude", undefined);
+                        setValue("longitude", undefined);
+                      }}
+                      placeholder="Street, landmark, city"
+                      disabled={loading}
+                      className="rq-input"
+                      style={{ flex: 1, minWidth: 0, borderColor: errors.address ? T.danger : undefined }}
+                    />
+                    <button
+                      type="button"
+                      onClick={fetchLocation}
+                      disabled={locLoading || loading}
+                      title="Use current location"
+                      style={{
+                        padding: "0 0.85rem",
+                        borderRadius: 8,
+                        border: `1px solid ${T.border}`,
+                        background: T.bgCard,
+                        color: T.text,
+                        cursor: locLoading || loading ? "default" : "pointer",
+                        fontWeight: 600,
+                        fontSize: "0.8rem",
+                        fontFamily: "inherit",
+                        whiteSpace: "nowrap",
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 6,
+                      }}
+                    >
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M12 22s-8-7.58-8-13a8 8 0 0 1 16 0c0 5.42-8 13-8 13z" />
+                        <circle cx="12" cy="9" r="3" />
+                      </svg>
+                      {locLoading ? "Locating…" : "GPS"}
+                    </button>
+                  </div>
+                  {fieldErr("address") && <div className="rq-field-error">{fieldErr("address")}</div>}
+                </div>
 
-            {/* Notes */}
-            <div style={{ marginBottom: "1.5rem" }}>
-              <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: T.textSub, marginBottom: "0.4rem", letterSpacing: "0.04em" }}>
-                ADDITIONAL NOTES
-              </label>
-              <textarea
-                {...register("notes")}
-                placeholder="Any other details that might help the rescue team…"
-                rows={2}
-                disabled={loading}
-                className="rq-textarea"
-                style={{ opacity: loading ? 0.6 : 1 }}
-              />
-            </div>
+                {/* City / State / Phone */}
+                <div style={{ display: "grid", gridTemplateColumns: vp.mobile ? "1fr 1fr" : "1fr 1fr 1.3fr", gap: "0.85rem" }}>
+                  <div>
+                    <FieldLabel>City</FieldLabel>
+                    <input {...register("city")} disabled={loading} className="rq-input" placeholder="City" />
+                  </div>
+                  <div>
+                    <FieldLabel>State</FieldLabel>
+                    <input {...register("state")} disabled={loading} className="rq-input" placeholder="State" />
+                  </div>
+                  <div style={{ gridColumn: vp.mobile ? "span 2" : "auto" }}>
+                    <FieldLabel required>Contact Phone</FieldLabel>
+                    <input
+                      {...register("contactPhone")}
+                      disabled={loading}
+                      placeholder="+91 XXXXX XXXXX"
+                      className="rq-input"
+                      style={{ borderColor: errors.contactPhone ? T.danger : undefined }}
+                    />
+                    {fieldErr("contactPhone") && <div className="rq-field-error">{fieldErr("contactPhone")}</div>}
+                  </div>
+                </div>
 
-            {/* Submit */}
-            <AnimatePresence mode="wait">
-              {loading ? (
-                <motion.div
-                  key="loading"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
+                {/* Notes */}
+                <div>
+                  <FieldLabel>Additional Notes</FieldLabel>
+                  <textarea
+                    {...register("notes")}
+                    placeholder="Anything else the rescue team should know"
+                    rows={2}
+                    disabled={loading}
+                    className="rq-textarea"
+                    style={{ minHeight: 56 }}
+                  />
+                </div>
+              </div>
+
+              {/* ── RIGHT: photo upload ── */}
+              <div style={{ minWidth: 0 }}>
+                <FieldLabel>Photo</FieldLabel>
+                <div
+                  onClick={() => !loading && fileRef.current?.click()}
+                  className="rq-upload-zone"
                   style={{
-                    padding: "1rem",
-                    borderRadius: 10,
-                    background: T.accentPale,
-                    border: `1px solid ${T.accentBorder || T.border}`,
+                    cursor: loading ? "default" : "pointer",
+                    padding: imagePreview ? "0.5rem" : "1.25rem 0.75rem",
+                    opacity: loading ? 0.6 : 1,
+                    minHeight: vp.mobile ? 140 : 200,
                     display: "flex",
                     alignItems: "center",
-                    gap: "0.75rem",
+                    justifyContent: "center",
+                    flexDirection: "column",
                   }}
                 >
-                  <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                    style={{
-                      width: 20,
-                      height: 20,
-                      border: `2px solid ${T.border}`,
-                      borderTop: `2px solid ${T.accent}`,
-                      borderRadius: "50%",
-                      flexShrink: 0,
-                    }}
+                  <input
+                    ref={fileRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImage}
+                    style={{ display: "none" }}
+                    disabled={loading}
                   />
-                  <div style={{ flex: 1, textAlign: "left" }}>
-                    <div style={{ fontSize: "0.85rem", fontWeight: 700, color: T.text }}>
-                      {LOADING_STEPS[step]}
-                    </div>
-                    <div style={{ height: 4, borderRadius: 2, background: T.border, marginTop: 6 }}>
-                      <motion.div
-                        animate={{
-                          width: `${((step + 1) / LOADING_STEPS.length) * 100}%`,
-                        }}
-                        transition={{ duration: 0.5 }}
-                        style={{ height: "100%", borderRadius: 2, background: T.accent }}
+                  {imagePreview ? (
+                    <div style={{ position: "relative", width: "100%", display: "flex", justifyContent: "center" }}>
+                      <img
+                        src={imagePreview}
+                        alt="Preview"
+                        style={{ maxHeight: vp.mobile ? 120 : 180, maxWidth: "100%", borderRadius: 6, objectFit: "contain" }}
                       />
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setImagePreview(null);
+                          setSelectedFile(null);
+                        }}
+                        disabled={loading}
+                        aria-label="Remove photo"
+                        style={{
+                          position: "absolute", top: 4, right: 4,
+                          background: "rgba(0,0,0,0.65)", color: "#fff",
+                          border: "none", borderRadius: "50%",
+                          width: 22, height: 22, cursor: "pointer",
+                          fontSize: "0.7rem", display: "flex",
+                          alignItems: "center", justifyContent: "center",
+                        }}
+                      >✕</button>
                     </div>
-                  </div>
-                </motion.div>
-              ) : (
-                <motion.button
-                  key="submit"
-                  type="submit"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  whileHover={{ scale: 1.02, boxShadow: "0 0 24px rgba(239,68,68,0.35)" }}
-                  whileTap={{ scale: 0.97 }}
-                  disabled={loading}
-                  style={{
-                    width: "100%",
-                    padding: "0.95rem",
-                    borderRadius: 10,
-                    border: "none",
-                    background: "linear-gradient(135deg, #EF4444, #DC2626)",
-                    color: T.textOnAccent,
-                    fontSize: "1rem",
-                    fontWeight: 700,
-                    cursor: loading ? "default" : "pointer",
-                    fontFamily: "inherit",
-                    letterSpacing: "-0.01em",
-                  }}
-                >
-                  🚨 Submit Emergency Rescue Request
-                </motion.button>
-              )}
-            </AnimatePresence>
+                  ) : (
+                    <>
+                      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={T.textMuted} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: 6 }}>
+                        <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z" />
+                        <circle cx="12" cy="13" r="3.5" />
+                      </svg>
+                      <div style={{ fontSize: "0.82rem", color: T.text, fontWeight: 600 }}>Upload photo</div>
+                      <div style={{ fontSize: "0.7rem", color: T.textMuted, marginTop: 3, textAlign: "center", lineHeight: 1.35 }}>
+                        Optional · JPG/PNG · max 5MB
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* ── Submit ── */}
+            <div style={{ marginTop: "1rem" }}>
+              <AnimatePresence mode="wait">
+                {loading ? (
+                  <motion.div
+                    key="loading"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    style={{
+                      padding: "0.85rem 1rem",
+                      borderRadius: 10,
+                      background: T.accentPale,
+                      border: `1px solid ${T.accentBorder || T.border}`,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "0.75rem",
+                    }}
+                  >
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                      style={{
+                        width: 18, height: 18,
+                        border: `2px solid ${T.border}`,
+                        borderTop: `2px solid ${T.accent}`,
+                        borderRadius: "50%",
+                        flexShrink: 0,
+                      }}
+                    />
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: "0.82rem", fontWeight: 700, color: T.text }}>
+                        {LOADING_STEPS[step]}
+                      </div>
+                      <div style={{ height: 3, borderRadius: 2, background: T.border, marginTop: 5 }}>
+                        <motion.div
+                          animate={{ width: `${((step + 1) / LOADING_STEPS.length) * 100}%` }}
+                          transition={{ duration: 0.5 }}
+                          style={{ height: "100%", borderRadius: 2, background: T.accent }}
+                        />
+                      </div>
+                    </div>
+                  </motion.div>
+                ) : (
+                  <motion.button
+                    key="submit"
+                    type="submit"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    whileHover={{ boxShadow: "0 4px 18px rgba(239,68,68,0.32)" }}
+                    whileTap={{ scale: 0.99 }}
+                    style={{
+                      width: "100%",
+                      padding: "0.85rem",
+                      borderRadius: 10,
+                      border: "none",
+                      background: "linear-gradient(135deg, #EF4444, #DC2626)",
+                      color: "#fff",
+                      fontSize: "0.95rem",
+                      fontWeight: 700,
+                      cursor: "pointer",
+                      fontFamily: "inherit",
+                      letterSpacing: "-0.005em",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: 8,
+                    }}
+                  >
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+                    </svg>
+                    Submit Rescue Request
+                  </motion.button>
+                )}
+              </AnimatePresence>
+            </div>
           </form>
         </motion.div>
       </div>
