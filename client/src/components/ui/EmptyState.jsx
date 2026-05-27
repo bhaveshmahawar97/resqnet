@@ -1,9 +1,9 @@
-import React from "react";
 import { useT } from "../../context/ThemeContext";
 import Button from "./Button";
 
-export function EmptyState({ icon: Icon, title, description, actionLabel, onAction, height = "250px" }) {
+export function EmptyState({ icon: Icon, title, description, message, actionLabel, onAction, height = "250px" }) {
   const { T } = useT();
+  const text = description || message;
 
   return (
     <div
@@ -31,22 +31,28 @@ export function EmptyState({ icon: Icon, title, description, actionLabel, onActi
           alignItems: "center",
           justifyContent: "center",
           marginBottom: "1rem",
-          color: T.textMuted
+          color: T.textMuted,
         }}>
-          <Icon size={24} />
+          {typeof Icon === "string" ? (
+            <span style={{ fontSize: "1.5rem" }}>{Icon}</span>
+          ) : (
+            <Icon size={24} />
+          )}
         </div>
       )}
-      <h3 style={{ fontSize: "1rem", fontWeight: 600, color: T.textHeading, marginBottom: "0.5rem" }}>
+      <h3 style={{ fontSize: "1rem", fontWeight: 600, color: T.textHeading, marginBottom: "0.5rem", margin: "0 0 0.5rem" }}>
         {title}
       </h3>
-      <p style={{ fontSize: "0.875rem", color: T.textSub, maxWidth: "300px", marginBottom: actionLabel ? "1.5rem" : 0 }}>
-        {description}
-      </p>
+      {text && (
+        <p style={{ fontSize: "0.875rem", color: T.textSub, maxWidth: "300px", margin: "0 0 1.5rem" }}>
+          {text}
+        </p>
+      )}
       {actionLabel && onAction && (
-        <Button onClick={onAction} variant="outline" size="sm">
-          {actionLabel}
-        </Button>
+        <Button onClick={onAction} variant="outline" size="sm">{actionLabel}</Button>
       )}
     </div>
   );
 }
+
+export default EmptyState;

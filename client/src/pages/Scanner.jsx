@@ -3,13 +3,14 @@ import { useT } from "../context/ThemeContext";
 import useViewport from "../hooks/useViewport";
 import { uploadToCloudinary, scanAnimal } from "../services/aiService";
 import { getApiErrorMessage } from "../utils/apiErrors";
+import PageHeader from "../components/ui/PageHeader";
 import ScannerUpload from "../components/scanner/ScannerUpload";
 import ScannerResult from "../components/scanner/ScannerResult";
 import ScannerRecommendations from "../components/scanner/ScannerRecommendations";
-import ScannerHero from "../components/scanner/ScannerHero";
 import ScannerHistory from "../components/scanner/ScannerHistory";
 import ScannerLoader from "../components/scanner/ScannerLoader";
 import { validateImageFile } from "../components/scanner/scannerUtils";
+
 export default function Scanner() {
   const { T } = useT();
   const vp = useViewport();
@@ -25,11 +26,7 @@ export default function Scanner() {
   const [scanError, setScanError] = useState("");
 
   useEffect(() => {
-    return () => {
-      if (previewUrl) {
-        URL.revokeObjectURL(previewUrl);
-      }
-    };
+    return () => { if (previewUrl) URL.revokeObjectURL(previewUrl); };
   }, [previewUrl]);
 
   const scrollToUpload = useCallback(() => {
@@ -39,59 +36,25 @@ export default function Scanner() {
 
   const setFileFromInput = (file) => {
     if (!file) return;
-
     const validation = validateImageFile(file);
-    if (!validation.valid) {
-      setScanError(validation.error);
-      return;
-    }
-
+    if (!validation.valid) { setScanError(validation.error); return; }
     setScanError("");
     setImageFile(file);
     setScanResult(null);
     setPreviewUrl(URL.createObjectURL(file));
   };
 
-  const handleInputChange = (event) => {
-    setFileFromInput(event.target.files?.[0]);
-  };
-
-  const handleDrop = (event) => {
-    event.preventDefault();
-    setDragging(false);
-    setFileFromInput(event.dataTransfer.files?.[0]);
-  };
-
-  const handleDragOver = (event) => {
-    event.preventDefault();
-    setDragging(true);
-  };
-
-  const handleDragLeave = () => {
-    setDragging(false);
-  };
+  const handleDrop = (e) => { e.preventDefault(); setDragging(false); setFileFromInput(e.dataTransfer.files?.[0]); };
 
   const clearSelection = () => {
-    setImageFile(null);
-    setScanResult(null);
-    setScanError("");
-    if (previewUrl) {
-      URL.revokeObjectURL(previewUrl);
-    }
+    setImageFile(null); setScanResult(null); setScanError("");
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
     setPreviewUrl("");
   };
 
   const handleScan = async () => {
-    if (!imageFile) {
-      setScanError("Select an animal image before starting the scan.");
-      return;
-    }
-
-    setScanError("");
-    setUploading(true);
-    setIsProcessing(true);
-    setScanResult(null);
-
+    if (!imageFile) { setScanError("Select an animal image before starting the scan."); return; }
+    setScanError(""); setUploading(true); setIsProcessing(true); setScanResult(null);
     try {
       const cloudUrl = await uploadToCloudinary(imageFile);
       const scanData = await scanAnimal(cloudUrl, imageFile.name);
@@ -99,8 +62,7 @@ export default function Scanner() {
     } catch (error) {
       setScanError(getApiErrorMessage(error, "Image analysis failed."));
     } finally {
-      setUploading(false);
-      setIsProcessing(false);
+      setUploading(false); setIsProcessing(false);
     }
   };
 
@@ -108,40 +70,37 @@ export default function Scanner() {
 
   return (
     <div style={{ width: "100%", minHeight: "100vh", background: T.bg, color: T.text }}>
-      <section
-        style={{
-          width: "100%",
-          padding: "3rem clamp(1.25rem, 4vw, 3.5rem)",
-          maxWidth: 1280,
-          margin: "0 auto",
-        }}
-      >
-        <ScannerHero onStartScan={scrollToUpload} />
-
-        <div ref={uploadSectionRef}>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: vp.mobile ? "1fr" : "1.35fr 1fr",
-              gap: "1.25rem",
-              alignItems: "start",
-            }}
+      <PageHeader
+        title="AI Health Scanner"
+        subtitle="Upload a photo — detect species, injuries, and triage urgency."
+        badge={{ label: "AI · Triage", color: T.accent }}
+        actions={
+          <button
+            onClick={scrollToUpload}
+            style={{ padding: "0.45rem 0.85rem", borderRadius: 8, border: "none", background: T.accent, color: "#fff", fontWeight: 600, fontSize: "0.76rem", cursor: "pointer", fontFamily: "inherit" }}
           >
+            Start Scan
+          </button>
+        }
+      />
+
+      <div style={{ maxWidth: 1280, margin: "0 auto", padding: vp.mobile ? "1.25rem 1rem" : "1.5rem clamp(1.25rem, 4vw, 3.5rem)" }}>
+        <div ref={uploadSectionRef}>
+          <div style={{ display: "grid", gridTemplateColumns: vp.mobile ? "1fr" : "1.35fr 1fr", gap: "1.25rem", alignItems: "start" }}>
             <ScannerUpload
               imageFile={imageFile}
               previewUrl={previewUrl}
               dragging={dragging}
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
+              onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+              onDragLeave={() => setDragging(false)}
               onDrop={handleDrop}
-              onInputChange={handleInputChange}
+              onInputChange={(e) => setFileFromInput(e.target.files?.[0])}
               onChooseImage={handleScan}
               onClear={clearSelection}
               isProcessing={isBusy}
               error={scanError}
               fileInputRef={fileInputRef}
             />
-
             <div style={{ display: "grid", gap: "1rem" }}>
               {isBusy ? (
                 <ScannerLoader label={uploading ? "Uploading image…" : "Analyzing with AI…"} />
@@ -153,11 +112,9 @@ export default function Scanner() {
               )}
             </div>
           </div>
-
         </div>
-
         <ScannerHistory />
-      </section>
+      </div>
     </div>
   );
 }

@@ -1,9 +1,4 @@
-export { default as AdoptionHero }         from "./AdoptionHero";
-export { default as AdoptionStats }        from "./AdoptionStats";
 export { default as AdoptionGrid }         from "./AdoptionGrid";
 export { default as AnimalCard }           from "./AnimalCard";
 export { default as AdoptionModal }        from "./AdoptionModal";
 export { default as AIMatching }           from "./AIMatching";
-export { default as SuccessStories }       from "./SuccessStories";
-export { default as ResponsibleAdoption }  from "./ResponsibleAdoption";
-export { default as AdoptionCTA }          from "./AdoptionCTA";

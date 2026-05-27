@@ -56,10 +56,19 @@ api.interceptors.response.use(
     }
 
     // Attempt to extract backend error message
-    const message = error.response?.data?.message || error.message || "An unexpected error occurred.";
+    let message = error.response?.data?.message || error.message || "An unexpected error occurred.";
     
-    // Dispatch global toast (unless the request explicitly asked to suppress it - we could add logic for that later)
-    showErrorToast(message);
+    if (error.response?.status === 429) {
+      message = "Server is busy. Please try again in a moment.";
+    }
+
+    // Dispatch global toast (suppress spam for 429s)
+    if (!window._last429Toast || Date.now() - window._last429Toast > 3000 || error.response?.status !== 429) {
+      showErrorToast(message);
+      if (error.response?.status === 429) {
+        window._last429Toast = Date.now();
+      }
+    }
 
     return Promise.reject(error);
   }
@@ -72,5 +81,43 @@ export function setAuthToken(token) {
     delete api.defaults.headers.common.Authorization;
   }
 }
+
+// --- In-flight Request Deduplicator ---
+const pendingRequests = new Map();
+
+const generateRequestKey = (method, url, config, data) => {
+  return `${method}:${url}:${JSON.stringify(config?.params || {})}:${JSON.stringify(data || {})}`;
+};
+
+['get', 'post', 'put', 'delete'].forEach((method) => {
+  const originalMethod = api[method];
+  api[method] = function (url, ...args) {
+    let data, config;
+    if (method === 'get' || method === 'delete') {
+      config = args[0];
+    } else {
+      data = args[0];
+      config = args[1];
+    }
+
+    // Do not deduplicate FormData requests (file uploads)
+    if (data instanceof FormData) {
+      return originalMethod.apply(this, [url, ...args]);
+    }
+
+    const key = generateRequestKey(method, url, config, data);
+
+    if (pendingRequests.has(key)) {
+      return pendingRequests.get(key);
+    }
+
+    const promise = originalMethod.apply(this, [url, ...args]).finally(() => {
+      pendingRequests.delete(key);
+    });
+
+    pendingRequests.set(key, promise);
+    return promise;
+  };
+});
 
 export default api;

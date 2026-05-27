@@ -2,7 +2,15 @@
   "permissions": {
     "allow": [
       "Bash(ls ~/.claude/projects/ 2>/dev/null | head -20)",
-      "Read(//c/Users/hp935/.claude/projects/**)"
+      "Read(//c/Users/hp935/.claude/projects/**)",
+      "Bash(npx --version)",
+      "Bash(npm ls *)",
+      "Bash(npm run *)",
+      "Bash(npm install *)",
+      "Bash(sleep 8 && cat /c/Users/hp935/AppData/Local/Temp/claude/d--Mern-Stack-Projects-resqnet/83c43206-6051-4627-9702-261a2353f9fa/tasks/bjh6encid.output 2>&1 | head -30)",
+      "Read(//c/Users/hp935/AppData/Local/Temp/claude/d--Mern-Stack-Projects-resqnet/83c43206-6051-4627-9702-261a2353f9fa/tasks/**)",
+      "Bash(tasklist //FI \"IMAGENAME eq node.exe\")",
+      "Bash(git checkout *)"
     ]
   }
 }

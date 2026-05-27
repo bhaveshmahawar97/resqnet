@@ -93,9 +93,12 @@ html, body, #root {
 
 body {
   font-family: var(--font-sans);
-  font-size: 15px;
-  line-height: 1.6;
-  letter-spacing: -0.01em;
+  font-size: 14.5px;
+  line-height: 1.55;
+  letter-spacing: -0.011em;
+  color: var(--text);
+  background-color: var(--bg);
+  font-weight: 400;
 }
 
 #root {
@@ -107,17 +110,35 @@ body {
 /* ── Typography ───────────────────────────────────────────────────────────── */
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading);
+  color: var(--text-heading);
   font-weight: 700;
-  line-height: 1.25;
-  letter-spacing: -0.025em;
+  line-height: 1.2;
+  letter-spacing: -0.028em;
 }
 
-h1 { font-size: clamp(1.875rem, 4.5vw, 3rem); font-weight: 800; line-height: 1.15; }
-h2 { font-size: clamp(1.5rem, 3vw, 2.25rem); line-height: 1.2; }
-h3 { font-size: clamp(1.125rem, 2vw, 1.375rem); }
-h4 { font-size: 1.0625rem; font-weight: 600; }
+h1 { font-size: clamp(1.625rem, 3.5vw, 2.25rem); font-weight: 800; line-height: 1.15; letter-spacing: -0.032em; }
+h2 { font-size: clamp(1.25rem, 2.5vw, 1.625rem); line-height: 1.2; letter-spacing: -0.028em; }
+h3 { font-size: clamp(1.05rem, 1.8vw, 1.25rem); font-weight: 700; letter-spacing: -0.022em; }
+h4 { font-size: 0.9375rem; font-weight: 600; letter-spacing: -0.015em; }
+h5 { font-size: 0.8125rem; font-weight: 700; letter-spacing: 0.02em; text-transform: uppercase; color: var(--text-sub); }
+h6 { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-muted); }
 
-p { margin: 0; line-height: 1.7; }
+p { margin: 0; line-height: 1.55; color: var(--text); }
+p.rq-lead { font-size: 0.9375rem; color: var(--text-sub); line-height: 1.6; }
+small, .rq-small { font-size: 0.75rem; color: var(--text-muted); }
+
+strong, b { font-weight: 700; color: var(--text-heading); }
+
+/* Field labels — uppercase, tight, operational */
+.rq-field-label {
+  display: block;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: var(--text-sub);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 0.35rem;
+}
 
 a {
   text-decoration: none;
@@ -265,52 +286,15 @@ a {
 .rq-btn-md { padding: 0.625rem 1.25rem; font-size: 0.875rem; gap: 0.45rem; border-radius: var(--radius-md); height: 40px; }
 .rq-btn-lg { padding: 0.85rem 1.75rem; font-size: 0.95rem; gap: 0.5rem; border-radius: var(--radius-lg); height: 48px; }
 
-/* Button Variants */
-.rq-btn-primary {
-  background: var(--accent);
-  color: var(--text-on-accent);
-  box-shadow: 0 1px 3px rgba(22, 163, 74, 0.2);
-}
-.rq-btn-primary:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 2px 10px rgba(22, 163, 74, 0.3);
-}
-
-.rq-btn-secondary {
-  background: var(--bg-alt);
-  color: var(--text);
-  border: 1px solid var(--border);
-}
-.rq-btn-secondary:hover:not(:disabled) {
-  background: var(--border);
-}
-
-.rq-btn-ghost {
-  background: transparent;
-  color: var(--text-sub);
-  border: 1px solid var(--border);
-}
-.rq-btn-ghost:hover:not(:disabled) {
-  background: var(--bg-alt);
-  color: var(--text);
-}
-
+/* (Button Variants — primary block defined later, this block was a duplicate
+   with stale green shadows. Only the outline variant remains here.) */
 .rq-btn-outline {
   background: transparent;
   color: var(--accent);
   border: 1.5px solid var(--accent);
 }
 .rq-btn-outline:hover:not(:disabled) {
-  background: rgba(22, 163, 74, 0.05);
-}
-
-.rq-btn-danger {
-  background: var(--danger-pale);
-  color: var(--danger);
-  border: 1px solid var(--danger-border);
-}
-.rq-btn-danger:hover:not(:disabled) {
-  background: var(--danger-border);
+  background: var(--accent-pale);
 }
 
 /* ── Stat Card ────────────────────────────────────────────────────────────── */
@@ -427,34 +411,75 @@ a {
   gap: 0.375rem;
 }
 
-.rq-input {
+/* ── Input / Textarea / Select — refined field styling ──────────────────────
+   Stronger border, subtle inset depth, accent focus ring, hover lift.
+   Applied via class .rq-input and .rq-textarea (HTML <select> with .rq-input
+   inherits this too). */
+.rq-input,
+.rq-textarea,
+select.rq-input {
   width: 100%;
   padding: 0.625rem 0.875rem;
   border-radius: var(--radius-md);
-  border: 1.5px solid var(--border-input);
-  background: var(--bg-card);
+  border: 1px solid var(--border-input);
+  background: var(--bg-input);
   color: var(--text);
   font-family: var(--font-sans);
   font-size: var(--text-sm);
+  font-weight: 500;
   line-height: 1.5;
   outline: none;
-  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  box-shadow: var(--shadow-input-inset);
+  transition: border-color var(--transition-fast),
+              box-shadow var(--transition-fast),
+              background var(--transition-fast);
   box-sizing: border-box;
+  -webkit-appearance: none;
+  appearance: none;
 }
 
-.rq-input:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 2px var(--accent-pale);
+.rq-input:hover:not(:disabled):not(:focus),
+.rq-textarea:hover:not(:disabled):not(:focus),
+select.rq-input:hover:not(:disabled):not(:focus) {
+  border-color: var(--border-input-hov);
+  background: var(--bg-input-hov);
 }
 
-.rq-input::placeholder {
+.rq-input:focus,
+.rq-textarea:focus,
+select.rq-input:focus {
+  border-color: var(--border-input-focus);
+  background: var(--bg-input);
+  box-shadow: 0 0 0 3px var(--ring), var(--shadow-input-inset);
+}
+
+.rq-input::placeholder,
+.rq-textarea::placeholder {
   color: var(--text-muted);
+  font-weight: 400;
 }
 
-.rq-input:disabled {
-  opacity: 0.55;
+.rq-input:disabled,
+.rq-textarea:disabled,
+select.rq-input:disabled {
   cursor: not-allowed;
-  background: var(--bg);
+  background: var(--bg-muted);
+  color: var(--text-muted);
+  border-color: var(--border);
+  box-shadow: none;
+}
+
+/* Custom chevron for <select> elements */
+select.rq-input {
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 12px 12px;
+  padding-right: 2.25rem;
+}
+
+html[data-theme="dark"] select.rq-input {
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394A8C6' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
 }
 
 .rq-label {
@@ -868,9 +893,9 @@ a {
 .rq-form-card {
   background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: var(--radius-xl);
-  padding: clamp(1.5rem, 4vw, 2.5rem);
-  box-shadow: 0 8px 40px var(--shadow);
+  border-radius: var(--radius-lg);
+  padding: clamp(1rem, 2.5vw, 1.5rem);
+  box-shadow: var(--shadow-md);
 }
 
 .rq-input-row {
@@ -880,44 +905,31 @@ a {
   margin-bottom: var(--space-4);
 }
 
-.rq-input, .rq-textarea {
-  width: 100%;
-  padding: 0.75rem 1rem;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border);
-  background: var(--bg-card);
-  color: var(--text);
-  font-family: inherit;
-  font-size: var(--text-sm);
-  outline: none;
-  transition: all 0.2s ease;
-  box-sizing: border-box;
-}
-
-.rq-input:focus, .rq-textarea:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-pale);
-}
-
+/* .rq-input and .rq-textarea base styling lives at the top of this file
+   (consolidated). This block previously redefined them; removed to avoid
+   cascade conflicts. Keep only textarea size override here. */
 .rq-textarea {
-  min-height: 100px;
+  min-height: 84px;
   resize: vertical;
 }
 
 .rq-upload-zone {
-  border: 2px dashed var(--border);
-  border-radius: var(--radius-lg);
-  padding: var(--space-6);
+  border: 1.5px dashed var(--border-input);
+  border-radius: var(--radius-md);
+  padding: var(--space-5);
   text-align: center;
   cursor: pointer;
-  transition: all 0.2s ease;
-  background: var(--bg-alt);
+  transition: border-color var(--transition-fast),
+              background var(--transition-fast);
+  background: var(--bg-muted);
+  color: var(--text-sub);
   position: relative;
   overflow: hidden;
 }
 .rq-upload-zone:hover {
   border-color: var(--accent);
   background: var(--accent-pale);
+  color: var(--text);
 }
 
 .rq-field-hint {
@@ -1078,20 +1090,10 @@ a {
     background: #38BDF8;
   }
 
-  .rq-input {
-    background: var(--text-heading);
-    border-color: rgba(255,255,255,0.1);
-    color: #E2EAF4;
-  }
-
-  .rq-input:focus {
-    border-color: #38BDF8;
-    box-shadow: 0 0 0 2px rgba(56,189,248,0.1);
-  }
-
-  .rq-input:disabled {
-    background: #0F1E35;
-  }
+  /* .rq-input dark overrides removed — the consolidated definition above
+     uses CSS vars that flip on html[data-theme="dark"]. Leaving them here
+     would fight the app's theme toggle and override correct values with
+     stale hardcoded colors. */
 
   .rq-divider {
     background: rgba(255,255,255,0.06);

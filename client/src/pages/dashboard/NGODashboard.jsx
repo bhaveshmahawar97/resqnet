@@ -82,7 +82,7 @@ export default function NGODashboard() {
       if (ngoProfile.verificationStatus === "pending") {
         return (
           <div style={{ maxWidth: 600, margin: "3rem auto", textAlign: "center" }}>
-            <div style={{ width: 64, height: 64, background: T.accentPale, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1.5rem", fontSize: "2rem" }}>⏳</div>
+            <div style={{ width: 64, height: 64, background: T.accentPale, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1.5rem", color: T.accent }}><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
             <h2 style={{ fontSize: "1.5rem", fontWeight: 800, color: T.text, marginBottom: "1rem" }}>Application Submitted</h2>
             <p style={{ color: T.textSub, marginBottom: "2rem", lineHeight: 1.6 }}>Your application for <strong>{ngoProfile.organizationName}</strong> has been received. Our team will begin reviewing your documents shortly.</p>
           </div>
@@ -91,7 +91,7 @@ export default function NGODashboard() {
       if (ngoProfile.verificationStatus === "under_review") {
         return (
           <div style={{ maxWidth: 600, margin: "3rem auto", textAlign: "center" }}>
-            <div style={{ width: 64, height: 64, background: T.infoPale, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1.5rem", fontSize: "2rem" }}>🔍</div>
+            <div style={{ width: 64, height: 64, background: T.infoPale, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1.5rem", color: T.info }}><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg></div>
             <h2 style={{ fontSize: "1.5rem", fontWeight: 800, color: T.text, marginBottom: "1rem" }}>Under Review</h2>
             <p style={{ color: T.textSub, marginBottom: "2rem", lineHeight: 1.6 }}>An admin is currently reviewing your registration documents for <strong>{ngoProfile.organizationName}</strong>. You will be notified of the decision soon.</p>
           </div>
@@ -100,7 +100,7 @@ export default function NGODashboard() {
       if (ngoProfile.verificationStatus === "rejected") {
         return (
           <div style={{ maxWidth: 600, margin: "3rem auto", textAlign: "center" }}>
-            <div style={{ width: 64, height: 64, background: T.dangerPale, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1.5rem", fontSize: "2rem" }}>❌</div>
+            <div style={{ width: 64, height: 64, background: T.dangerPale, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1.5rem", color: T.danger }}><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg></div>
             <h2 style={{ fontSize: "1.5rem", fontWeight: 800, color: T.text, marginBottom: "1rem" }}>Application Rejected</h2>
             <p style={{ color: T.textSub, marginBottom: "1.5rem", lineHeight: 1.6 }}>Unfortunately, your application for <strong>{ngoProfile.organizationName}</strong> was not approved.</p>
             <button onClick={() => navigate("/ngo-register")} className="rq-btn rq-btn-primary">Submit New Application</button>
@@ -110,7 +110,7 @@ export default function NGODashboard() {
       if (ngoProfile.verificationStatus === "suspended") {
         return (
           <div style={{ maxWidth: 600, margin: "3rem auto", textAlign: "center" }}>
-            <div style={{ width: 64, height: 64, background: T.warningPale, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1.5rem", fontSize: "2rem" }}>⚠️</div>
+            <div style={{ width: 64, height: 64, background: T.warningPale, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1.5rem", color: T.warning }}><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
             <h2 style={{ fontSize: "1.5rem", fontWeight: 800, color: T.text, marginBottom: "1rem" }}>Account Suspended</h2>
             <p style={{ color: T.textSub, marginBottom: "2rem", lineHeight: 1.6 }}>Your operational access for <strong>{ngoProfile.organizationName}</strong> has been suspended. Please contact support.</p>
           </div>

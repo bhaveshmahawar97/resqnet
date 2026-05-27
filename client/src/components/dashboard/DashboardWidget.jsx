@@ -115,7 +115,7 @@ export default function DashboardWidget({ widget, onAction }) {
       );
 
     case "ApplicationList":
-      if (!data || data.length === 0) return wrapWithCard(<EmptyState icon={emptyIcon || "📋"} title={emptyTitle || "No Applications"} message={emptyMessage || "No adoption applications pending."} minHeight="150px" />);
+      if (!data || data.length === 0) return wrapWithCard(<EmptyState title={emptyTitle || "No Applications"} message={emptyMessage || "No adoption applications pending."} minHeight="150px" />);
       return wrapWithCard(
         <div style={{ overflowX: "auto" }}>
           {data.map(app => <AdoptionApplicationRow key={app._id || app.id} app={app} T={T} onAction={onAction} />)}
@@ -124,7 +124,7 @@ export default function DashboardWidget({ widget, onAction }) {
       );
 
     case "AdoptionList":
-      if (!data || data.length === 0) return wrapWithCard(<EmptyState icon={emptyIcon || "🐾"} title={emptyTitle || "No Adoptions"} message={emptyMessage || "No animals listed for adoption."} minHeight="150px" />);
+      if (!data || data.length === 0) return wrapWithCard(<EmptyState title={emptyTitle || "No Adoptions"} message={emptyMessage || "No animals listed for adoption."} minHeight="150px" />);
       return wrapWithCard(
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 12 }}>
           {data.map(app => (
@@ -164,7 +164,7 @@ function MissionCardWidget({ mission, onAction, T }) {
             <SeverityBadge level={mission.severity} />
           </div>
           <div style={{ fontSize: "0.95rem", fontWeight: 750, color: T.text }}>{mission.animal}</div>
-          <div style={{ fontSize: "0.71rem", color: T.textMuted, marginTop: 2 }}>📍 {mission.location}</div>
+          <div style={{ fontSize: "0.71rem", color: T.textMuted, marginTop: 2 }}>{mission.location}</div>
         </div>
         <div style={{ textAlign: "right" }}>
           <div style={{ fontSize: "1.5rem", fontWeight: 900, color: scoreColor, lineHeight: 1 }}>{mission.aiScore}</div>
