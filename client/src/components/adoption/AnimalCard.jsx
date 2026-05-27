@@ -3,27 +3,33 @@ import { motion } from "framer-motion";
 import { useT } from "../../context/ThemeContext";
 import Button from "../ui/Button";
 import { vFadeUp } from "../../animations/variants";
-const SPECIES_COLORS = {
-  Dog:      { bg: "rgba(22,160,86,0.10)",  text: "#16A056" },
-  Cat:      { bg: "rgba(139,92,246,0.10)", text: "#7C3AED" },
-  Bird:     { bg: "rgba(245,158,11,0.10)", text: "#D97706" },
-  Wildlife: { bg: "rgba(239,68,68,0.10)",  text: "#DC2626" },
-  Rabbit:   { bg: "rgba(59,130,246,0.10)", text: "#3B82F6" },
-};
+function getSpeciesColors(species, T) {
+  const map = {
+    Dog:      { bg: T.successPale, text: T.success },
+    Cat:      { bg: T.accentPale,  text: T.accent },
+    Bird:     { bg: T.warningPale, text: T.warning },
+    Wildlife: { bg: T.dangerPale,  text: T.danger },
+    Rabbit:   { bg: T.infoPale,    text: T.info },
+  };
+  return map[species] || { bg: T.bgAlt, text: T.textSub };
+}
 
-const STATUS_META = {
-  Available:   { bg: "#16A056", label: "Available" },
-  "In Foster": { bg: "#F59E0B", label: "In Foster" },
-  "On Hold":   { bg: "#3B82F6", label: "On Hold"   },
-};
+function getStatusMeta(status, T) {
+  const map = {
+    Available:   { bg: T.success, label: "Available" },
+    "In Foster": { bg: T.warning, label: "In Foster" },
+    "On Hold":   { bg: T.info,    label: "On Hold" },
+  };
+  return map[status] || { bg: T.textSub, label: status || "Available" };
+}
 export default function AnimalCard({ animal, i, onAdopt }) {
   const { T } = useT();
   const [hov,       setHov]       = useState(false);
   const [favorited, setFavorited] = useState(false);
   const [heartPop,  setHeartPop]  = useState(false);
 
-  const sc = SPECIES_COLORS[animal.species] || SPECIES_COLORS.Dog;
-  const st = STATUS_META[animal.status]    || STATUS_META.Available;
+  const sc = getSpeciesColors(animal.species, T);
+  const st = getStatusMeta(animal.status, T);
 
   const handleFavorite = (e) => {
     e.stopPropagation();

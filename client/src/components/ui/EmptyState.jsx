@@ -19,35 +19,33 @@ export function EmptyState({ icon: Icon, title, description, message, actionLabe
         border: `1px dashed ${T.border}`,
         borderRadius: "12px",
         textAlign: "center",
+        gap: "0.65rem",
       }}
     >
       {Icon && (
         <div style={{
-          width: "48px",
-          height: "48px",
-          borderRadius: "50%",
+          width: "44px",
+          height: "44px",
+          borderRadius: "12px",
           background: T.bgAlt,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          marginBottom: "1rem",
           color: T.textMuted,
         }}>
-          {typeof Icon === "string" ? (
-            <span style={{ fontSize: "1.5rem" }}>{Icon}</span>
-          ) : (
-            <Icon size={24} />
-          )}
+          {typeof Icon === "function" || (typeof Icon === "object" && Icon.render) ? <Icon size={20} /> : <span style={{ fontSize: "1.25rem" }}>{Icon}</span>}
         </div>
       )}
-      <h3 style={{ fontSize: "1rem", fontWeight: 600, color: T.textHeading, marginBottom: "0.5rem", margin: "0 0 0.5rem" }}>
-        {title}
-      </h3>
-      {text && (
-        <p style={{ fontSize: "0.875rem", color: T.textSub, maxWidth: "300px", margin: "0 0 1.5rem" }}>
-          {text}
-        </p>
-      )}
+      <div>
+        <h3 style={{ fontSize: "0.92rem", fontWeight: 700, color: T.textHeading, margin: "0 0 0.3rem" }}>
+          {title}
+        </h3>
+        {text && (
+          <p style={{ fontSize: "0.78rem", color: T.textSub, maxWidth: "280px", margin: 0, lineHeight: 1.5 }}>
+            {text}
+          </p>
+        )}
+      </div>
       {actionLabel && onAction && (
         <Button onClick={onAction} variant="outline" size="sm">{actionLabel}</Button>
       )}

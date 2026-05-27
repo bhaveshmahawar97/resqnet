@@ -12,10 +12,10 @@ import { getCurrentPosition, reverseGeocode } from "../../utils/geo";
 
 const ANIMAL_TYPES = ["Dog", "Cat", "Bird", "Cow", "Horse", "Monkey", "Rabbit", "Snake", "Deer", "Other"];
 const SEVERITY_LEVELS = [
-  { value: "critical", label: "Critical", color: "#DC2626" },
-  { value: "high",     label: "High",     color: "#EA580C" },
-  { value: "medium",   label: "Medium",   color: "#CA8A04" },
-  { value: "low",      label: "Low",      color: "#16A34A" },
+  { value: "critical", label: "Critical", getColor: (T) => T.danger },
+  { value: "high",     label: "High",     getColor: (T) => T.warning },
+  { value: "medium",   label: "Medium",   getColor: (T) => T.info },
+  { value: "low",      label: "Low",      getColor: (T) => T.success },
 ];
 
 const LOADING_STEPS = [
@@ -217,8 +217,8 @@ export default function EmergencyForm({ onSuccess }) {
               style={{
                 padding: "0.55rem 0.85rem",
                 borderRadius: 8,
-                background: "rgba(239,68,68,0.08)",
-                border: "1px solid rgba(239,68,68,0.3)",
+                background: T.dangerPale,
+                border: `1px solid ${T.dangerBorder}`,
                 color: T.danger,
                 fontSize: "0.82rem",
                 marginBottom: "0.85rem",
@@ -233,9 +233,9 @@ export default function EmergencyForm({ onSuccess }) {
               style={{
                 padding: "0.55rem 0.85rem",
                 borderRadius: 8,
-                background: "rgba(34,197,94,0.08)",
-                border: "1px solid rgba(34,197,94,0.3)",
-                color: "#16A34A",
+                background: T.successPale,
+                border: `1px solid ${T.successBorder}`,
+                color: T.success,
                 fontSize: "0.82rem",
                 marginBottom: "0.85rem",
               }}
@@ -305,8 +305,9 @@ export default function EmergencyForm({ onSuccess }) {
                       gap: "0.4rem",
                     }}
                   >
-                    {SEVERITY_LEVELS.map(({ value, label, color }) => {
+                    {SEVERITY_LEVELS.map(({ value, label, getColor }) => {
                       const active = severity === value;
+                      const color = getColor(T);
                       return (
                         <button
                           key={value}
@@ -541,14 +542,14 @@ export default function EmergencyForm({ onSuccess }) {
                     type="submit"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    whileHover={{ boxShadow: "0 4px 18px rgba(239,68,68,0.32)" }}
+                    whileHover={{ boxShadow: `0 4px 18px ${T.danger}50` }}
                     whileTap={{ scale: 0.99 }}
                     style={{
                       width: "100%",
                       padding: "0.85rem",
                       borderRadius: 10,
                       border: "none",
-                      background: "linear-gradient(135deg, #EF4444, #DC2626)",
+                      background: T.danger,
                       color: "#fff",
                       fontSize: "0.95rem",
                       fontWeight: 700,

@@ -1,11 +1,6 @@
-import { motion } from "framer-motion";
 import { useT } from "../../context/ThemeContext";
 import ScannerPreview from "./ScannerPreview";
 
-/**
- * ScannerUpload - Upload and preview area
- * Handles file selection, preview, and drag-drop
- */
 export default function ScannerUpload({
   imageFile,
   previewUrl,
@@ -28,56 +23,94 @@ export default function ScannerUpload({
       onDragOver={onDragOver}
       onDragLeave={onDragLeave}
       onDragEnd={onDragLeave}
-      onClick={() => fileInputRef?.current?.click()}
       style={{
-        cursor: "pointer",
-        borderRadius: 14,
-        border: `1px solid ${dragging ? T.accent : T.border}`,
+        borderRadius: 12,
+        border: `1.5px dashed ${dragging ? T.accent : T.border}`,
         background: dragging ? T.accentPale : T.bgCard,
-        padding: "2rem",
-        minHeight: 320,
+        transition: "border-color 0.2s, background 0.2s",
         display: "flex",
         flexDirection: "column",
-        justifyContent: "space-between",
         gap: "1rem",
-        transition: "border-color 0.2s ease, background 0.2s ease",
+        overflow: "hidden",
       }}
     >
-      <div style={{ display: "grid", gap: "0.85rem" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "0.8rem" }}>
-          <div
-            style={{
-              width: 44,
-              height: 44,
-              borderRadius: 12,
-              background: T.accentPale,
-              display: "grid",
-              placeItems: "center",
-              fontSize: "1.35rem",
-            }}
-          >
-            📷
-          </div>
-          <div>
-            <div style={{ fontSize: "0.95rem", fontWeight: 700, color: T.text }}>
-              Upload or drop an animal photo
+      {/* Drop zone / preview */}
+      <div
+        onClick={() => !imageFile && fileInputRef?.current?.click()}
+        style={{
+          cursor: imageFile ? "default" : "pointer",
+          padding: imageFile ? 0 : "2.5rem 2rem",
+          minHeight: imageFile ? 0 : 200,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: "0.75rem",
+        }}
+      >
+        {imageFile ? (
+          <ScannerPreview previewUrl={previewUrl} />
+        ) : (
+          <>
+            <div
+              style={{
+                width: 48,
+                height: 48,
+                borderRadius: 12,
+                background: T.accentPale,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: T.accent,
+              }}
+            >
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2" />
+                <circle cx="8.5" cy="8.5" r="1.5" />
+                <path d="M21 15l-5-5L5 21" />
+              </svg>
             </div>
-            <div style={{ fontSize: "0.86rem", color: T.textMuted }}>
-              JPEG, PNG, WebP · max 5 MB
+            <div style={{ textAlign: "center" }}>
+              <div style={{ fontSize: "0.9rem", fontWeight: 700, color: T.text, marginBottom: "0.25rem" }}>
+                Drop animal photo here
+              </div>
+              <div style={{ fontSize: "0.76rem", color: T.textMuted }}>
+                JPEG · PNG · WebP · max 5 MB
+              </div>
             </div>
-          </div>
-        </div>
-
-        <ScannerPreview previewUrl={previewUrl} />
-        <div style={{ fontSize: "0.82rem", color: T.textMuted, marginTop: "0.5rem" }}>
-          <strong style={{ color: T.text }}>Supported animals:</strong> dog, cat, cow, bird, horse, puppy, kitten
-          <div style={{ marginTop: 6 }}>
-            <strong style={{ color: T.text }}>Example filenames:</strong> dog_injury.jpg, cow_rescue.png, cat_wound.jpeg
-          </div>
-        </div>
+          </>
+        )}
       </div>
 
-      <div style={{ display: "grid", gap: "0.85rem" }}>
+      {/* File info bar (when image selected) */}
+      {imageFile && (
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            padding: "0.65rem 1rem",
+            borderTop: `1px solid ${T.border}`,
+            background: T.bgAlt,
+            gap: "0.5rem",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", minWidth: 0 }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={T.success} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 12l2 2 4-4" /><circle cx="12" cy="12" r="10" />
+            </svg>
+            <span style={{ fontSize: "0.76rem", color: T.text, fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              {imageFile.name}
+            </span>
+          </div>
+          <span style={{ fontSize: "0.7rem", color: T.textMuted, flexShrink: 0 }}>
+            {(imageFile.size / 1024).toFixed(0)} KB
+          </span>
+        </div>
+      )}
+
+      {/* Actions */}
+      <div style={{ padding: "0 1rem 1rem", display: "flex", flexDirection: "column", gap: "0.65rem" }}>
         <input
           ref={fileInputRef}
           type="file"
@@ -86,73 +119,61 @@ export default function ScannerUpload({
           onChange={onInputChange}
         />
 
-        <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={(e) => {
-              e.stopPropagation();
-              fileInputRef?.current?.click();
-            }}
-            type="button"
-            style={{
-              flex: 1,
-              minWidth: 140,
-              padding: "0.95rem 1rem",
-              borderRadius: 10,
-              border: "none",
-              background: T.accent,
-              color: T.textOnAccent,
-              fontWeight: 700,
-              cursor: "pointer",
-              fontFamily: "inherit",
-            }}
-          >
-            Choose Image
-          </motion.button>
-
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={(e) => {
-              e.stopPropagation();
-              onChooseImage?.();
-            }}
-            type="button"
-            disabled={!imageFile || isProcessing}
-            style={{
-              flex: 1,
-              minWidth: 140,
-              padding: "0.95rem 1rem",
-              borderRadius: 10,
-              border: `1px solid ${imageFile ? T.accent : T.border}`,
-              background: imageFile ? T.accent : T.bgAlt,
-              color: imageFile ? "#fff" : T.textMuted,
-              fontWeight: 700,
-              cursor: imageFile ? "pointer" : "not-allowed",
-              fontFamily: "inherit",
-            }}
-          >
-            {isProcessing ? "Analyzing…" : "Run AI Scan"}
-          </motion.button>
-        </div>
-
-        {imageFile && (
+        <div style={{ display: "flex", gap: "0.6rem" }}>
           <button
             type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              onClear?.();
-            }}
+            onClick={() => fileInputRef?.current?.click()}
             style={{
-              padding: "0.85rem 1rem",
-              borderRadius: 10,
+              flex: 1,
+              padding: "0.7rem 1rem",
+              borderRadius: 8,
               border: `1px solid ${T.border}`,
               background: T.bgAlt,
               color: T.text,
-              fontWeight: 700,
+              fontWeight: 600,
               cursor: "pointer",
               fontFamily: "inherit",
+              fontSize: "0.82rem",
+            }}
+          >
+            {imageFile ? "Change Image" : "Select Image"}
+          </button>
+
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); onChooseImage?.(); }}
+            disabled={!imageFile || isProcessing}
+            style={{
+              flex: 1,
+              padding: "0.7rem 1rem",
+              borderRadius: 8,
+              border: "none",
+              background: imageFile && !isProcessing ? T.accent : T.bgAlt,
+              color: imageFile && !isProcessing ? "#fff" : T.textMuted,
+              fontWeight: 700,
+              cursor: imageFile && !isProcessing ? "pointer" : "not-allowed",
+              fontFamily: "inherit",
+              fontSize: "0.82rem",
+              transition: "background 0.2s",
+            }}
+          >
+            {isProcessing ? "Analyzing…" : "Scan Animal"}
+          </button>
+        </div>
+
+        {imageFile && !isProcessing && (
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); onClear?.(); }}
+            style={{
+              padding: "0.55rem",
+              borderRadius: 8,
+              border: `1px solid ${T.border}`,
+              background: "transparent",
+              color: T.textMuted,
+              cursor: "pointer",
+              fontFamily: "inherit",
+              fontSize: "0.76rem",
             }}
           >
             Clear selection
@@ -160,7 +181,16 @@ export default function ScannerUpload({
         )}
 
         {error && (
-          <div style={{ color: T.danger, fontSize: "0.92rem", marginTop: "0.25rem" }}>
+          <div
+            style={{
+              padding: "0.6rem 0.85rem",
+              borderRadius: 8,
+              border: `1px solid ${T.dangerBorder}`,
+              background: T.dangerPale,
+              color: T.danger,
+              fontSize: "0.78rem",
+            }}
+          >
             {error}
           </div>
         )}

@@ -1,35 +1,71 @@
 import { motion } from "framer-motion";
 import { useT } from "../../context/ThemeContext";
 
-export default function ScannerLoader({ label = "Loading…" }) {
+const STAGES = ["Uploading", "Processing", "Analyzing", "Complete"];
+
+export default function ScannerLoader({ label = "Analyzing…" }) {
   const { T } = useT();
+
+  const activeStage = label.toLowerCase().includes("upload") ? 0
+    : label.toLowerCase().includes("process") ? 1
+    : label.toLowerCase().includes("analyz") ? 2
+    : 1;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35 }}
+      transition={{ duration: 0.3 }}
       style={{
         padding: "1.5rem",
-        borderRadius: 20,
+        borderRadius: 12,
         border: `1px solid ${T.border}`,
         background: T.bgCard,
-        color: T.textMuted,
+        display: "flex",
+        flexDirection: "column",
+        gap: "1.1rem",
       }}
     >
-      <div style={{ fontWeight: 700, color: T.text, marginBottom: 8 }}>{label}</div>
-      <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
-        {[0, 1, 2].map((index) => (
-          <motion.span
-            key={index}
-            animate={{ y: [0, -6, 0] }}
-            transition={{ duration: 0.9, repeat: Infinity, delay: index * 0.12 }}
-            style={{
-              width: 10,
-              height: 10,
-              borderRadius: "50%",
-              background: T.accent,
-            }}
-          />
+      {/* Stage label */}
+      <div style={{ display: "flex", alignItems: "center", gap: "0.65rem" }}>
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          style={{
+            width: 18,
+            height: 18,
+            border: `2.5px solid ${T.border}`,
+            borderTopColor: T.accent,
+            borderRadius: "50%",
+            flexShrink: 0,
+          }}
+        />
+        <span style={{ fontSize: "0.88rem", fontWeight: 700, color: T.text }}>{label}</span>
+      </div>
+
+      {/* Stage progress */}
+      <div style={{ display: "flex", gap: "0.35rem" }}>
+        {STAGES.map((stage, i) => (
+          <div key={stage} style={{ flex: 1, display: "flex", flexDirection: "column", gap: "0.3rem" }}>
+            <div
+              style={{
+                height: 3,
+                borderRadius: 2,
+                background: i <= activeStage ? T.accent : T.border,
+                transition: "background 0.3s",
+              }}
+            />
+            <span
+              style={{
+                fontSize: "0.6rem",
+                color: i <= activeStage ? T.accent : T.textMuted,
+                fontWeight: i === activeStage ? 700 : 400,
+                textAlign: "center",
+              }}
+            >
+              {stage}
+            </span>
+          </div>
         ))}
       </div>
     </motion.div>

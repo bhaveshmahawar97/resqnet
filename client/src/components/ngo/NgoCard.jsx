@@ -4,21 +4,25 @@ import { useT } from "../../context/ThemeContext";
 import { vFadeUp } from "../../animations/variants";
 import Btn from "../ui/Button";
 
-const TYPE_COLORS = {
-  Rescue: { bg: "rgba(234, 88, 12, 0.15)", text: "#EA580C" },
-  Shelter: { bg: "rgba(37, 99, 235, 0.15)", text: "#2563EB" },
-  Medical: { bg: "rgba(22, 163, 74, 0.15)", text: "#16A34A" },
-  Wildlife: { bg: "rgba(217, 119, 6, 0.15)", text: "#D97706" },
-  Adoption: { bg: "rgba(147, 51, 234, 0.15)", text: "#9333EA" },
-  Sanctuary: { bg: "rgba(13, 148, 136, 0.15)", text: "#0D9488" },
-};
+function getTypeColors(type, T) {
+  const map = {
+    Rescue:    { bg: T.dangerPale,   text: T.danger },
+    Medical:   { bg: T.successPale,  text: T.success },
+    Wildlife:  { bg: T.infoPale,     text: T.info },
+    Shelter:   { bg: T.accentPale,   text: T.accent },
+    Adoption:  { bg: T.accentPale,   text: T.accent },
+    Advocacy:  { bg: T.warningPale,  text: T.warning },
+    Sanctuary: { bg: T.bgAlt,        text: T.textSub },
+  };
+  return map[type] || { bg: T.bgAlt, text: T.textSub };
+}
 
 export default function NgoCard({ ngo, i }) {
   const { T } = useT();
   const [hov, setHov] = useState(false);
   const type = (ngo.specialties || ["Partner"])[0];
   const focus = (ngo.specialties || []).slice(0, 3).join(", ") || "Rescue support";
-  const tc = TYPE_COLORS[type] || TYPE_COLORS.Rescue;
+  const tc = getTypeColors(type, T);
 
   // Ensure organizationName/name are supported
   const name = ngo.organizationName || ngo.name || "Unknown NGO";
@@ -65,8 +69,8 @@ export default function NgoCard({ ngo, i }) {
         <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "0.35rem" }}>
           <span style={{ fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: tc.text, background: tc.bg, padding: "0.18rem 0.55rem", borderRadius: 20 }}>{type}</span>
           <div style={{ display: "flex", alignItems: "center", gap: "0.25rem" }}>
-            <div style={{ width: 5, height: 5, borderRadius: "50%", background: ngo.verified ? T.accent : "#F59E0B" }} />
-            <span style={{ fontSize: "0.65rem", color: ngo.verified ? T.accent : "#D97706", fontWeight: 600 }}>{ngo.verified ? "Verified" : "Unverified"}</span>
+            <div style={{ width: 5, height: 5, borderRadius: "50%", background: ngo.verified ? T.success : T.warning }} />
+            <span style={{ fontSize: "0.65rem", color: ngo.verified ? T.success : T.warning, fontWeight: 600 }}>{ngo.verified ? "Verified" : "Unverified"}</span>
           </div>
         </div>
       </div>

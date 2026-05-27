@@ -82,9 +82,9 @@ export default function ScannerHistory() {
             style={{
               padding: "1.5rem",
               borderRadius: 12,
-              border: "1px solid #DC2626",
-              background: "rgba(220,38,38,0.08)",
-              color: "#B91C1C",
+              border: `1px solid ${T.dangerBorder}`,
+              background: T.dangerPale,
+              color: T.danger,
             }}
           >
             {error}
