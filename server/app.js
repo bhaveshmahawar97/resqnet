@@ -13,8 +13,6 @@ import { CORE_DB_NAME, AI_DB_NAME, isCoreConnected, isAiConnected } from "./conf
 import { CORE_COLLECTIONS, AI_COLLECTIONS } from "./models/index.js";
 import authRoutes from "./routes/auth.js";
 import rescueRoutes from "./routes/rescue.js";
-import uploadRoutes from "./routes/uploadRoutes.js";
-import adminRoutes from "./routes/adminRoutes.js";
 import aiRoutes from "./routes/aiRoutes.js";
 import userRoutes from "./routes/users.js";
 import adoptionRoutes from "./routes/adoption.js";
@@ -123,8 +121,6 @@ app.get("/api/health", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/rescue", rescueRoutes);
 app.use("/api/ai", aiRoutes);
-app.use("/api/upload", uploadRoutes);
-app.use("/api/admin", adminRoutes);
 app.use("/api/scanner", scannerRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/adoption", adoptionRoutes);

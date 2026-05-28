@@ -1,47 +1,14 @@
-import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { useT } from '../../context/ThemeContext';
-import Button from '../ui/Button';
+import { Link } from "react-router-dom";
+import { useT } from "../context/ThemeContext";
 
 export default function NotFound() {
   const { T } = useT();
-
   return (
-    <div style={{
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      minHeight: '80vh',
-      textAlign: 'center',
-      padding: '2rem'
-    }}>
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        style={{
-          background: T.bgCard,
-          padding: '3rem',
-          borderRadius: 16,
-          boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
-          border: `1px solid ${T.border}`,
-          maxWidth: 400,
-          width: '100%'
-        }}
-      >
-        <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🐕</div>
-        <h1 style={{ color: T.textHeading, fontSize: '2rem', margin: '0 0 0.5rem 0' }}>404</h1>
-        <h2 style={{ color: T.text, fontSize: '1.25rem', margin: '0 0 1rem 0' }}>Page Not Found</h2>
-        <p style={{ color: T.textMuted, fontSize: '0.9rem', marginBottom: '2rem', lineHeight: 1.5 }}>
-          Oops! The page you're looking for seems to have wandered off. Let's get you back home.
-        </p>
-        <Link to="/" style={{ textDecoration: 'none' }}>
-          <Button variant="primary" style={{ width: '100%' }}>
-            Return Home
-          </Button>
-        </Link>
-      </motion.div>
-    </div>
+    <main style={{ width:"100%", minHeight:"80vh", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", background:T.bg, padding:"2rem", textAlign:"center" }}>
+      <div style={{ fontSize:"4rem", fontWeight:900, color:T.border, letterSpacing:"-0.05em", lineHeight:1 }}>404</div>
+      <h1 style={{ fontSize:"1.25rem", fontWeight:800, color:T.text, margin:"1rem 0 0.5rem" }}>Page not found</h1>
+      <p style={{ fontSize:"0.85rem", color:T.textMuted, margin:"0 0 1.5rem", lineHeight:1.6 }}>The page you're looking for doesn't exist or has been moved.</p>
+      <Link to="/" style={{ padding:"0.65rem 1.25rem", borderRadius:8, background:T.accent, color:"#fff", fontWeight:700, fontSize:"0.85rem", textDecoration:"none" }}>Back to Home</Link>
+    </main>
   );
 }

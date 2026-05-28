@@ -83,7 +83,7 @@ export default function AnalysisReportModal({ scanData, onClose }) {
                 <div style={{ fontSize: "0.75rem", fontWeight: 700, color: T.textMuted, textTransform: "uppercase", marginBottom: 4 }}>Detected Species</div>
                 <div style={{ fontSize: "1rem", fontWeight: 700, color: T.textHeading }}>{analysis.animalType || scanData.animalType || "Unknown"}</div>
               </div>
-              <div style={{ padding: "1rem", borderRadius: 12, border: `1px solid ${T.border}`, background: T.bgAlt, borderLeft: `4px solid ${severityColor}` }}>
+              <div style={{ padding: "1rem", borderRadius: 12, borderTop: `1px solid ${T.border}`, borderRight: `1px solid ${T.border}`, borderBottom: `1px solid ${T.border}`, background: T.bgAlt, borderLeft: `4px solid ${severityColor}` }}>
                 <div style={{ fontSize: "0.75rem", fontWeight: 700, color: T.textMuted, textTransform: "uppercase", marginBottom: 4 }}>Severity Assessment</div>
                 <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
                   <span style={{ fontSize: "1.2rem", fontWeight: 800, color: severityColor, textTransform: "capitalize" }}>{scanData.severity || "Unknown"}</span>

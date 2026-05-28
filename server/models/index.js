@@ -22,6 +22,7 @@ export const CORE_COLLECTIONS = {
   analytics: "analytics",
   reports: "reports",
   ngos: "ngos",
+  feedbacks: "feedbacks",
 };
 
 export const AI_COLLECTIONS = {
@@ -81,6 +82,7 @@ export const Adoption = createModelProxy(() => requireCoreModel("Adoption"));
 export const Analytics = createModelProxy(() => requireCoreModel("Analytics"));
 export const Report = createModelProxy(() => requireCoreModel("Report"));
 export const NGO = createModelProxy(() => requireCoreModel("NGO"));
+export const Feedback = createModelProxy(() => requireCoreModel("Feedback"));
 
 export const AIScan = createModelProxy(() => requireAiModel("AIScan"));
 export const AIPrediction = createModelProxy(() => requireAiModel("AIPrediction"));

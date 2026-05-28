@@ -4,14 +4,15 @@ import { SEVERITY_COLOR, STATUS_LABEL } from "../../../constants/ui";
 // ─── SEVERITY BADGE ───────────────────────────────────────────────────────────
 export function SeverityBadge({ level, size = "sm" }) {
   const { T } = useT();
-  const colorMap = { critical: "#DC2626", high: "#EA580C", medium: "#D97706", low: "#059669" };
-  const color = colorMap[level] || SEVERITY_COLOR[level] || T.accent;
+  const safeLevel = typeof level === "string" ? level : "unknown";
+  const colorMap = { critical: "#DC2626", high: "#EA580C", medium: "#D97706", low: "#059669", unknown: T.textMuted };
+  const color = colorMap[safeLevel] || SEVERITY_COLOR[safeLevel] || T.accent;
   return (
     <span className={`rq-chip ${size === "sm" ? "rq-chip-sm" : ""}`} style={{
       background: `${color}15`, borderColor: `${color}30`, color
     }}>
       <span style={{ width: 6, height: 6, borderRadius: "50%", background: color, flexShrink: 0 }} />
-      {level}
+      {safeLevel}
     </span>
   );
 }
@@ -19,6 +20,7 @@ export function SeverityBadge({ level, size = "sm" }) {
 // ─── STATUS BADGE ─────────────────────────────────────────────────────────────
 export function StatusBadge({ status }) {
   const { T } = useT();
+  const safeStatus = typeof status === "string" ? status : "";
   const colorMap = {
     pending: "#9333EA", accepted: "#2563EB", in_progress: "#0EA5E9",
     rescued: "#059669", completed: "#10B981", cancelled: "#EF4444",
@@ -26,13 +28,14 @@ export function StatusBadge({ status }) {
     active: "#059669", available: "#059669", busy: "#EA580C", offline: "#6B7280",
     approved: "#059669", rejected: "#EF4444",
   };
-  const color = colorMap[status] || T.textMuted;
+  const color = colorMap[safeStatus] || T.textMuted;
+  const label = STATUS_LABEL[safeStatus] || safeStatus.replace(/_/g, " ") || "Unknown";
   return (
     <span className="rq-chip" style={{
       background: `${color}15`, borderColor: `${color}30`, color
     }}>
       <span style={{ width: 6, height: 6, borderRadius: "50%", background: color, flexShrink: 0 }} />
-      {STATUS_LABEL[status] || status?.replace(/_/g, " ") || status}
+      {label}
     </span>
   );
 }
