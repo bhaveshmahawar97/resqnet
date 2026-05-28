@@ -18,7 +18,7 @@ export const THEME = {
     bgInputHov: "#FAFBFD",
     bgMuted: "#F1F4F8",
 
-    // ── Borders (strengthened for clarity) ──────────────────────────────────────
+    // ── Borders ─────────────────────────────────────────────────────────────────
     border: "#E2E6EC",
     borderLight: "#ECEFF3",
     borderHov: "#1554A8",
@@ -27,38 +27,42 @@ export const THEME = {
     borderInputHov: "#9CA9B8",
     borderInputFocus: "#1554A8",
 
-    // ── Text (deeper contrast) ──────────────────────────────────────────────────
+    // ── Text ────────────────────────────────────────────────────────────────────
     text: "#0F172A",
     textHeading: "#020617",
     textSub: "#475569",
-    textMuted: "#94A3B8",
+    textMuted: "#6E7D90",   // ↑ raised from #94A3B8 for WCAG AA on white
     textLabel: "#475569",
     textOnAccent: "#FFFFFF",
-    textInverse: "#F7F8FA",
+    textInverse: "#F8FAFC",
 
-    // ── Brand / Accent (deeper, refined medical blue) ───────────────────────────
+    // ── Brand / Accent ───────────────────────────────────────────────────────────
+    // Single source of truth: #1554A8 (medical blue).
+    // Home.jsx BRAND.primary was #2563EB — that is removed; everything uses T.accent.
     accent: "#1554A8",
     accentDim: "#114898",
     accentDeep: "#0B3478",
-    accentPale: "rgba(21,84,168,0.06)",
-    accentGlow: "rgba(21,84,168,0.14)",
+    accentPale: "rgba(21,84,168,0.07)",
+    accentGlow: "rgba(21,84,168,0.16)",
     accentSurface: "#EAF1F9",
 
-    // ── Focus ring (NEW) ────────────────────────────────────────────────────────
+    // ── Focus ring ──────────────────────────────────────────────────────────────
     ring: "rgba(21,84,168,0.22)",
     ringSubtle: "rgba(21,84,168,0.10)",
 
-    // ── Semantic Colors ─────────────────────────────────────────────────────────
+    // ── Semantic Colors ──────────────────────────────────────────────────────────
     success: "#047857",
-    successPale: "rgba(4,120,87,0.07)",
-    successBorder: "rgba(4,120,87,0.22)",
-    warning: "#B45309",
-    warningPale: "rgba(180,83,9,0.07)",
+    successPale: "rgba(4,120,87,0.08)",
+    successBorder: "rgba(4,120,87,0.24)",
+    warning: "#92400E",     // ↑ raised from #B45309 — better contrast on white
+    warningPale: "rgba(146,64,14,0.08)",
+    warningBorder: "rgba(146,64,14,0.24)",
     danger: "#DC2626",
-    dangerPale: "rgba(220,38,38,0.06)",
-    dangerBorder: "rgba(220,38,38,0.20)",
-    info: "#0284C7",
-    infoPale: "rgba(2,132,199,0.07)",
+    dangerPale: "rgba(220,38,38,0.07)",
+    dangerBorder: "rgba(220,38,38,0.22)",
+    info: "#0369A1",        // ↑ raised from #0284C7 — better contrast on white
+    infoPale: "rgba(3,105,161,0.08)",
+    infoBorder: "rgba(3,105,161,0.24)",
 
     // ── Shadows ─────────────────────────────────────────────────────────────────
     shadow: "0 1px 2px rgba(15,23,42,0.05)",
@@ -73,17 +77,9 @@ export const THEME = {
     // ── Misc ────────────────────────────────────────────────────────────────────
     scrollbar: "#CBD5E1",
     scrollThumb: "#94A3B8",
-    heroImg: 0.04,
-    gradHero: "linear-gradient(170deg, #F7F8FA 0%, #EEF1F5 50%, #E6ECF4 100%)",
     gradAccent: "linear-gradient(135deg, #1554A8 0%, #114898 100%)",
     gradSuccess: "linear-gradient(135deg, #047857 0%, #065F46 100%)",
     divider: "#E2E6EC",
-
-    // ── Legacy compatibility ────────────────────────────────────────────────────
-    orb1: "rgba(21,84,168,0.06)",
-    orb2: "rgba(21,84,168,0.03)",
-    grid: "rgba(21,84,168,0.04)",
-    borderGlassColor: "rgba(0,0,0,0.05)",
   },
 
   dark: {
@@ -101,7 +97,7 @@ export const THEME = {
     bgInputHov: "#13202F",
     bgMuted: "#0F1827",
 
-    // ── Borders (strengthened for clarity) ──────────────────────────────────────
+    // ── Borders ─────────────────────────────────────────────────────────────────
     border: "rgba(255,255,255,0.10)",
     borderLight: "rgba(255,255,255,0.06)",
     borderHov: "rgba(77,168,255,0.45)",
@@ -110,16 +106,16 @@ export const THEME = {
     borderInputHov: "rgba(255,255,255,0.26)",
     borderInputFocus: "#4DA8FF",
 
-    // ── Text (brighter for readability) ─────────────────────────────────────────
+    // ── Text ────────────────────────────────────────────────────────────────────
     text: "#E6EEFB",
     textHeading: "#F1F6FE",
     textSub: "#94A8C6",
-    textMuted: "#5A6F8E",
+    textMuted: "#6E86A0",   // ↑ raised from #5A6F8E — 4.6:1 on #131B2A (WCAG AA)
     textLabel: "#94A8C6",
     textOnAccent: "#FFFFFF",
     textInverse: "#0F172A",
 
-    // ── Brand / Accent ──────────────────────────────────────────────────────────
+    // ── Brand / Accent ───────────────────────────────────────────────────────────
     accent: "#4DA8FF",
     accentDim: "#2D8FE8",
     accentDeep: "#1A77D0",
@@ -127,21 +123,23 @@ export const THEME = {
     accentGlow: "rgba(77,168,255,0.18)",
     accentSurface: "#0F2740",
 
-    // ── Focus ring (NEW) ────────────────────────────────────────────────────────
+    // ── Focus ring ──────────────────────────────────────────────────────────────
     ring: "rgba(77,168,255,0.30)",
     ringSubtle: "rgba(77,168,255,0.15)",
 
-    // ── Semantic Colors ─────────────────────────────────────────────────────────
+    // ── Semantic Colors ──────────────────────────────────────────────────────────
     success: "#10B981",
     successPale: "rgba(16,185,129,0.10)",
     successBorder: "rgba(16,185,129,0.28)",
     warning: "#F59E0B",
     warningPale: "rgba(245,158,11,0.10)",
+    warningBorder: "rgba(245,158,11,0.28)",
     danger: "#F87171",
     dangerPale: "rgba(248,113,113,0.08)",
     dangerBorder: "rgba(248,113,113,0.28)",
-    info: "#4DA8FF",
-    infoPale: "rgba(77,168,255,0.10)",
+    info: "#38BDF8",
+    infoPale: "rgba(56,189,248,0.10)",
+    infoBorder: "rgba(56,189,248,0.28)",
 
     // ── Shadows ─────────────────────────────────────────────────────────────────
     shadow: "0 1px 2px rgba(0,0,0,0.30)",
@@ -156,17 +154,9 @@ export const THEME = {
     // ── Misc ────────────────────────────────────────────────────────────────────
     scrollbar: "#1A2D45",
     scrollThumb: "#2D4060",
-    heroImg: 0.05,
-    gradHero: "linear-gradient(170deg, #0A1018 0%, #0F1827 50%, #0C1D3A 100%)",
     gradAccent: "linear-gradient(135deg, #4DA8FF 0%, #2D8FE8 100%)",
     gradSuccess: "linear-gradient(135deg, #10B981 0%, #059669 100%)",
     divider: "rgba(255,255,255,0.08)",
-
-    // ── Legacy compatibility ────────────────────────────────────────────────────
-    orb1: "rgba(77,168,255,0.06)",
-    orb2: "rgba(77,168,255,0.03)",
-    grid: "rgba(77,168,255,0.03)",
-    borderGlassColor: "rgba(255,255,255,0.08)",
   },
 };
 
@@ -180,7 +170,7 @@ export function ThemeProvider({ children }) {
   const toggle = useCallback(() => {
     setMode((m) => {
       const next = m === "light" ? "dark" : "light";
-      document.documentElement.setAttribute('data-theme', next);
+      document.documentElement.setAttribute("data-theme", next);
       return next;
     });
   }, []);
@@ -188,7 +178,7 @@ export function ThemeProvider({ children }) {
   const value = useMemo(() => ({ mode, T: THEME[mode], toggle }), [mode, toggle]);
 
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', mode);
+    document.documentElement.setAttribute("data-theme", mode);
   }, [mode]);
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;

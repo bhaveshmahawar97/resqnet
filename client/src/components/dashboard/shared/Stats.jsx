@@ -28,7 +28,7 @@ export function DashboardStats({ stats = [] }) {
             {stat.value}
           </div>
           {stat.sub && (
-            <div style={{ fontSize: "var(--text-xs)", marginTop: "var(--space-2)", fontWeight: 600, color: stat.trend === "up" ? "#059669" : stat.trend === "down" ? "#DC2626" : T.textMuted }}>
+            <div style={{ fontSize: "var(--text-xs)", marginTop: "var(--space-2)", fontWeight: 600, color: stat.trend === "up" ? T.success : stat.trend === "down" ? T.danger : T.textMuted }}>
               {stat.trend === "up" ? "↑ " : stat.trend === "down" ? "↓ " : ""}{stat.sub}
             </div>
           )}

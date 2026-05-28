@@ -1,17 +1,29 @@
 import { useT } from "../../../context/ThemeContext";
-import { SEVERITY_COLOR, STATUS_LABEL } from "../../../constants/ui";
+import { STATUS_LABEL } from "../../../constants/ui";
 
 // ─── SEVERITY BADGE ───────────────────────────────────────────────────────────
 export function SeverityBadge({ level, size = "sm" }) {
   const { T } = useT();
-  const safeLevel = typeof level === "string" ? level : "unknown";
-  const colorMap = { critical: "#DC2626", high: "#EA580C", medium: "#D97706", low: "#059669", unknown: T.textMuted };
-  const color = colorMap[safeLevel] || SEVERITY_COLOR[safeLevel] || T.accent;
+  const safeLevel = typeof level === "string" ? level.toLowerCase() : "unknown";
+
+  // All colors from T.* — no hardcoded hex
+  const colorMap = {
+    critical: { color: T.danger,   bg: T.dangerPale,   border: T.dangerBorder },
+    high:     { color: T.warning,  bg: T.warningPale,  border: T.warningBorder },
+    medium:   { color: T.info,     bg: T.infoPale,     border: T.infoBorder },
+    moderate: { color: T.info,     bg: T.infoPale,     border: T.infoBorder },
+    low:      { color: T.success,  bg: T.successPale,  border: T.successBorder },
+    unknown:  { color: T.textMuted, bg: T.bgAlt,       border: T.border },
+  };
+
+  const c = colorMap[safeLevel] || colorMap.unknown;
+
   return (
-    <span className={`rq-chip ${size === "sm" ? "rq-chip-sm" : ""}`} style={{
-      background: `${color}15`, borderColor: `${color}30`, color
-    }}>
-      <span style={{ width: 6, height: 6, borderRadius: "50%", background: color, flexShrink: 0 }} />
+    <span
+      className={`rq-chip ${size === "sm" ? "rq-chip-sm" : ""}`}
+      style={{ background: c.bg, borderColor: c.border, color: c.color }}
+    >
+      <span style={{ width: 6, height: 6, borderRadius: "50%", background: c.color, flexShrink: 0 }} />
       {safeLevel}
     </span>
   );
@@ -21,20 +33,33 @@ export function SeverityBadge({ level, size = "sm" }) {
 export function StatusBadge({ status }) {
   const { T } = useT();
   const safeStatus = typeof status === "string" ? status : "";
+
+  // All colors from T.* — no hardcoded hex
+  // "pending" maps to info (no purple in design system)
   const colorMap = {
-    pending: "#9333EA", accepted: "#2563EB", in_progress: "#0EA5E9",
-    rescued: "#059669", completed: "#10B981", cancelled: "#EF4444",
-    dispatched: "#D97706", on_site: T.accent, resolved: "#059669",
-    active: "#059669", available: "#059669", busy: "#EA580C", offline: "#6B7280",
-    approved: "#059669", rejected: "#EF4444",
+    pending:     { color: T.info,     bg: T.infoPale,    border: T.infoBorder },
+    accepted:    { color: T.accent,   bg: T.accentPale,  border: `${T.accent}33` },
+    in_progress: { color: T.info,     bg: T.infoPale,    border: T.infoBorder },
+    dispatched:  { color: T.warning,  bg: T.warningPale, border: T.warningBorder },
+    on_site:     { color: T.accent,   bg: T.accentPale,  border: `${T.accent}33` },
+    rescued:     { color: T.success,  bg: T.successPale, border: T.successBorder },
+    resolved:    { color: T.success,  bg: T.successPale, border: T.successBorder },
+    completed:   { color: T.success,  bg: T.successPale, border: T.successBorder },
+    active:      { color: T.success,  bg: T.successPale, border: T.successBorder },
+    available:   { color: T.success,  bg: T.successPale, border: T.successBorder },
+    approved:    { color: T.success,  bg: T.successPale, border: T.successBorder },
+    cancelled:   { color: T.danger,   bg: T.dangerPale,  border: T.dangerBorder },
+    rejected:    { color: T.danger,   bg: T.dangerPale,  border: T.dangerBorder },
+    busy:        { color: T.warning,  bg: T.warningPale, border: T.warningBorder },
+    offline:     { color: T.textMuted, bg: T.bgAlt,      border: T.border },
   };
-  const color = colorMap[safeStatus] || T.textMuted;
+
+  const c = colorMap[safeStatus] || { color: T.textMuted, bg: T.bgAlt, border: T.border };
   const label = STATUS_LABEL[safeStatus] || safeStatus.replace(/_/g, " ") || "Unknown";
+
   return (
-    <span className="rq-chip" style={{
-      background: `${color}15`, borderColor: `${color}30`, color
-    }}>
-      <span style={{ width: 6, height: 6, borderRadius: "50%", background: color, flexShrink: 0 }} />
+    <span className="rq-chip" style={{ background: c.bg, borderColor: c.border, color: c.color }}>
+      <span style={{ width: 6, height: 6, borderRadius: "50%", background: c.color, flexShrink: 0 }} />
       {label}
     </span>
   );
@@ -69,4 +94,3 @@ export function SectionLabel({ children, action, onAction }) {
     </div>
   );
 }
-

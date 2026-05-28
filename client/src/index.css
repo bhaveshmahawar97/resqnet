@@ -265,37 +265,29 @@ a {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-family: inherit;
+  gap: 0.45rem;
+  padding: 0.5625rem 1.125rem;
+  border-radius: var(--radius-md);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
   font-weight: 600;
   letter-spacing: -0.01em;
-  border-radius: var(--radius-md);
-  border: none;
   cursor: pointer;
+  border: none;
+  transition: all var(--transition-base);
   white-space: nowrap;
-  line-height: 1;
-  transition: all var(--transition-fast);
+  line-height: 1.4;
 }
 
 .rq-btn:disabled {
-  opacity: 0.55;
+  opacity: 0.5;
   cursor: not-allowed;
+  pointer-events: none;
 }
 
 /* Button Sizes */
-.rq-btn-sm { padding: 0.4rem 0.875rem; font-size: 0.8rem; gap: 0.35rem; border-radius: var(--radius-md); height: 32px; }
-.rq-btn-md { padding: 0.625rem 1.25rem; font-size: 0.875rem; gap: 0.45rem; border-radius: var(--radius-md); height: 40px; }
-.rq-btn-lg { padding: 0.85rem 1.75rem; font-size: 0.95rem; gap: 0.5rem; border-radius: var(--radius-lg); height: 48px; }
-
-/* (Button Variants — primary block defined later, this block was a duplicate
-   with stale green shadows. Only the outline variant remains here.) */
-.rq-btn-outline {
-  background: transparent;
-  color: var(--accent);
-  border: 1.5px solid var(--accent);
-}
-.rq-btn-outline:hover:not(:disabled) {
-  background: var(--accent-pale);
-}
+.rq-btn-sm { padding: 0.375rem 0.75rem; font-size: 0.75rem; border-radius: var(--radius-sm); }
+.rq-btn-lg { padding: 0.75rem 1.5rem; font-size: var(--text-base); border-radius: var(--radius-md); }
 
 /* ── Stat Card ────────────────────────────────────────────────────────────── */
 .rq-stat-card {
@@ -318,37 +310,12 @@ a {
   background: var(--accent);
 }
 
-/* ── Buttons ──────────────────────────────────────────────────────────────── */
-.rq-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.45rem;
-  padding: 0.5625rem 1.125rem;
-  border-radius: var(--radius-md);
-  font-family: var(--font-sans);
-  font-size: var(--text-sm);
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  cursor: pointer;
-  border: none;
-  transition: all var(--transition-base);
-  white-space: nowrap;
-  line-height: 1.4;
-}
-
-.rq-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  pointer-events: none;
-}
-
+/* ── Button Variants ─────────────────────────────────────────────────────── */
 .rq-btn-primary {
   background: var(--accent);
   color: var(--text-on-accent);
   box-shadow: 0 1px 3px var(--accent-pale);
 }
-
 .rq-btn-primary:hover:not(:disabled) {
   background: var(--accent-dim);
   box-shadow: 0 2px 8px var(--accent-glow);
@@ -359,7 +326,6 @@ a {
   color: var(--text);
   border: 1px solid var(--border-light);
 }
-
 .rq-btn-secondary:hover:not(:disabled) {
   background: var(--accent-surface);
   border-color: var(--border-hov);
@@ -370,7 +336,6 @@ a {
   color: var(--text-sub);
   border: 1px solid var(--border-light);
 }
-
 .rq-btn-ghost:hover:not(:disabled) {
   background: var(--bg-alt);
   color: var(--text);
@@ -381,24 +346,21 @@ a {
   color: var(--danger);
   border: 1px solid var(--danger-border);
 }
-
 .rq-btn-danger:hover:not(:disabled) {
   background: var(--danger-pale);
+  box-shadow: 0 2px 8px var(--danger-pale);
 }
 
-.rq-btn-sm {
-  padding: 0.375rem 0.75rem;
-  font-size: 0.75rem;
-  border-radius: var(--radius-sm);
+.rq-btn-outline {
+  background: transparent;
+  color: var(--accent);
+  border: 1.5px solid var(--accent);
+}
+.rq-btn-outline:hover:not(:disabled) {
+  background: var(--accent-pale);
 }
 
-.rq-btn-lg {
-  padding: 0.75rem 1.5rem;
-  font-size: var(--text-base);
-  border-radius: var(--radius-md);
-}
-
-/* ── Form System ──────────────────────────────────────────────────────────── */
+/* ── Form System ─────────────────────────────────────────────────────────── */
 .rq-form-group {
   display: flex;
   flex-direction: column;
@@ -491,10 +453,11 @@ html[data-theme="dark"] select.rq-input {
   letter-spacing: -0.005em;
 }
 
+/* single canonical .rq-field-error — uses var(--danger) */
 .rq-field-error {
-  font-size: 0.75rem;
+  font-size: var(--text-xs);
   color: var(--danger);
-  margin-top: 0.3rem;
+  margin-top: 4px;
   display: flex;
   align-items: center;
   gap: 0.25rem;
@@ -677,7 +640,7 @@ html[data-theme="dark"] select.rq-input {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #CBD5E1;
+  background: var(--scrollbar);
   border-radius: 999px;
 }
 ::-webkit-scrollbar-thumb:hover {
@@ -938,11 +901,7 @@ html[data-theme="dark"] select.rq-input {
   margin-top: 4px;
 }
 
-.rq-field-error {
-  font-size: var(--text-xs);
-  color: #EF4444;
-  margin-top: 4px;
-}
+/* .rq-field-error canonical definition is above near .rq-label — removed duplicate here */
 
 .rq-form-actions {
   display: flex;
@@ -952,36 +911,8 @@ html[data-theme="dark"] select.rq-input {
   border-top: 1px solid var(--border);
 }
 
-/* ── Modals & Popups ──────────────────────────────────────────────────────── */
-.rq-modal-header {
-  position: sticky;
-  top: 0;
-  background: var(--bg-card);
-  z-index: 10;
-  padding: var(--space-4) var(--space-5);
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.rq-modal-body {
-  padding: var(--space-5);
-  flex: 1;
-  overflow-y: auto;
-}
-
-.rq-modal-footer {
-  position: sticky;
-  bottom: 0;
-  background: var(--bg-card);
-  z-index: 10;
-  padding: var(--space-4) var(--space-5);
-  border-top: 1px solid var(--border);
-  display: flex;
-  gap: var(--space-3);
-  justify-content: flex-end;
-}
+/* .rq-modal-header, .rq-modal-body, .rq-modal-footer canonical definitions are
+   in the Modals section above (~line 726). Removed duplicate definitions here. */
 
 /* ── Typography & Components ──────────────────────────────────────────────── */
 .rq-page-section {
@@ -1064,73 +995,19 @@ html[data-theme="dark"] select.rq-input {
   color: var(--text);
 }
 
-/* ── Dark Mode ────────────────────────────────────────────────────────────── */
-@media (prefers-color-scheme: dark) {
-  .rq-card,
-  .rq-card-elevated,
-  .rq-card-interactive,
-  .rq-card-bordered {
-    background: #141F33;
-    border-color: rgba(255,255,255,0.06);
-    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-  }
+/* ── Dark Mode ──────────────────────────────────────────────────────────────
+   The app uses html[data-theme="dark"] via ThemeContext toggle.
+   All dark mode colors come from CSS variables defined in theme-vars.css.
+   The @media (prefers-color-scheme: dark) block previously here was removed
+   because it conflicted with the app's manual toggle by firing independently
+   of the data-theme attribute, causing hardcoded hex values to override the
+   correct theme-token values. Theme variables in theme-vars.css handle both
+   light and dark surfaces correctly via html[data-theme="dark"] selectors.
+────────────────────────────────────────────────────────────────────────── */
 
-  .rq-card-elevated:hover,
-  .rq-card-interactive:hover {
-    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
-    border-color: rgba(255,255,255,0.1);
-  }
-
-  .rq-stat-card {
-    background: #141F33;
-    border-color: rgba(255,255,255,0.06);
-  }
-
-  .rq-stat-card::before {
-    background: #38BDF8;
-  }
-
-  /* .rq-input dark overrides removed — the consolidated definition above
-     uses CSS vars that flip on html[data-theme="dark"]. Leaving them here
-     would fight the app's theme toggle and override correct values with
-     stale hardcoded colors. */
-
-  .rq-divider {
-    background: rgba(255,255,255,0.06);
-  }
-
-  .rq-table th {
-    background: #0F1E35;
-    border-color: rgba(255,255,255,0.06);
-    color: #7B92B2;
-  }
-
-  .rq-table td {
-    border-color: rgba(255,255,255,0.04);
-    color: #E2EAF4;
-  }
-
-  .rq-table tr:hover td {
-    background: rgba(255,255,255,0.02);
-  }
-
-  .dashboard-section-tabs {
-    background: #0F1E35;
-  }
-
-  .rq-map-container {
-    border-color: rgba(255,255,255,0.06);
-  }
-
-  .rq-modal {
-    background: #141F33;
-    border-color: rgba(255,255,255,0.06);
-    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-  }
-
-  ::-webkit-scrollbar-thumb {
-    background: #2D4060;
-  }
+/* Scrollbar dark mode — safe to use data-theme here */
+html[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  background: var(--scroll-thumb);
 }
 
 /* ── Dashboard Responsive ─────────────────────────────────────────────────── */

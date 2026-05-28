@@ -1,4 +1,4 @@
-/* ── Theme CSS Variables — mirrors ThemeContext.jsx THEME object ── */
+/* ── Theme CSS Variables — mirrors ThemeContext.jsx THEME object exactly ── */
 :root {
   /* Surfaces */
   --bg: #F7F8FA;
@@ -27,17 +27,17 @@
   --text: #0F172A;
   --text-heading: #020617;
   --text-sub: #475569;
-  --text-muted: #94A3B8;
+  --text-muted: #6E7D90;
   --text-label: #475569;
   --text-on-accent: #FFFFFF;
-  --text-inverse: #F7F8FA;
+  --text-inverse: #F8FAFC;
 
-  /* Brand */
+  /* Brand — single source: #1554A8 */
   --accent: #1554A8;
   --accent-dim: #114898;
   --accent-deep: #0B3478;
-  --accent-pale: rgba(21,84,168,0.06);
-  --accent-glow: rgba(21,84,168,0.14);
+  --accent-pale: rgba(21,84,168,0.07);
+  --accent-glow: rgba(21,84,168,0.16);
   --accent-surface: #EAF1F9;
 
   /* Focus ring */
@@ -46,15 +46,17 @@
 
   /* Semantic */
   --success: #047857;
-  --success-pale: rgba(4,120,87,0.07);
-  --success-border: rgba(4,120,87,0.22);
-  --warning: #B45309;
-  --warning-pale: rgba(180,83,9,0.07);
+  --success-pale: rgba(4,120,87,0.08);
+  --success-border: rgba(4,120,87,0.24);
+  --warning: #92400E;
+  --warning-pale: rgba(146,64,14,0.08);
+  --warning-border: rgba(146,64,14,0.24);
   --danger: #DC2626;
-  --danger-pale: rgba(220,38,38,0.06);
-  --danger-border: rgba(220,38,38,0.20);
-  --info: #0284C7;
-  --info-pale: rgba(2,132,199,0.07);
+  --danger-pale: rgba(220,38,38,0.07);
+  --danger-border: rgba(220,38,38,0.22);
+  --info: #0369A1;
+  --info-pale: rgba(3,105,161,0.08);
+  --info-border: rgba(3,105,161,0.24);
 
   /* Shadows */
   --shadow: 0 1px 2px rgba(15,23,42,0.05);
@@ -69,15 +71,9 @@
   /* Misc */
   --scrollbar: #CBD5E1;
   --scroll-thumb: #94A3B8;
-  --hero-img: 0.04;
-  --grad-hero: linear-gradient(170deg, #F7F8FA 0%, #EEF1F5 50%, #E6ECF4 100%);
   --grad-accent: linear-gradient(135deg, #1554A8 0%, #114898 100%);
   --grad-success: linear-gradient(135deg, #047857 0%, #065F46 100%);
   --divider: #E2E6EC;
-  --orb1: rgba(21,84,168,0.06);
-  --orb2: rgba(21,84,168,0.03);
-  --grid: rgba(21,84,168,0.04);
-  --border-glass-color: rgba(0,0,0,0.05);
 }
 
 html[data-theme="dark"] {
@@ -108,7 +104,7 @@ html[data-theme="dark"] {
   --text: #E6EEFB;
   --text-heading: #F1F6FE;
   --text-sub: #94A8C6;
-  --text-muted: #5A6F8E;
+  --text-muted: #6E86A0;
   --text-label: #94A8C6;
   --text-on-accent: #FFFFFF;
   --text-inverse: #0F172A;
@@ -131,11 +127,13 @@ html[data-theme="dark"] {
   --success-border: rgba(16,185,129,0.28);
   --warning: #F59E0B;
   --warning-pale: rgba(245,158,11,0.10);
+  --warning-border: rgba(245,158,11,0.28);
   --danger: #F87171;
   --danger-pale: rgba(248,113,113,0.08);
   --danger-border: rgba(248,113,113,0.28);
-  --info: #4DA8FF;
-  --info-pale: rgba(77,168,255,0.10);
+  --info: #38BDF8;
+  --info-pale: rgba(56,189,248,0.10);
+  --info-border: rgba(56,189,248,0.28);
 
   /* Shadows */
   --shadow: 0 1px 2px rgba(0,0,0,0.30);
@@ -150,13 +148,7 @@ html[data-theme="dark"] {
   /* Misc */
   --scrollbar: #1A2D45;
   --scroll-thumb: #2D4060;
-  --hero-img: 0.05;
-  --grad-hero: linear-gradient(170deg, #0A1018 0%, #0F1827 50%, #0C1D3A 100%);
   --grad-accent: linear-gradient(135deg, #4DA8FF 0%, #2D8FE8 100%);
   --grad-success: linear-gradient(135deg, #10B981 0%, #059669 100%);
   --divider: rgba(255,255,255,0.08);
-  --orb1: rgba(77,168,255,0.06);
-  --orb2: rgba(77,168,255,0.03);
-  --grid: rgba(77,168,255,0.03);
-  --border-glass-color: rgba(255,255,255,0.08);
 }

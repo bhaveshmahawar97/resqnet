@@ -13,7 +13,7 @@ export function DashboardHeader({ role, userName }) {
     volunteer: "View your active missions and field assignments",
     admin: "Platform health, NGO verification, and system analytics",
   };
-  const roleColors = { user: T.accent, ngo: T.success || "#059669", volunteer: T.warning || "#D97706", admin: T.danger || "#DC2626" };
+  const roleColors = { user: T.accent, ngo: T.success, volunteer: T.warning, admin: T.danger };
   const rColor = roleColors[role] || T.accent;
 
   return (
@@ -23,7 +23,7 @@ export function DashboardHeader({ role, userName }) {
           {roleLabels[role] || "Dashboard"}
         </div>
         <h1 className="rq-section-title" style={{ margin: 0, marginBottom: "var(--space-1)" }}>
-          Welcome back, {userName} 👋
+          Welcome back, {userName}
         </h1>
         <p style={{ margin: 0, fontSize: "var(--text-sm)", color: T.textSub }}>
           {roleDescriptions[role]}
