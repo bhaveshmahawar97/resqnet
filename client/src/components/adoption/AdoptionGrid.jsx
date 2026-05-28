@@ -2,7 +2,6 @@ import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useT } from "../../context/ThemeContext";
 import useViewport from "../../hooks/useViewport";
-import Label from "../ui/Label";
 import Button from "../ui/Button";
 import AnimalCard from "./AnimalCard";
 import AdoptionModal from "./AdoptionModal";
@@ -13,7 +12,6 @@ import EmptyState from "../system/EmptyState";
 
 const ALL_SPECIES  = ["All", "Dog", "Cat", "Bird", "Rabbit", "Wildlife"];
 const ALL_STATUSES = ["All", "Available", "In Foster", "On Hold"];
-import { useAuth } from "../../context/AuthContext";
 
 const PLACEHOLDER_IMG = (species) =>
   `https://placehold.co/480x360/f5f5f5/666?text=${encodeURIComponent(species || "Animal")}`;

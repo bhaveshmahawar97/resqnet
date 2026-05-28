@@ -7,6 +7,7 @@ import useViewport from "../../hooks/useViewport";
 import Button from "../ui/Button";
 import ThemeToggle from "../ui/ThemeToggle";
 import logo from "../../assets/logos/logo-main.png";
+import FeedbackModal from "../system/FeedbackModal";
  
 import { ROUTE_LINKS } from "../../routes/routesConfig";
 import { useNotification } from "../../context/NotificationContext";
@@ -22,6 +23,7 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(false);
 
   const { unreadCount } = useNotification();
 
@@ -32,6 +34,7 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", fn);
   }, []);
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { setMenuOpen(false); }, [location.pathname, location.hash]);
 
   // Close user menu when clicking outside
@@ -145,6 +148,13 @@ export default function Navbar() {
 
           {/* Controls */}
           <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", flexShrink: 0 }}>
+            <button 
+              onClick={() => setShowFeedback(true)} 
+              style={{ background: "none", border: "none", cursor: "pointer", color: T.textSub, display: "flex", alignItems: "center", padding: "4px" }} 
+              title="Send Feedback"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+            </button>
             <ThemeToggle />
 
             {isAuthenticated ? (
@@ -300,6 +310,20 @@ export default function Navbar() {
                                 My Dashboard
                               </button>
                               <button
+                                onClick={() => { navigate('/profile'); setUserMenuOpen(false); }}
+                                style={{
+                                  width: "100%", padding: "0.5rem 0.65rem", borderRadius: 6,
+                                  border: "none", background: "transparent",
+                                  color: T.textSub, fontSize: "0.8rem", fontWeight: 500,
+                                  cursor: "pointer", fontFamily: "inherit", textAlign: "left",
+                                  transition: "background 0.12s",
+                                }}
+                                onMouseEnter={(e) => e.currentTarget.style.background = T.bgAlt}
+                                onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
+                              >
+                                My Profile
+                              </button>
+                              <button
                                 onClick={handleLogout}
                                 style={{
                                   width: "100%", padding: "0.5rem 0.65rem", borderRadius: 6,
@@ -439,12 +463,37 @@ export default function Navbar() {
                     Go to Dashboard
                   </button>
                   <button
+                    onClick={() => { setMenuOpen(false); navigate('/profile'); }}
+                    style={{
+                      width: "100%", padding: "0.65rem 0.875rem", borderRadius: 8,
+                      border: `1px solid ${T.border}`, background: T.bgCard,
+                      color: T.text, fontSize: "0.85rem", fontWeight: 600,
+                      cursor: "pointer", fontFamily: "inherit",
+                    }}
+                  >
+                    My Profile
+                  </button>
+                  <button
+                    onClick={() => {
+                      setMenuOpen(false);
+                      setShowFeedback(true);
+                    }}
+                    style={{
+                      width: "100%", padding: "0.65rem 0.875rem", borderRadius: 8,
+                      border: `1px solid ${T.border}`, background: T.bgCard,
+                      color: T.text, fontSize: "0.85rem", fontWeight: 600,
+                      cursor: "pointer", fontFamily: "inherit", marginTop: "0.4rem",
+                    }}
+                  >
+                    Send Feedback
+                  </button>
+                  <button
                     onClick={handleLogout}
                     style={{
                       width: "100%", padding: "0.65rem 0.875rem", borderRadius: 8,
                       border: "none", background: T.dangerPale || "rgba(220,38,38,0.06)",
                       color: T.danger || "#DC2626", fontSize: "0.85rem", fontWeight: 600,
-                      cursor: "pointer", fontFamily: "inherit",
+                      cursor: "pointer", fontFamily: "inherit", marginTop: "0.4rem",
                     }}
                   >
                     Sign out

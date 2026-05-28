@@ -10,11 +10,9 @@ import { useAdoption } from "../../context/AdoptionContext";
 import Button from "../ui/Button";
 
 const STEPS = [
-  { step: 1, title: "Express Interest",       desc: "Submit a quick interest form — takes 2 minutes. No fees, ever."              },
-  { step: 2, title: "NGO Review",             desc: "The rescue NGO reviews your profile and reaches out within 24–48 hours."     },
-  { step: 3, title: "Meet & Greet",           desc: "Schedule a home visit or shelter visit to meet your potential companion."    },
-  { step: 4, title: "Adoption Approved",      desc: "Sign the adoption agreement and complete any required vet checks."           },
-  { step: 5, title: "Welcome Home!",          desc: "Your animal comes home. Post-adoption support is available for 6 months."   },
+  { step: 1, title: "Application Review",     desc: "The rescue NGO reviews your profile and reaches out within 24–48 hours." },
+  { step: 2, title: "Background & Reference", desc: "A brief check to ensure a safe and loving environment for the animal." },
+  { step: 3, title: "Meet & Match",           desc: "Schedule a visit to meet your companion and finalize the adoption!" }
 ];
 
 export default function AdoptionModal({ animal, onClose }) {

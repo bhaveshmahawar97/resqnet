@@ -157,8 +157,8 @@ export default function Home() {
             </div>
             <div style={{ display: "grid", gridTemplateColumns: vp.mobile ? "1fr 1fr" : "repeat(4, 1fr)", gap: "0.75rem" }}>
               {ngos.map((ngo, i) => {
-                const name = ngo?.fullName || ngo?.ngoProfile?.organizationName || "Verified NGO";
-                const city = ngo?.location?.city || ngo?.ngoProfile?.city || "India";
+                const name = ngo.organizationName || ngo.name || ngo?.ngoProfile?.organizationName || "Verified NGO";
+                const city = ngo.city || ngo.location?.city || ngo?.ngoProfile?.city || "India";
                 return (
                   <Link key={ngo._id || i} to="/ngos" style={{ display: "flex", flexDirection: "column", gap: "0.4rem", padding: "0.85rem 1rem", borderRadius: 10, border: `1px solid ${T.border}`, background: T.bgCard, textDecoration: "none", color: "inherit", transition: "border-color 0.15s" }}
                     onMouseEnter={e => e.currentTarget.style.borderColor = T.accent}

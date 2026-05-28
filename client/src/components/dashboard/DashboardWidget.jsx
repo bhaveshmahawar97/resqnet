@@ -1,6 +1,5 @@
 import { motion } from "framer-motion";
 import { useT } from "../../context/ThemeContext";
-import { getImageUrl } from "../../utils/imageUrl";
 import {
   DashboardQuickActions,
   DashboardTimeline,
@@ -12,14 +11,15 @@ import {
   StatusBadge,
 } from "./DashboardShared";
 import EmptyState from "../system/EmptyState";
-import { SystemHealthPanel } from "./admin/AdminShared"; // Adjust import later if needed
+import { SystemHealthPanel } from "./admin/AdminShared";
 import AdminNGOVerification from "./admin/AdminNGOVerification";
+import AdminUserManagement from "./admin/AdminUserManagement";
 import RescueMap from "../maps/RescueMap";
 import MissionMap from "../maps/MissionMap";
 
 export default function DashboardWidget({ widget, onAction }) {
   const { T } = useT();
-  const { id, type, data, title, emptyMessage, emptyIcon, emptyTitle } = widget;
+  const { type, data, title, emptyMessage, emptyIcon, emptyTitle } = widget;
 
   // Render a section label if title exists
   const wrapWithCard = (content, pad = true) => (
@@ -79,6 +79,9 @@ export default function DashboardWidget({ widget, onAction }) {
 
     case "AdminNGOVerification":
       return <AdminNGOVerification />;
+
+    case "AdminUserManagement":
+      return <AdminUserManagement />;
 
     case "RescueMap":
       if (!data) return wrapWithCard(<div style={{ padding: 20, color: T.textMuted }}>No rescue location available.</div>);

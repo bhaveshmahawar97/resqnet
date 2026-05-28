@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
-import { Marker, Popup, TileLayer, useMap } from "react-leaflet";
+import { Marker, Popup, useMap } from "react-leaflet";
 import { reverseGeocode } from "../../services/geocodingService";
 import { useT } from "../../context/ThemeContext";
 import Label from "../ui/Label";
@@ -31,10 +31,14 @@ export default function RescueLocationPicker({ value = {}, onChange, label = "Re
 
   useEffect(() => {
     if (value.latitude && value.longitude) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setPosition({ lat: value.latitude, lng: value.longitude });
     }
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (value.address) setAddress(value.address);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (value.city) setCity(value.city);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (value.state) setStateName(value.state);
   }, [value.latitude, value.longitude, value.address, value.city, value.state]);
 
@@ -61,6 +65,7 @@ export default function RescueLocationPicker({ value = {}, onChange, label = "Re
           longitude: latlng.lng,
         });
       } catch (err) {
+        console.error(err);
         setError("Unable to resolve location. Please try another point.");
       } finally {
         setLoading(false);
@@ -90,7 +95,7 @@ export default function RescueLocationPicker({ value = {}, onChange, label = "Re
           </div>
         </div>
         <GeolocationLoader>
-          {({ position: current, loading: geoLoading, error: geoError, status: geoStatus, requestLocation }) => (
+          {({ loading: geoLoading, error: geoError, status: geoStatus, requestLocation }) => (
             <div style={{ display: "flex", flexDirection: "column", gap: 8, minWidth: 160 }}>
               <Button variant="outline" size="sm" onClick={() => requestLocation().then((pos) => syncLocation({ lat: pos.latitude, lng: pos.longitude }, "detected")).catch(() => {})} style={{ minWidth: 160 }}>
                 {geoLoading ? "Detecting…" : "Detect Current Location"}

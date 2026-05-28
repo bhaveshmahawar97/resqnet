@@ -10,12 +10,13 @@ import { getImageUrl } from "../../utils/imageUrl";
 import {
   DashboardHeader, DashboardStats,
   DashboardModal, DashboardErrorBoundary, DashboardSidebar,
-  SeverityBadge, StatusBadge,
+  SeverityBadge, StatusBadge, DashboardTimeline
 } from "../../components/dashboard/DashboardShared";
 import LoadingState from "../../components/system/LoadingState";
 import ErrorState from "../../components/system/ErrorState";
 import useDashboardData from "../../hooks/useDashboardData";
 import DashboardWidget from "../../components/dashboard/DashboardWidget";
+import AnalysisReportModal from "../../components/scanner/AnalysisReportModal";
 
 // ─── MAIN DASHBOARD ───────────────────────────────────────────────────────────
 export default function UserDashboard() {
@@ -104,6 +105,18 @@ export default function UserDashboard() {
                   <img src={getImageUrl(modal.data.images[0]) || ""} alt="rescue" style={{ width: "100%", maxHeight: 320, objectFit: "cover", borderRadius: 10 }} />
                 </div>
               )}
+              {modal.data.status === 'pending' && (
+                <div style={{ padding: 12, borderRadius: 8, background: `${T.warning}20`, border: `1px solid ${T.warning}40`, color: T.warning, fontSize: "0.85rem", fontWeight: 600, display: "flex", gap: 8, alignItems: "center" }}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  Wait until help arrives. Nearest NGO is being notified.
+                </div>
+              )}
+              {modal.data.status === 'accepted' && modal.data.volunteer && (
+                <div style={{ padding: 12, borderRadius: 8, background: `${T.success}20`, border: `1px solid ${T.success}40`, color: T.success, fontSize: "0.85rem", fontWeight: 600, display: "flex", gap: 8, alignItems: "center" }}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                  Help is on the way! Volunteer {modal.data.volunteer} has been assigned.
+                </div>
+              )}
               {[
                 ["Animal", modal.data.animal],
                 ["Location", modal.data.location],
@@ -117,9 +130,17 @@ export default function UserDashboard() {
                   <div style={{ flex: 1, fontSize: "0.82rem", color: T.text, letterSpacing: "-0.01em", lineHeight: 1.4 }}>{v || "N/A"}</div>
                 </div>
               ))}
+              <div style={{ marginTop: 12, paddingTop: 12, borderTop: `1px solid ${T.border}` }}>
+                <div style={{ fontSize: "0.8rem", fontWeight: 700, color: T.textHeading, marginBottom: 12 }}>Rescue Timeline</div>
+                <DashboardTimeline events={modal.data.rescueTimeline || []} />
+              </div>
             </div>
           )}
         </DashboardModal>
+
+        {modal.open && modal.type === "scan" && (
+          <AnalysisReportModal scanData={modal.data} onClose={() => setModal({ open: false, type: null, data: null })} />
+        )}
 
       </DashboardErrorBoundary>
     </DashboardPage>

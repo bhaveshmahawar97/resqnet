@@ -1,4 +1,6 @@
 import { Notification, User } from "../models/index.js";
+import { emitToUser, emitToRoom } from "../socket/socketServer.js";
+import { sendRescueAlertEmail } from "./emailService.js";
 
 /**
  * Creates an in-app notification (websocket delivery prepared for later).
@@ -15,7 +17,7 @@ export const createNotification = async ({
 }) => {
   if (!recipientId) return null;
 
-  return Notification.create({
+  const notification = await Notification.create({
     recipient: recipientId,
     type,
     title,
@@ -25,6 +27,11 @@ export const createNotification = async ({
     relatedEntityType,
     data,
   });
+
+  // Emit real-time notification
+  emitToUser(recipientId, "new_notification", notification);
+
+  return notification;
 };
 
 /**
@@ -57,7 +64,26 @@ export const notifyNewRescue = async (rescue, creator) => {
 
   if (notifications.length === 0) return [];
 
-  return Notification.insertMany(notifications, { ordered: false });
+  const createdNotifications = await Notification.insertMany(notifications, { ordered: false });
+
+  // Broadcast to dashboards
+  emitToRoom("ngo_network", "new_rescue_broadcast", rescue);
+  emitToRoom("role:volunteer", "new_rescue_broadcast", rescue);
+
+  // Send individualized notifications and emails
+  createdNotifications.forEach(notif => {
+    emitToUser(notif.recipient, "new_notification", notif);
+    
+    // Only email if it's a critical alert to prevent spam
+    if (notif.priority === "critical") {
+      const recipientUser = operationalUsers.find(u => u._id.toString() === notif.recipient.toString());
+      if (recipientUser) {
+        sendRescueAlertEmail(recipientUser, rescue).catch(err => console.error("Rescue alert email failed:", err));
+      }
+    }
+  });
+
+  return createdNotifications;
 };
 
 export const notifyStatusChange = async (rescue, actor, newStatus) => {
@@ -83,7 +109,17 @@ export const notifyStatusChange = async (rescue, actor, newStatus) => {
   }));
 
   if (docs.length === 0) return [];
-  return Notification.insertMany(docs, { ordered: false });
+  const createdNotifications = await Notification.insertMany(docs, { ordered: false });
+
+  createdNotifications.forEach(notif => {
+    emitToUser(notif.recipient, "new_notification", notif);
+  });
+
+  // Also broadcast the status change for dashboard live-updates
+  emitToRoom("ngo_network", "rescue_updated", rescue);
+  emitToRoom("role:volunteer", "rescue_updated", rescue);
+
+  return createdNotifications;
 };
 
 export const getUserNotifications = async (userId, { page = 1, limit = 20, unreadOnly = false } = {}) => {

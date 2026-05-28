@@ -7,9 +7,6 @@ import {
   getCriticalRescues,
   getSingleRescue,
   updateRescueStatus,
-  updateMissionStatus,
-  assignNgo,
-  assignVolunteer,
   createRescue
 } from "../../services/rescueService";
 

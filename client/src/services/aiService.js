@@ -90,8 +90,8 @@ export const scanAnimal = async (imageUrl, imageName) => {
 };
 
 export const fetchScanHistory = async ({ limit = 8, page = 1 } = {}) => {
-  const response = await api.get(`/ai/scans?limit=${limit}&page=${page}`);
-  return response.data?.data || { scans: [], pagination: null };
+  const response = await api.get(`/scanner/history?limit=${limit}&page=${page}`);
+  return response.data || { scans: [], pagination: null };
 };
 
 export default {

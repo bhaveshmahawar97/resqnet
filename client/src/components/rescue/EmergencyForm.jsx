@@ -64,6 +64,7 @@ export default function EmergencyForm({ onSuccess }) {
     },
   });
 
+  // eslint-disable-next-line react-hooks/incompatible-library
   const severity = watch("severity");
 
   const [imagePreview, setImagePreview] = useState(null);

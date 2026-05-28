@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 import { getCurrentPosition } from "../../utils/geo";
 
-export default function GeolocationLoader({ children, autoLoad = false }) {
+export default function GeolocationLoader({ children }) {
   const [position, setPosition] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");

@@ -16,8 +16,13 @@ try {
   await connectDatabases();
 
   const { default: app } = await import("./app.js");
+  const { createServer } = await import("http");
+  const { initSocket } = await import("./socket/socketServer.js");
 
-  app.listen(PORT, () => {
+  const httpServer = createServer(app);
+  initSocket(httpServer);
+
+  httpServer.listen(PORT, () => {
     console.log(`🚀 ResQNet API — port ${PORT} (MongoDB Atlas)`);
   });
 } catch (err) {

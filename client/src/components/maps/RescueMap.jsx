@@ -31,6 +31,7 @@ export default function RescueMap({ rescue, userPosition }) {
     if (!rescue) return;
     const coords = getRescueCoordinates(rescue);
     if (coords) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setResolvedRescue({ ...rescue, latitude: coords.lat, longitude: coords.lng });
       setCenter(coords);
       return;

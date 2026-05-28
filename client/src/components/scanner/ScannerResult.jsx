@@ -2,7 +2,6 @@ import { useT } from "../../context/ThemeContext";
 import { Link } from "react-router-dom";
 import { formatTime } from "./scannerUtils";
 import { getSeverityStyle } from "../../constants/ui";
-import Badge from "../ui/Badge";
 
 function Section({ title, children, T }) {
   return (

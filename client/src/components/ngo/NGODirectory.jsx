@@ -4,7 +4,6 @@ import { useT } from "../../context/ThemeContext";
 import useViewport from "../../hooks/useViewport";
 import { vFadeUp } from "../../animations/variants";
 import Btn from "../ui/Button";
-import Label from "../ui/Label";
 import { fetchNgos } from "../../services/userService";
 import NgoCard from "./NgoCard";
 import SkeletonCard from "../system/SkeletonCard";

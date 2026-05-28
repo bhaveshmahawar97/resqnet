@@ -8,7 +8,9 @@ export default function useNgos({ limit = 4, sort } = {}) {
 
   useEffect(() => {
     let mounted = true;
-    setLoading(true);
+    Promise.resolve().then(() => {
+      if (mounted) setLoading(true);
+    });
     getNgos({ limit, sort })
       .then((d) => {
         if (!mounted) return;

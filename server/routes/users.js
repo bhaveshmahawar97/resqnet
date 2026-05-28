@@ -1,10 +1,24 @@
 import express from "express";
-import authMiddleware from "../middleware/authMiddleware.js";
-import { getNgoDirectory, getVolunteerDirectory } from "../controllers/userController.js";
+import authMiddleware, { roleMiddleware } from "../middleware/authMiddleware.js";
+import { 
+  getNgoDirectory, 
+  getVolunteerDirectory,
+  getAllUsers,
+  updateUserRole,
+  toggleUserStatus,
+  toggleAvailability
+} from "../controllers/userController.js";
 
 const router = express.Router();
 
+router.put("/me/availability", authMiddleware, roleMiddleware("volunteer"), toggleAvailability);
+
 router.get("/ngos", getNgoDirectory);
 router.get("/volunteers", authMiddleware, getVolunteerDirectory);
+
+// Admin Routes
+router.get("/", authMiddleware, roleMiddleware("admin"), getAllUsers);
+router.put("/:id/role", authMiddleware, roleMiddleware("admin"), updateUserRole);
+router.put("/:id/toggle-status", authMiddleware, roleMiddleware("admin"), toggleUserStatus);
 
 export default router;

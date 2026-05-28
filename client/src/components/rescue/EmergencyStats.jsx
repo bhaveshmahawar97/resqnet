@@ -5,7 +5,7 @@ import useViewport from "../../hooks/useViewport";
 import useCountUp from "../../hooks/useCountUp";
 import Label from "../ui/Label";
 import { vFadeUp } from "../../animations/variants";
-import { usePlatformStats, formatStat } from "../../hooks/usePlatformStats";
+import { usePlatformStats } from "../../hooks/usePlatformStats";
 
 
 

@@ -1,3 +1,5 @@
+/* eslint-disable react-refresh/only-export-components -- AuthContext intentionally exports both provider and hook */
+/* eslint-disable react-hooks/set-state-in-effect -- context init pattern */
 import { createContext, useContext, useEffect, useState } from "react";
 import api, { setAuthToken } from "../services/api";
 
@@ -31,10 +33,10 @@ export const AuthProvider = ({ children }) => {
       setUser(data.user || null);
 
       return { success: true, user: data.user };
-    } catch (error) {
+    } catch (err) {
       return {
         success: false,
-        message: error.response?.data?.message || "Registration failed",
+        message: err.response?.data?.message || "Registration failed",
       };
     }
   };
@@ -56,10 +58,10 @@ export const AuthProvider = ({ children }) => {
       setUser(data.user || null);
 
       return { success: true, user: data.user };
-    } catch (error) {
+    } catch (err) {
       return {
         success: false,
-        message: error.response?.data?.message || "Login failed",
+        message: err.response?.data?.message || "Login failed",
       };
     }
   };
@@ -95,7 +97,7 @@ export const AuthProvider = ({ children }) => {
       const { data } = await api.get("/auth/me");
 
       setUser(data.user || null);
-    } catch (error) {
+    } catch {
       localStorage.removeItem("token");
       setAuthToken(null);
       setUser(null);

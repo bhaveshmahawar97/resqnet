@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useT } from "../context/ThemeContext";
 import useViewport from "../hooks/useViewport";
 import { usePlatformStats, formatStat } from "../hooks/usePlatformStats";

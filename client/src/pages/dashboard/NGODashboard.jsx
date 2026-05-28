@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useT } from "../../context/ThemeContext";
 import { useAuth } from "../../context/AuthContext";
+import { useToast } from "../../context/ToastContext";
 import DashboardPage from "../../components/dashboard/DashboardPage";
 import DashboardSectionTabs from "../../components/dashboard/DashboardSectionTabs";
 import { getImageUrl } from "../../utils/imageUrl";
@@ -13,8 +14,7 @@ import {
 } from "../../components/dashboard/DashboardShared";
 import { useRescue } from "../../context/RescueContext";
 import { fetchVolunteers } from "../../services/userService";
-import { reviewApplication, createAdoptionListing } from "../../services/adoptionService";
-import { uploadToCloudinary } from "../../services/aiService";
+import { reviewApplication } from "../../services/adoptionService";
 import { extractCityFromAddress } from "../../utils/geo";
 import LoadingState from "../../components/system/LoadingState";
 import ErrorState from "../../components/system/ErrorState";
@@ -23,17 +23,6 @@ import DashboardWidget from "../../components/dashboard/DashboardWidget";
 import useViewport from "../../hooks/useViewport";
 import CreateListingModal from "../../components/ngo/CreateListingModal";
 
-/* ─── Form field helper ─── */
-function Field({ label, error, children }) {
-  const { T } = useT();
-  return (
-    <div style={{ display: "grid", gap: 6 }}>
-      <label style={{ fontSize: "0.76rem", fontWeight: 700, color: T.textMuted }}>{label}</label>
-      {children}
-      {error && <div style={{ color: T.danger, fontSize: "0.72rem" }}>{error}</div>}
-    </div>
-  );
-}
 
 export default function NGODashboard() {
   const { T } = useT();
@@ -46,24 +35,24 @@ export default function NGODashboard() {
 
   const [section, setSection] = useState("overview");
   const [modal, setModal] = useState({ open: false, type: null, data: null });
-  const [toast, setToast] = useState("");
+  const { addToast } = useToast();
 
   const [volunteerDirectory, setVolunteerDirectory] = useState([]);
   const [assignLoading, setAssignLoading] = useState(false);
   const [statusLoading, setStatusLoading] = useState(false);
 
   // Adoption state
-  const [reviewLoading, setReviewLoading] = useState("");
   const [listingModalOpen, setListingModalOpen] = useState(false);
   const [listingInitialData, setListingInitialData] = useState(null);
+  
+  const [statusNote, setStatusNote] = useState("");
 
   if (isLoading) return <DashboardPage><LoadingState message="Loading dashboard..." minHeight="80vh" /></DashboardPage>;
   if (error) return <DashboardPage><ErrorState message="Failed to load dashboard data." minHeight="80vh" /></DashboardPage>;
   if (!config) return <DashboardPage><ErrorState message="Dashboard configuration missing." minHeight="80vh" /></DashboardPage>;
 
   const showToast = (message) => {
-    setToast(message);
-    window.setTimeout(() => setToast(""), 2500);
+    addToast(message);
   };
 
   // ── Registration/Verification Views ──
@@ -149,6 +138,7 @@ export default function NGODashboard() {
         break;
       case "view_rescue":
         setModal({ open: true, type: "rescue", data: payload });
+        setStatusNote("");
         break;
       case "assign_rescue":
         setModal({ open: true, type: "assign", data: payload });
@@ -201,21 +191,25 @@ export default function NGODashboard() {
   const handleUpdateStatus = async (status) => {
     if (!modal.data) return;
     setStatusLoading(true);
-    const result = await updateRescueStatus(modal.data._id || modal.data.id, status, `Updated by ${user?.role}`);
+    const result = await updateRescueStatus(modal.data._id || modal.data.id, status, statusNote || `Updated by ${user?.role}`);
     setStatusLoading(false);
-    if (result.success) { setModal({ open: false, type: null, data: null }); showToast(`Rescue ${status.replace("_", " ")}`); refetch(); }
-    else showToast(result.message || "Unable to update");
+    if (result.success) { 
+      setModal({ open: false, type: null, data: null }); 
+      setStatusNote("");
+      showToast(`Rescue ${status.replace("_", " ")}`); 
+      refetch(); 
+    } else {
+      showToast(result.message || "Unable to update");
+    }
   };
 
   const handleReviewApplication = async (applicationId, status) => {
     if (!applicationId) return;
-    setReviewLoading(applicationId);
     try {
       const result = await reviewApplication(applicationId, status, `Reviewed by ${user?.fullName || user?.name || user?.email || "NGO"}`);
       if (result.success) { showToast(`Application ${status}`); refetch(); }
       else throw new Error(result.message || "Unable to update");
     } catch (err) { showToast(err.message || "Unable to update"); }
-    finally { setReviewLoading(""); }
   };
 
   // ── Listing Form ──
@@ -275,7 +269,17 @@ export default function NGODashboard() {
                 </div>
               ))}
               
-              <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 14 }}>
+              <div style={{ marginTop: 10 }}>
+                <input
+                  type="text"
+                  placeholder="Optional note for status update..."
+                  value={statusNote}
+                  onChange={(e) => setStatusNote(e.target.value)}
+                  style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: `1px solid ${T.border}`, background: T.bgAlt, color: T.text, fontSize: "0.82rem" }}
+                />
+              </div>
+              
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 4 }}>
                 {["accepted", "in_progress", "rescued", "completed", "cancelled"].filter(s => s !== modal.data.status).map(status => (
                   <button key={status} disabled={statusLoading} onClick={() => handleUpdateStatus(status)} style={{ padding: "8px 14px", borderRadius: 8, background: T.bgAlt, border: `1px solid ${T.border}`, cursor: statusLoading ? "not-allowed" : "pointer", color: T.text, fontWeight: 700, fontSize: "0.78rem" }}>
                     {status.replace("_", " ")}

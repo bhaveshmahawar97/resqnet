@@ -13,6 +13,7 @@ import UserDashboard from "../pages/dashboard/UserDashboard";
 import NGODashboard from "../pages/dashboard/NGODashboard";
 import VolunteerDashboard from "../pages/dashboard/VolunteerDashboard";
 import AdminDashboard from "../pages/dashboard/AdminDashboard";
+import Profile from "../pages/Profile";
 
 function DashboardRedirect() {
   const { role } = useAuth();
@@ -29,7 +30,6 @@ function DashboardRedirect() {
   return <Navigate to={destination} replace />;
 }
 
-// eslint-disable-next-line react-refresh/only-export-components
 export const ROUTE_LINKS = [
   { label: "Home", to: "/" },
   { label: "NGOs", to: "/ngos" },
@@ -38,7 +38,6 @@ export const ROUTE_LINKS = [
   { label: "Emergency", to: "/rescue" },
 ];
 
-// eslint-disable-next-line react-refresh/only-export-components
 export const APP_ROUTES = [
   { index: true, element: <Home /> },
   { path: "ai-health", element: <Scanner /> },
@@ -59,4 +58,5 @@ export const APP_ROUTES = [
   { path: "dashboard/volunteer", element: <VolunteerDashboard />, protected: true, allowedRoles: ["volunteer"] },
   { path: "dashboard/admin", element: <AdminDashboard />, protected: true, allowedRoles: ["admin"] },
   { path: "admin", element: <Navigate to="/dashboard/admin" replace /> },
+  { path: "profile", element: <Profile />, protected: true },
 ];

@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useT } from "../../context/ThemeContext";
 import { useAuth } from "../../context/AuthContext";
+import { useToast } from "../../context/ToastContext";
+import api from "../../services/api";
 import useViewport from "../../hooks/useViewport";
 import DashboardPage from "../../components/dashboard/DashboardPage";
 import DashboardSectionTabs from "../../components/dashboard/DashboardSectionTabs";
@@ -10,7 +12,7 @@ import { getImageUrl } from "../../utils/imageUrl";
 import {
   DashboardHeader, DashboardStats,
   DashboardModal, DashboardErrorBoundary,
-  SeverityBadge, DashboardSidebar, StatusBadge
+  SeverityBadge, DashboardSidebar, StatusBadge, DashboardTimeline
 } from "../../components/dashboard/DashboardShared";
 import { useRescue } from "../../context/RescueContext";
 import LoadingState from "../../components/system/LoadingState";
@@ -23,7 +25,8 @@ export default function VolunteerDashboard() {
   const { T } = useT();
   const vp = useViewport();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user } = useAuth(); // We'll use login to silently refresh user state if needed, or just keep it simple
+  const { addToast } = useToast();
   
   const { data: config, isLoading, error, refetch } = useDashboardData();
   const { acceptMission, updateMissionStatus } = useRescue();
@@ -31,6 +34,7 @@ export default function VolunteerDashboard() {
   const [section, setSection] = useState("overview");
   const [modal, setModal] = useState({ open: false, type: null, data: null });
   const [reportText, setReportText] = useState("");
+  const [reportStatus, setReportStatus] = useState("in_progress");
 
   if (isLoading) return <DashboardPage><LoadingState message="Loading dashboard..." minHeight="80vh" /></DashboardPage>;
   if (error) return <DashboardPage><ErrorState message="Failed to load dashboard data." minHeight="80vh" /></DashboardPage>;
@@ -51,7 +55,8 @@ export default function VolunteerDashboard() {
         setModal({ open: true, type: "report", data: payload });
         break;
       case "update_mission":
-        setModal({ open: true, type: "report", data: payload }); // Reusing report modal for now
+        setReportStatus(payload.status || "in_progress");
+        setModal({ open: true, type: "report", data: payload });
         break;
       case "modal":
         if (payload?.payload === "report") setModal({ open: true, type: "report", data: null });
@@ -71,18 +76,42 @@ export default function VolunteerDashboard() {
 
   const submitReport = async () => {
     if (modal.data && reportText) {
-      await updateMissionStatus(modal.data.id, "in_progress", reportText);
+      await updateMissionStatus(modal.data.id, reportStatus, reportText);
     }
     setReportText("");
+    setReportStatus("in_progress");
     setModal({ open: false, type: null, data: null });
     refetch();
+  };
+
+  const toggleAvailability = async () => {
+    try {
+      const res = await api.put("/users/me/availability");
+      if (res.data.success) {
+        // Ideally we would update AuthContext user here, but a page reload or refetch works for the dashboard display
+        addToast(`Availability updated to ${res.data.data.availability}`);
+        // Quick hack: we can just reload the window to update the user context, or better, the header just shows it
+        window.location.reload(); 
+      }
+    } catch (err) {
+      console.error(err);
+      addToast("Failed to update availability");
+    }
   };
 
   return (
     <DashboardPage>
       <DashboardErrorBoundary T={T}>
-        <div style={{ position: "relative" }}>
+        <div style={{ position: "relative", display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "10px" }}>
           <DashboardHeader role="volunteer" userName={user?.fullName || user?.name || user?.email || "Volunteer"} />
+          
+          <div style={{ display: "flex", alignItems: "center", gap: 10, background: T.bgCard, padding: "8px 14px", borderRadius: 12, border: `1px solid ${T.border}` }}>
+            <span style={{ fontSize: "0.85rem", fontWeight: 600, color: T.text }}>Status:</span>
+            <StatusBadge status={user?.volunteerProfile?.availability || "active"} />
+            <button onClick={toggleAvailability} style={{ marginLeft: 8, padding: "5px 10px", borderRadius: 6, background: T.accent, color: T.textOnAccent, border: "none", cursor: "pointer", fontSize: "0.75rem", fontWeight: 700 }}>
+              Toggle
+            </button>
+          </div>
         </div>
 
         {config.stats && <DashboardStats stats={config.stats} />}
@@ -137,25 +166,40 @@ export default function VolunteerDashboard() {
           )}
         </DashboardModal>
 
-        <DashboardModal isOpen={modal.open && modal.type === "report"} title="Field Report" onClose={() => setModal({ open: false, type: null, data: null })}>
+        <DashboardModal isOpen={modal.open && modal.type === "report"} title="Field Report / Update Status" onClose={() => setModal({ open: false, type: null, data: null })}>
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             <div style={{ fontSize: "0.78rem", color: T.textSub }}>
-              Reporting for mission: <strong>{modal.data?.id} — {modal.data?.animal}</strong>
+              Updating mission: <strong>{modal.data?.id} — {modal.data?.animal}</strong>
             </div>
+            
+            <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+              <label style={{ fontSize: "0.75rem", fontWeight: 600, color: T.text }}>Status</label>
+              <select 
+                value={reportStatus} 
+                onChange={e => setReportStatus(e.target.value)}
+                className="rq-input"
+                style={{ width: "100%", padding: "8px", borderRadius: 8, border: `1px solid ${T.border}`, background: T.bgCard, color: T.text, fontSize: "0.85rem" }}
+              >
+                <option value="in_progress">In Progress</option>
+                <option value="rescued">Rescued (Safe)</option>
+                <option value="completed">Completed (Closed)</option>
+              </select>
+            </div>
+
             <textarea
               value={reportText}
               onChange={(e) => setReportText(e.target.value)}
-              placeholder="Describe current situation, animal condition, actions taken, and any issues…"
+              placeholder="Describe current situation, actions taken, and any issues…"
               rows={5}
               className="rq-textarea"
-              style={{ width: "100%", marginBottom: "12px" }}
+              style={{ width: "100%", marginBottom: "12px", padding: "10px", borderRadius: 8, border: `1px solid ${T.border}`, background: T.bgCard, color: T.text, fontFamily: "inherit" }}
             />
             <button
               onClick={submitReport}
               className="rq-btn rq-btn-primary"
               style={{ width: "100%", padding: "10px" }}
             >
-              Submit Report
+              Submit Update
             </button>
           </div>
         </DashboardModal>
@@ -182,6 +226,10 @@ export default function VolunteerDashboard() {
                   <div style={{ flex: 1, fontSize: "0.82rem", color: T.text, lineHeight: 1.4 }}>{v || "N/A"}</div>
                 </div>
               ))}
+              <div style={{ marginTop: 12, paddingTop: 12, borderTop: `1px solid ${T.border}` }}>
+                <div style={{ fontSize: "0.8rem", fontWeight: 700, color: T.textHeading, marginBottom: 12 }}>Mission Timeline</div>
+                <DashboardTimeline events={modal.data.rescueTimeline || []} />
+              </div>
             </div>
           )}
         </DashboardModal>

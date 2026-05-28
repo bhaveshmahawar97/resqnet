@@ -73,6 +73,7 @@ export default function Register() {
     defaultValues: { role: ROLES.user },
   });
 
+  // eslint-disable-next-line react-hooks/incompatible-library
   const selectedRole = watch("role");
   const currentPassword = watch("password") || "";
 

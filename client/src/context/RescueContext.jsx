@@ -1,10 +1,12 @@
+/* eslint-disable react-refresh/only-export-components -- RescueContext intentionally exports both provider and hook */
+/* eslint-disable react-hooks/set-state-in-effect -- context data-fetching pattern */
 import { createContext, useContext, useEffect, useState } from "react";
 import { useAuth } from "./AuthContext";
+import useSocket from "../hooks/useSocket";
 import {
   createRescue,
   getMyRescues,
   getAllRescues,
-  getSingleRescue,
   updateRescueStatus,
   assignNgo,
   autoAssignNgo,
@@ -21,6 +23,7 @@ const RescueContext = createContext();
 
 export const RescueProvider = ({ children }) => {
   const { user } = useAuth();
+  const { socket, isConnected } = useSocket();
 
   const [rescues, setRescues] = useState([]);
   const [myRescues, setMyRescues] = useState([]);
@@ -68,15 +71,6 @@ export const RescueProvider = ({ children }) => {
   };
 
   const normalizeRescueList = (list = []) => list.map(normalizeRescue);
-
-  const updateRescueLists = (updatedRescue) => {
-    const normalized = normalizeRescue(updatedRescue);
-    setMyRescues((prev) => prev.map((item) => (item.id === normalized.id ? normalized : item)));
-    setRescues((prev) => prev.map((item) => (item.id === normalized.id ? normalized : item)));
-    setCriticalRescues((prev) => prev.map((item) => (item.id === normalized.id ? normalized : item)));
-    setAssignedRescues((prev) => prev.map((item) => (item.id === normalized.id ? normalized : item)));
-    return normalized;
-  };
 
   const mergeRescueIntoList = (list, rescue) => {
     const normalized = normalizeRescue(rescue);
@@ -408,7 +402,34 @@ export const RescueProvider = ({ children }) => {
     if (user.role === "admin") {
       handleFetchStats();
     }
-  }, [user]);
+  }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // =========================
+  // SOCKET.IO REAL-TIME REFRESH
+  // =========================
+  useEffect(() => {
+    if (!socket || !isConnected || !user) return;
+
+    const handleBroadcast = () => {
+      // Automatically refresh the dashboard data if the user is an operational role
+      const isOperational = ["ngo", "volunteer", "admin"].includes(user.role);
+      
+      if (isOperational) {
+        handleFetchAllRescues();
+        handleFetchCriticalRescues();
+        handleFetchAssignedRescues();
+        if (user.role === "admin") handleFetchStats();
+      }
+    };
+
+    socket.on("new_rescue_broadcast", handleBroadcast);
+    socket.on("rescue_updated", handleBroadcast);
+
+    return () => {
+      socket.off("new_rescue_broadcast", handleBroadcast);
+      socket.off("rescue_updated", handleBroadcast);
+    };
+  }, [socket, isConnected, user]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <RescueContext.Provider

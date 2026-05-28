@@ -260,6 +260,7 @@ export const fetchDashboardData = async (user) => {
       { id: "ai", label: "AI Monitoring" },
       { id: "analytics", label: "Analytics" },
       { id: "alerts", label: "System Alerts" },
+      { id: "users", label: "User Management" },
     ];
 
     responseData.stats = [
@@ -312,6 +313,9 @@ export const fetchDashboardData = async (user) => {
       ],
       alerts: [
         { id: "full_alerts", type: "EmptyState", icon: "🔔", title: "No Alerts", message: "System is operating normally without any critical alerts." }
+      ],
+      users: [
+        { id: "user_management", type: "AdminUserManagement" }
       ]
     };
   }

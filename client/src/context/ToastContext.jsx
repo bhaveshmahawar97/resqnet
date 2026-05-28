@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components -- ToastContext intentionally exports hook + provider from same file */
 import { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { TOAST_EVENT } from "../utils/toastEvent";
 

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useT } from "../../context/ThemeContext";
+import { useT, THEME } from "../../context/ThemeContext";
 import useViewport from "../../hooks/useViewport";
 import Label from "../ui/Label";
 import { vFadeUp } from "../../animations/variants";
@@ -11,7 +11,7 @@ const GUIDES = [
     icon: "🚗",
     title: "Road Accident",
     subtitle: "Hit-and-run injuries in animals",
-    color: T.danger,
+    color: THEME.light.danger,
     summary: "Road accidents cause severe trauma in animals. Quick assessment and safe immobilization can save a life.",
     steps: [
       "Ensure your own safety first — stay off the road",

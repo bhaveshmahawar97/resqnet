@@ -1,3 +1,5 @@
+/* eslint-disable react-refresh/only-export-components -- AdoptionContext intentionally exports both provider and hook */
+/* eslint-disable react-hooks/set-state-in-effect -- context data fetching */
 import { createContext, useContext, useEffect, useState, useCallback } from "react";
 import { useAuth } from "./AuthContext";
 import {

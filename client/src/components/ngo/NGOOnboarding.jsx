@@ -6,7 +6,6 @@ import { ngoRegistrationSchema } from "../../utils/validators";
 import { useT } from "../../context/ThemeContext";
 import { useAuth } from "../../context/AuthContext";
 import useViewport from "../../hooks/useViewport";
-import { vFadeUp } from "../../animations/variants";
 import { registerNGO } from "../../services/ngoService";
 import { uploadToCloudinary } from "../../services/aiService";
 
@@ -89,6 +88,7 @@ export default function NGOOnboarding() {
     },
   });
 
+  // eslint-disable-next-line react-hooks/incompatible-library
   const ngoType = watch("ngoType") || [];
   const organizationName = watch("organizationName");
   const email = watch("email");
@@ -152,7 +152,7 @@ export default function NGOOnboarding() {
 
   const handleNext = async () => {
     setGlobalError(null);
-    let isValid = true;
+    let isValid;
     
     if (activeStep === 2) {
       isValid = await trigger(steps[activeStep].fields);
@@ -204,7 +204,7 @@ export default function NGOOnboarding() {
       } else {
         setGlobalError(result.message || "Failed to submit application.");
       }
-    } catch (err) {
+    } catch {
       setGlobalError("An unexpected error occurred during submission.");
     } finally {
       setLoading(false);

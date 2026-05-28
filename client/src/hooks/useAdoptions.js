@@ -8,7 +8,9 @@ export default function useAdoptions(limit = 4) {
 
   useEffect(() => {
     let mounted = true;
-    setLoading(true);
+    Promise.resolve().then(() => {
+      if (mounted) setLoading(true);
+    });
     getAdoptions({ limit })
       .then((d) => mounted && setData(d))
       .catch((e) => mounted && setError(e))

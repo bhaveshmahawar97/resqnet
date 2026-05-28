@@ -15,4 +15,9 @@ export default defineConfig({
       leaflet: path.resolve(__dirname, 'node_modules/leaflet'),
     },
   },
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: './src/setupTests.js',
+  },
 })

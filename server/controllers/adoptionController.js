@@ -13,6 +13,7 @@ import {
 } from "../services/adoptionNotificationService.js";
 import { sendSuccess, sendError } from "../utils/apiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
+import { sendAdoptionApprovalEmail } from "../services/emailService.js";
 
 export const getAdoptionListings = asyncHandler(async (req, res) => {
   const listings = await listPublicAdoptions({
@@ -94,6 +95,11 @@ export const putReviewAdoptionApplication = asyncHandler(async (req, res) => {
     status,
     application.adoption?.animalName || application.adoption?.animalType
   );
+
+  if (status === "approved" && application.applicant) {
+    sendAdoptionApprovalEmail(application.applicant, application.adoption)
+      .catch(err => console.error("Adoption approval email failed:", err));
+  }
 
   return sendSuccess(res, {
     message: `Application ${status}`,

@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { useT } from "../../context/ThemeContext";
 import { vFadeUp } from "../../animations/variants";
 import Btn from "../ui/Button";
+import NgoDetailsModal from "./NgoDetailsModal";
 
 function getTypeColors(type, T) {
   const map = {
@@ -20,6 +21,7 @@ function getTypeColors(type, T) {
 export default function NgoCard({ ngo, i }) {
   const { T } = useT();
   const [hov, setHov] = useState(false);
+  const [showModal, setShowModal] = useState(false);
   const type = (ngo.specialties || ["Partner"])[0];
   const focus = (ngo.specialties || []).slice(0, 3).join(", ") || "Rescue support";
   const tc = getTypeColors(type, T);
@@ -103,12 +105,14 @@ export default function NgoCard({ ngo, i }) {
 
       {/* Footer actions */}
       <div style={{ display: "flex", gap: "0.55rem", alignItems: "center", marginTop: "auto" }}>
-        <Btn variant="primary" size="sm" style={{ flex: 1 }}>Contact NGO</Btn>
-        <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+        <Btn variant="primary" size="sm" style={{ flex: 1 }} onClick={() => setShowModal(true)}>Contact NGO</Btn>
+        <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => setShowModal(true)}
           style={{ width: 34, height: 34, borderRadius: 9, border: `1px solid ${T.border}`, background: T.bgCard, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={T.textSub} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg>
         </motion.button>
       </div>
+
+      {showModal && <NgoDetailsModal ngo={ngo} onClose={() => setShowModal(false)} />}
     </motion.div>
   );
 }

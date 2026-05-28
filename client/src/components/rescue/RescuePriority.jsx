@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useT } from "../../context/ThemeContext";
+import { useT, THEME } from "../../context/ThemeContext";
 import useViewport from "../../hooks/useViewport";
 import Label from "../ui/Label";
 import { vFadeUp } from "../../animations/variants";
@@ -10,7 +10,7 @@ const PRIORITIES = [
     level: "Critical",
     code: "critical",
     emoji: "🔴",
-    color: T.danger,
+    color: THEME.light.danger,
     bgLight: "rgba(239,68,68,0.08)",
     border: "rgba(239,68,68,0.3)",
     desc: "Life-threatening condition requiring immediate intervention within minutes.",

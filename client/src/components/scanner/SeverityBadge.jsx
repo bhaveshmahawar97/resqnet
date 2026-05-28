@@ -1,9 +1,8 @@
-import { useT } from "../../context/ThemeContext";
+
 import { getSeverityMeta } from "./scannerUtils";
 
-export default function SeverityBadge({ severity }) {
-  const { T } = useT();
-  const meta = getSeverityMeta(severity);
+export default function SeverityBadge({ level }) {
+  const meta = getSeverityMeta(level);
 
   return (
     <span

@@ -9,7 +9,8 @@
     "start": "node server.js",
     "seed:test": "node ../scripts/dev/seedTestData.js",
     "verify:test": "node ../scripts/dev/verifyTestData.js",
-    "verify:atlas": "node ../scripts/dev/verifyAtlasInfrastructure.js"
+    "verify:atlas": "node ../scripts/dev/verifyAtlasInfrastructure.js",
+    "test": "vitest run"
   },
   "keywords": [],
   "author": "",
@@ -29,11 +30,15 @@
     "morgan": "^1.10.1",
     "multer": "^2.1.1",
     "node-fetch": "^3.3.2",
+    "nodemailer": "^8.0.9",
     "openai": "^6.38.0",
+    "socket.io": "^4.8.3",
     "xss-clean": "^0.1.4",
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "nodemon": "^3.1.14"
+    "nodemon": "^3.1.14",
+    "supertest": "^7.2.2",
+    "vitest": "^4.1.7"
   }
 }

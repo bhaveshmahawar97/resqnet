@@ -1,4 +1,4 @@
-import { analyzeAnimalImage } from "../services/aiService.js";
+import { analyzeAnimalImage, fetchScanHistory } from "../services/aiService.js";
 import { sendError } from "../utils/apiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
@@ -53,4 +53,14 @@ export const analyzeScannerImage = asyncHandler(async (req, res) => {
   });
 });
 
-export default { analyzeScannerImage };
+export const getScannerHistory = asyncHandler(async (req, res) => {
+  const result = await fetchScanHistory(req.user._id, req.query);
+  return res.status(200).json({
+    success: true,
+    scans: result.scans,
+    pagination: result.pagination,
+  });
+});
+
+export default { analyzeScannerImage, getScannerHistory };
+

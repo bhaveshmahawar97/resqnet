@@ -44,12 +44,15 @@ export default function LocationPicker({ value = {}, onChange, label = "Rescue L
 
   useEffect(() => {
     if (value.latitude && value.longitude) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setPosition({ lat: value.latitude, lng: value.longitude });
     }
     if (value.address) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setAddress(value.address);
     }
     if (value.city) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setCity(value.city);
     }
   }, [value.latitude, value.longitude, value.address, value.city]);
@@ -74,6 +77,7 @@ export default function LocationPicker({ value = {}, onChange, label = "Rescue L
           longitude: latlng.lng,
         });
       } catch (err) {
+        console.error(err);
         setError("Unable to resolve location. Please try another point.");
       } finally {
         setLoading(false);
@@ -85,6 +89,7 @@ export default function LocationPicker({ value = {}, onChange, label = "Rescue L
 
   useEffect(() => {
     if (position || value.latitude || value.longitude) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
     getCurrentPosition()
       .then((pos) => syncLocation({ lat: pos.latitude, lng: pos.longitude }, "detected"))

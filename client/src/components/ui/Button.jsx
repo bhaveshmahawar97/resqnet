@@ -1,4 +1,3 @@
-import { useT } from "../../context/ThemeContext";
 
 /**
  * ResQNet — Premium Button Component
@@ -18,8 +17,6 @@ export default function Button({
   rightIcon,
   style: extraStyle = {},
 }) {
-  const { T } = useT();
-
   const classNames = [
     "rq-btn",
     `rq-btn-${variant}`,

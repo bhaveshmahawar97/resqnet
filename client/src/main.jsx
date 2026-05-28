@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import { ThemeProvider } from "./context/ThemeContext.jsx";
 import { AuthProvider } from "./context/AuthContext.jsx";
+import { SocketProvider } from "./context/SocketContext.jsx";
 import { RescueProvider } from "./context/RescueContext.jsx";
 import { AdoptionProvider } from "./context/AdoptionContext.jsx";
 import { NotificationProvider } from "./context/NotificationContext.jsx";
@@ -26,7 +27,8 @@ createRoot(document.getElementById("root")).render(
   <StrictMode>
     <ThemeProvider>
       <AuthProvider>
-        <RescueProvider>
+        <SocketProvider>
+          <RescueProvider>
           <AdoptionProvider>
             <NotificationProvider>
               <BrowserRouter>
@@ -34,7 +36,8 @@ createRoot(document.getElementById("root")).render(
               </BrowserRouter>
             </NotificationProvider>
           </AdoptionProvider>
-        </RescueProvider>
+          </RescueProvider>
+        </SocketProvider>
       </AuthProvider>
     </ThemeProvider>
   </StrictMode>,

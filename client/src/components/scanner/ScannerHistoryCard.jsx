@@ -1,7 +1,6 @@
 import { motion } from "framer-motion";
 import { useT } from "../../context/ThemeContext";
-import useViewport from "../../hooks/useViewport";
-import { formatTime, getSeverityMeta, normalizeImageUrl } from "./scannerUtils";
+import { formatTime, normalizeImageUrl } from "./scannerUtils";
 import SeverityBadge from "./SeverityBadge";
 
 /**
@@ -10,9 +9,6 @@ import SeverityBadge from "./SeverityBadge";
  */
 export default function ScannerHistoryCard({ scan, onImageError }) {
   const { T } = useT();
-  const vp = useViewport();
-
-  const severity = getSeverityMeta(scan.predictedSeverity || scan.analysis?.severity);
   const recommendation = scan.recommendations?.[0] || scan.analysis?.recommendation || "No action suggested";
   const rawImageUrl = scan.imageUrl || scan.image || scan.analysis?.imageUrl;
   const imageUrl = normalizeImageUrl(rawImageUrl);

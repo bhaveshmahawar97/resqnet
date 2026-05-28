@@ -5,7 +5,6 @@ import { useAuth } from "../../context/AuthContext";
 import useViewport from "../../hooks/useViewport";
 import { vFadeUp } from "../../animations/variants";
 import { registerNGO } from "../../services/ngoService";
-import Btn from "../ui/Button";
 
 const NGO_TYPES = [
   "Rescue",
@@ -52,6 +51,7 @@ export default function NGORegistrationForm() {
 
   useEffect(() => {
     if (authEmail || user?.name || user?.fullName) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFormData((prev) => ({
         ...prev,
         email: prev.email || authEmail || "",
