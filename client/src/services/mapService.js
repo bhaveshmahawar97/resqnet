@@ -13,7 +13,7 @@ export const fetchMapFacilities = async (lat, lon, radius = 50000) => {
     out center;
   `;
   
-  const url = `https://overpass-api.de/api/interpreter`;
+  const url = `/overpass`;
   
   try {
     const res = await fetch(url, {
