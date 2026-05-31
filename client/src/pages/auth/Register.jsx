@@ -405,7 +405,7 @@ export default function Register() {
             style={{ marginBottom: "1.25rem" }}
           >
             <a
-              href={`/api/auth/google?role=${selectedRole || "user"}`}
+              href={`${import.meta.env.VITE_API_URL || "/api"}/auth/google?role=${selectedRole || "user"}`}
               style={{
                 display: "flex",
                 alignItems: "center",

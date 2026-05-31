@@ -9,7 +9,7 @@ export async function fetchJSON(path, opts = {}) {
 import axios from "axios";
 
 const rawApiUrl = import.meta.env.VITE_API_URL;
-const API_URL = (() => {
+export const API_URL = (() => {
   if (import.meta.env.PROD && !rawApiUrl) return "/api";
   if (!rawApiUrl) return "http://localhost:5000/api";
   if (rawApiUrl.startsWith(":")) {
