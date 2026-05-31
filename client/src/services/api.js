@@ -15,10 +15,15 @@ export const API_URL = (() => {
   if (rawApiUrl.startsWith(":")) {
     return `http://localhost${rawApiUrl}`;
   }
-  if (!/^https?:\/\//i.test(rawApiUrl) && !rawApiUrl.startsWith("/")) {
-    return `http://${rawApiUrl}`;
+  let finalUrl = rawApiUrl;
+  if (!/^https?:\/\//i.test(finalUrl) && !finalUrl.startsWith("/")) {
+    finalUrl = `http://${finalUrl}`;
   }
-  return rawApiUrl;
+  // Ensure it always ends with /api
+  if (finalUrl.endsWith("/")) finalUrl = finalUrl.slice(0, -1);
+  if (!finalUrl.endsWith("/api")) finalUrl += "/api";
+  
+  return finalUrl;
 })();
 
 const api = axios.create({
