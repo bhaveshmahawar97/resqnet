@@ -37,6 +37,7 @@ const app = express();
 
 const allowedOrigins = [
   ...(process.env.CLIENT_URL ? [process.env.CLIENT_URL] : []),
+  "https://resqnet-two.vercel.app",
   "http://localhost:5173",
   "http://localhost:5174",
 ];
