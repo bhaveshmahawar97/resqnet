@@ -135,17 +135,10 @@ app.use("/api/ngos", ngoRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/report", reportRoutes(express));
 
-// Serve frontend in production
-if (process.env.NODE_ENV === "production") {
-  app.use(express.static(path.join(__dirname, "../client/dist")));
-  app.use((req, res, next) => {
-    if (req.method === "GET" && !req.originalUrl.startsWith("/api")) {
-      res.sendFile(path.resolve(__dirname, "../client/dist", "index.html"));
-    } else {
-      next();
-    }
-  });
-}
+// Backend is now API-only (frontend hosted on Vercel)
+app.get("/", (req, res) => {
+  res.status(200).json({ message: "ResQNet API is running. Please visit the frontend URL." });
+});
 
 app.use(notFoundHandler);
 app.use(globalErrorHandler);
