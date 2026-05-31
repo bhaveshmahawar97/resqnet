@@ -79,6 +79,7 @@ export const DispatchLog = createModelProxy(() => requireCoreModel("DispatchLog"
 export const Notification = createModelProxy(() => requireCoreModel("Notification"));
 export const MissionHistory = createModelProxy(() => requireCoreModel("MissionHistory"));
 export const Adoption = createModelProxy(() => requireCoreModel("Adoption"));
+export const AdoptionApplication = createModelProxy(() => requireCoreModel("AdoptionApplication"));
 export const Analytics = createModelProxy(() => requireCoreModel("Analytics"));
 export const Report = createModelProxy(() => requireCoreModel("Report"));
 export const NGO = createModelProxy(() => requireCoreModel("NGO"));

@@ -1,4 +1,4 @@
-import { RescueRequest, NGO, User, Adoption } from "../models/index.js";
+import { RescueRequest, NGO, User, Adoption, AdoptionApplication } from "../models/index.js";
 
 // Helper to normalize rescue
 const normalizeRescue = (rescue) => {
@@ -40,7 +40,7 @@ export const fetchDashboardData = async (user) => {
     const myRescuesRaw = await RescueRequest.find({ reporter: userId }).sort({ createdAt: -1 }).lean();
     const myRescues = myRescuesRaw.map(normalizeRescue);
     const activeRescues = myRescues.filter(r => !["completed", "cancelled"].includes(r.status));
-    const myAdoptions = await Adoption.find({ applicant: userId }).sort({ createdAt: -1 }).populate("adoption").lean();
+    const myAdoptions = await AdoptionApplication.find({ applicant: userId }).sort({ createdAt: -1 }).populate("adoption").lean();
 
     const statsMap = {
       totalRescues: myRescues.length,
@@ -164,7 +164,7 @@ export const fetchDashboardData = async (user) => {
     }
 
     const rescuesRaw = await RescueRequest.find({
-      $or: [{ assignedNgo: ngoRaw._id }, { "location.city": ngoRaw.city }]
+      $or: [{ assignedNgo: user._id }, { "location.city": ngoRaw.city }]
     }).populate("assignedVolunteer assignedNgo").sort({ createdAt: -1 }).lean();
     
     const rescues = normalizeRescueList(rescuesRaw);
@@ -174,7 +174,7 @@ export const fetchDashboardData = async (user) => {
     const assignedCount = rescues.filter(r => r.assignedNgo || r.assignedVolunteer).length;
     const completedCount = rescues.filter(r => r.status === "completed").length;
 
-    const applications = await Adoption.find({ "adoption.ngo": ngoRaw._id }).populate("applicant").sort({ createdAt: -1 }).lean();
+    const applications = await AdoptionApplication.find({ ngo: user._id }).populate("applicant").sort({ createdAt: -1 }).lean();
     const volunteers = await User.find({ role: "volunteer", city: ngoRaw.city }).lean();
 
     responseData.sections = [
