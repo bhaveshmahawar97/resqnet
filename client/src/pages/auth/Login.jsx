@@ -6,6 +6,7 @@ import { motion, useMotionValue, useTransform, animate } from "framer-motion";
 import { loginSchema } from "../../utils/validators";
 import { useAuth, ROLES } from "../../context/AuthContext";
 import { useT } from "../../context/ThemeContext";
+import { API_URL } from "../../services/api";
 
 const ROLE_REDIRECTS = {
   [ROLES.user]: "/dashboard/user",
@@ -481,7 +482,7 @@ export default function Login() {
 
             {/* Google OAuth button */}
             <a
-              href={`${import.meta.env.VITE_API_URL || "/api"}/auth/google`}
+              href={`${API_URL}/auth/google`}
               style={{
                 display: "flex",
                 alignItems: "center",

@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { registerSchema } from "../../utils/validators";
 import { useAuth, ROLES } from "../../context/AuthContext";
 import { useT } from "../../context/ThemeContext";
+import { API_URL } from "../../services/api";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -405,7 +406,7 @@ export default function Register() {
             style={{ marginBottom: "1.25rem" }}
           >
             <a
-              href={`${import.meta.env.VITE_API_URL || "/api"}/auth/google?role=${selectedRole || "user"}`}
+              href={`${API_URL}/auth/google?role=${selectedRole || "user"}`}
               style={{
                 display: "flex",
                 alignItems: "center",
