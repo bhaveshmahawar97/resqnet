@@ -80,6 +80,11 @@ const userSchema = new mongoose.Schema(
       trim: true,
       default: "",
     },
+    age: {
+      type: Number,
+      min: 0,
+      default: null,
+    },
     avatar: {
       type: String,
       default: "",
@@ -87,6 +92,11 @@ const userSchema = new mongoose.Schema(
     avatarPublicId: {
       type: String,
       default: "",
+    },
+    googleId: {
+      type: String,
+      default: null,
+      index: { sparse: true },
     },
     isActive: {
       type: Boolean,

@@ -3,8 +3,10 @@ import { getRescueStats } from "../services/rescueService";
 import { fetchAdoptionStats } from "../services/adoptionService";
 import { getNgoStatsOverview } from "../services/ngoService";
 
-// Global cache to prevent redundant fetches when navigating between pages
+// Simple time-based cache (5 seconds) to prevent spamming while navigating rapidly,
+// but short enough to reflect new completions quickly.
 let cachedStats = null;
+let lastFetchTime = 0;
 let fetchPromise = null;
 
 export function usePlatformStats() {
@@ -22,13 +24,15 @@ export function usePlatformStats() {
     let mounted = true;
 
     async function loadStats() {
-      if (cachedStats) {
+      const now = Date.now();
+      // Use cache if it's less than 5 seconds old
+      if (cachedStats && now - lastFetchTime < 5000) {
         setStats(cachedStats);
         setLoading(false);
         return;
       }
 
-      if (!fetchPromise) {
+      if (!fetchPromise || now - lastFetchTime >= 5000) {
         fetchPromise = Promise.allSettled([
           getRescueStats(),
           fetchAdoptionStats(),
@@ -53,6 +57,7 @@ export function usePlatformStats() {
         };
 
         cachedStats = formattedStats;
+        lastFetchTime = Date.now();
 
         if (mounted) {
           setStats(formattedStats);

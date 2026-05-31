@@ -1,9 +1,9 @@
 import { mapProviderError } from "../utils/errors.js";
 import { getAiModels } from "../models/registerAi.js";
 import { parsePagination, buildPaginationMeta } from "../utils/pagination.js";
-import { analyzeAnimalImage as analyzeClaudeImage } from "./claudeService.js";
-
-const AI_PROVIDER = "freemodel-claude";
+import { detectAnimal } from "./huggingFaceService.js";
+import { explainAnalysis } from "./claudeService.js";
+import { analyzeWithRules } from "./ruleEngineService.js";
 
 const normalizeSeverity = (value) => {
   const raw = String(value || "medium").toLowerCase().trim();
@@ -56,8 +56,7 @@ export const analyzeAnimalImage = async ({ imageUrl, imageName } = {}) => {
     throw new Error("Invalid image input provided to analyzeAnimalImage");
   }
 
-  try {
-    const result = await analyzeClaudeImage({ imageUrl, imageName });
+  const formatResult = (result, providerName, usedFallback) => {
     const recommendations = Array.isArray(result.recommendations)
       ? result.recommendations
       : Array.isArray(result.actions)
@@ -75,13 +74,79 @@ export const analyzeAnimalImage = async ({ imageUrl, imageName } = {}) => {
       recommendations,
       confidence: parseConfidence(result.confidence),
       veterinaryAttention: String(result.veterinaryAttention || result.veterinaryAttentionRecommendation || "").trim(),
-      provider: AI_PROVIDER,
-      providerModel: result.providerModel || "claude-2.1",
+      provider: providerName,
+      providerModel: result.providerModel || "unknown",
+      usedFallback,
+    };
+  };
+
+  let detectionResult;
+  let lastError;
+
+  // Step 1: Animal Detection with Hugging Face
+  try {
+    console.info("[AI SERVICE] Step 1: Detecting animal with Hugging Face...");
+    detectionResult = await detectAnimal({ imageUrl, imageName });
+    console.info(`[AI SERVICE] Detection successful: ${detectionResult.animal} (${detectionResult.confidence}% confidence)`);
+  } catch (err) {
+    console.warn(`[AI SERVICE] Hugging Face detection failed: ${err?.message || err}`);
+    lastError = err;
+
+    // Fallback to rule engine immediately if detection fails
+    console.warn("[AI SERVICE] Falling back to rule engine for complete analysis");
+    const ruleResult = analyzeWithRules({ imageUrl, imageName });
+    return formatResult(ruleResult, "rule-engine", true);
+  }
+
+  // Step 2: Optional - Get detailed explanation from Claude
+  let explanation = null;
+  try {
+    console.info("[AI SERVICE] Step 2: Getting detailed analysis from Claude...");
+    explanation = await explainAnalysis({
+      animal: detectionResult.animal,
+      confidence: detectionResult.confidence,
+      imageUrl,
+    });
+    console.info("[AI SERVICE] Claude explanation successful");
+  } catch (err) {
+    console.warn(`[AI SERVICE] Claude explanation failed (non-critical): ${err?.message || err}`);
+    // Continue without explanation - not critical
+  }
+
+  // Step 3: Combine results or use rule engine for missing data
+  if (explanation) {
+    // We have both detection and explanation
+    const combined = {
+      animal: detectionResult.animal,
+      confidence: detectionResult.confidence,
+      severity: explanation.severity,
+      condition: explanation.condition,
+      priority: explanation.priority,
+      recommendation: explanation.recommendation,
+      recommendations: explanation.recommendations,
+      veterinaryAttention: explanation.veterinaryAttention,
+      provider: "huggingface+claude",
+      providerModel: `${detectionResult.providerModel} + ${explanation.providerModel}`,
       usedFallback: false,
     };
-  } catch (err) {
-    console.error("[AI SERVICE] Claude analysis failed", err?.message || err);
-    throw mapProviderError(err);
+    return formatResult(combined, "huggingface+claude", false);
+  } else {
+    // Use rule engine to fill in missing analysis
+    console.info("[AI SERVICE] Using rule engine to complete analysis");
+    const ruleAnalysis = analyzeWithRules({
+      animal: detectionResult.animal,
+      imageUrl,
+    });
+
+    const combined = {
+      ...ruleAnalysis,
+      animal: detectionResult.animal,
+      confidence: Math.round((detectionResult.confidence + ruleAnalysis.confidence) / 2),
+      provider: "huggingface+rules",
+      providerModel: `${detectionResult.providerModel} + heuristic-v1`,
+      usedFallback: true,
+    };
+    return formatResult(combined, "huggingface+rules", true);
   }
 };
 

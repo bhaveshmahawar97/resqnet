@@ -10,11 +10,12 @@ import axios from "axios";
 
 const rawApiUrl = import.meta.env.VITE_API_URL;
 const API_URL = (() => {
+  if (import.meta.env.PROD && !rawApiUrl) return "/api";
   if (!rawApiUrl) return "http://localhost:5000/api";
   if (rawApiUrl.startsWith(":")) {
     return `http://localhost${rawApiUrl}`;
   }
-  if (!/^https?:\/\//i.test(rawApiUrl)) {
+  if (!/^https?:\/\//i.test(rawApiUrl) && !rawApiUrl.startsWith("/")) {
     return `http://${rawApiUrl}`;
   }
   return rawApiUrl;

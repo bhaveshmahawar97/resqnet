@@ -1,5 +1,6 @@
 import {
   listPublicAdoptions,
+  getAdoptionById,
   createAdoptionListing,
   applyForAdoption,
   listMyApplications,
@@ -25,6 +26,14 @@ export const getAdoptionListings = asyncHandler(async (req, res) => {
   return sendSuccess(res, {
     message: "Adoption listings loaded",
     data: listings,
+  });
+});
+
+export const getAdoptionDetail = asyncHandler(async (req, res) => {
+  const adoption = await getAdoptionById(req.params.id);
+  return sendSuccess(res, {
+    message: "Adoption listing loaded",
+    data: adoption,
   });
 });
 

@@ -8,6 +8,7 @@ const ngoSchema = new mongoose.Schema(
       required: [true, "Organization name is required"],
       trim: true,
       index: true,
+      unique: true,
     },
     email: {
       type: String,
@@ -15,6 +16,7 @@ const ngoSchema = new mongoose.Schema(
       lowercase: true,
       trim: true,
       index: true,
+      unique: true,
     },
     phone: {
       type: String,

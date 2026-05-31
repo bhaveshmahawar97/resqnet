@@ -8,6 +8,10 @@ import helmet from "helmet";
 import morgan from "morgan";
 import mongoSanitize from "express-mongo-sanitize";
 import xss from "xss-clean";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 import { CORE_DB_NAME, AI_DB_NAME, isCoreConnected, isAiConnected } from "./config/database.js";
 import { CORE_COLLECTIONS, AI_COLLECTIONS } from "./models/index.js";
@@ -86,7 +90,7 @@ app.use(express.json({ limit: "2mb" }));
 app.use(express.urlencoded({ extended: true, limit: "2mb" }));
 app.use(cookieParser());
 
-app.get("/", (req, res) => {
+app.get("/api/status", (req, res) => {
   res.status(200).json({
     success: true,
     message: "🚀 ResQNet Backend Running",
@@ -129,6 +133,14 @@ app.use("/api/notifications", notificationRoutes);
 app.use("/api/ngos", ngoRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/report", reportRoutes(express));
+
+// Serve frontend in production
+if (process.env.NODE_ENV === "production") {
+  app.use(express.static(path.join(__dirname, "../client/dist")));
+  app.get("*", (req, res) => {
+    res.sendFile(path.resolve(__dirname, "../client/dist", "index.html"));
+  });
+}
 
 app.use(notFoundHandler);
 app.use(globalErrorHandler);

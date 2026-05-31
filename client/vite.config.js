@@ -15,6 +15,14 @@ export default defineConfig({
       leaflet: path.resolve(__dirname, 'node_modules/leaflet'),
     },
   },
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://localhost:5000',
+        changeOrigin: true,
+      },
+    },
+  },
   test: {
     globals: true,
     environment: 'jsdom',

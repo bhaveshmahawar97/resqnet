@@ -1,17 +1,16 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { useT } from "../../context/ThemeContext";
-import Button from "../ui/Button";
-import { vFadeUp } from "../../animations/variants";
+
 function getSpeciesColors(species, T) {
   const map = {
-    Dog:      { bg: T.successPale, text: T.success },
-    Cat:      { bg: T.accentPale,  text: T.accent },
-    Bird:     { bg: T.warningPale, text: T.warning },
-    Wildlife: { bg: T.dangerPale,  text: T.danger },
-    Rabbit:   { bg: T.infoPale,    text: T.info },
+    Dog:      { bg: `${T.success}12`, border: `${T.success}30`, text: T.success },
+    Cat:      { bg: `${T.accent}12`,  border: `${T.accent}30`,  text: T.accent },
+    Bird:     { bg: `${T.warning}12`, border: `${T.warning}30`, text: T.warning },
+    Wildlife: { bg: `${T.danger}12`,  border: `${T.danger}30`,  text: T.danger },
+    Rabbit:   { bg: `${T.info}12`,    border: `${T.info}30`,    text: T.info },
   };
-  return map[species] || { bg: T.bgAlt, text: T.textSub };
+  return map[species] || { bg: T.bgAlt, border: T.borderLight, text: T.textSub };
 }
 
 function getStatusMeta(status, T) {
@@ -20,13 +19,12 @@ function getStatusMeta(status, T) {
     "In Foster": { bg: T.warning, label: "In Foster" },
     "On Hold":   { bg: T.info,    label: "On Hold" },
   };
-  return map[status] || { bg: T.textSub, label: status || "Available" };
+  return map[status] || { bg: T.success, label: "Available" };
 }
+
 export default function AnimalCard({ animal, i, onAdopt }) {
   const { T } = useT();
-  const [hov,       setHov]       = useState(false);
   const [favorited, setFavorited] = useState(false);
-  const [heartPop,  setHeartPop]  = useState(false);
 
   const sc = getSpeciesColors(animal.species, T);
   const st = getStatusMeta(animal.status, T);
@@ -34,248 +32,295 @@ export default function AnimalCard({ animal, i, onAdopt }) {
   const handleFavorite = (e) => {
     e.stopPropagation();
     setFavorited((f) => !f);
-    setHeartPop(true);
-    setTimeout(() => setHeartPop(false), 400);
   };
 
   return (
     <motion.div
-      custom={i}
-      initial="hidden"
-      whileInView="show"
-      viewport={{ once: true, margin: "-50px" }}
-      variants={vFadeUp}
-      onMouseEnter={() => setHov(true)}
-      onMouseLeave={() => setHov(false)}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay: i * 0.05, ease: [0.22, 1, 0.36, 1] }}
+      whileHover={{ y: -6 }}
+      onClick={() => onAdopt(animal)}
       style={{
-        borderRadius: 14,
+        borderRadius: "var(--radius-xl)",
         overflow: "hidden",
-        border: `1px solid ${hov ? T.borderHov : T.border}`,
+        border: `1px solid ${T.border}`,
         background: T.bgCard,
         cursor: "pointer",
-        transform: hov ? "translateY(-3px)" : "none",
-        boxShadow: hov ? T.shadowHov : T.shadow,
-        transition: "all 0.25s ease",
+        boxShadow: T.shadowCard,
+        transition: "all 0.3s ease",
         display: "flex",
         flexDirection: "column",
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.boxShadow = T.shadowHov;
+        e.currentTarget.style.borderColor = T.borderHov;
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.boxShadow = T.shadowCard;
+        e.currentTarget.style.borderColor = T.border;
       }}
     >
       {/* Image */}
       <div style={{ position: "relative", aspectRatio: "4/3", overflow: "hidden", flexShrink: 0 }}>
-        <img
+        <motion.img
+          whileHover={{ scale: 1.05 }}
+          transition={{ duration: 0.4 }}
           src={animal.img}
           alt={animal.name}
           style={{
             width: "100%",
             height: "100%",
             objectFit: "cover",
-            transition: "transform 0.55s ease",
-            transform: hov ? "scale(1.07)" : "scale(1)",
             display: "block",
           }}
         />
-        {/* Status badge */}
-        <div
-          style={{
-            position: "absolute",
-            top: "0.6rem",
-            left: "0.6rem",
-            padding: "0.2rem 0.65rem",
-            borderRadius: 20,
-            background: st.bg,
-            color: T.textOnAccent,
-            fontSize: "0.62rem",
-            fontWeight: 800,
-            letterSpacing: "0.06em",
-          }}
-        >
+
+        {/* Status Badge */}
+        <div style={{
+          position: "absolute",
+          top: "0.75rem",
+          left: "0.75rem",
+          padding: "0.3rem 0.75rem",
+          borderRadius: "var(--radius-full)",
+          background: st.bg,
+          color: "#fff",
+          fontSize: "0.68rem",
+          fontWeight: 800,
+          letterSpacing: "0.05em",
+          textTransform: "uppercase",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+        }}>
           {st.label}
         </div>
 
-        {/* Species badge */}
-        <div
-          style={{
-            position: "absolute",
-            top: "0.6rem",
-            right: "0.6rem",
-            padding: "0.2rem 0.55rem",
-            borderRadius: 20,
-            background: sc.bg,
-            color: sc.text,
-            fontSize: "0.62rem",
-            fontWeight: 700,
-            border: `1px solid ${sc.text}22`,
-            backdropFilter: "blur(8px)",
-          }}
-        >
+        {/* Species Badge */}
+        <div style={{
+          position: "absolute",
+          top: "0.75rem",
+          right: "0.75rem",
+          padding: "0.3rem 0.75rem",
+          borderRadius: "var(--radius-full)",
+          background: sc.bg,
+          border: `1px solid ${sc.border}`,
+          color: sc.text,
+          fontSize: "0.68rem",
+          fontWeight: 700,
+          backdropFilter: "blur(8px)",
+        }}>
           {animal.species}
         </div>
 
-        {/* Since overlay */}
-        <div
+        {/* Favorite Button */}
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          onClick={handleFavorite}
           style={{
             position: "absolute",
-            bottom: "0.6rem",
-            right: "0.6rem",
-            fontSize: "0.6rem",
-            color: T.textMuted,
-            background: T.bgGlass,
-            backdropFilter: "blur(10px)",
-            border: `1px solid ${T.borderGlass}`,
-            borderRadius: 10,
-            padding: "0.18rem 0.5rem",
-            fontWeight: 500,
+            bottom: "0.75rem",
+            right: "0.75rem",
+            width: 36,
+            height: 36,
+            borderRadius: "50%",
+            border: "none",
+            background: favorited ? T.accent : "rgba(255,255,255,0.9)",
+            backdropFilter: "blur(8px)",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
           }}
+          title={favorited ? "Remove from favorites" : "Add to favorites"}
         >
-          Listed {animal.since} ago
-        </div>
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill={favorited ? "#fff" : "none"}
+            stroke={favorited ? "#fff" : T.text}
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+          </svg>
+        </motion.button>
       </div>
 
       {/* Body */}
-      <div style={{ padding: "clamp(1rem, 2vw, 1.3rem)", display: "flex", flexDirection: "column", gap: "0.65rem", flex: 1 }}>
-
-        {/* Name + gender */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <h3 style={{ fontSize: "clamp(1rem, 2vw, 1.1rem)", fontWeight: 800, margin: 0, color: T.text }}>{animal.name}</h3>
-          <span
-            style={{
-              fontSize: "0.68rem",
-              color: T.textSub,
-              background: T.bgAlt,
-              border: `1px solid ${T.border}`,
-              padding: "0.18rem 0.55rem",
-              borderRadius: 20,
-            }}
-          >
+      <div style={{
+        padding: "1.25rem",
+        display: "flex",
+        flexDirection: "column",
+        gap: "0.75rem",
+        flex: 1,
+      }}>
+        {/* Name + Gender */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "0.5rem" }}>
+          <h3 style={{
+            fontSize: "1.1rem",
+            fontWeight: 800,
+            margin: 0,
+            color: T.textHeading,
+            letterSpacing: "-0.01em",
+            lineHeight: 1.2,
+          }}>
+            {animal.name}
+          </h3>
+          <span style={{
+            fontSize: "0.7rem",
+            color: T.textSub,
+            background: T.bgAlt,
+            border: `1px solid ${T.borderLight}`,
+            padding: "0.25rem 0.65rem",
+            borderRadius: "var(--radius-full)",
+            fontWeight: 600,
+            whiteSpace: "nowrap",
+          }}>
             {animal.gender}
           </span>
         </div>
 
-        {/* Breed + age */}
-        <p style={{ fontSize: "0.76rem", color: T.textSub, margin: 0 }}>
+        {/* Breed + Age + Weight */}
+        <p style={{
+          fontSize: "0.8rem",
+          color: T.textSub,
+          margin: 0,
+          fontWeight: 500,
+        }}>
           {animal.breed} · {animal.age} · {animal.weight}
         </p>
 
-        {/* Health tags */}
-        <div style={{ display: "flex", gap: "0.35rem", flexWrap: "wrap" }}>
+        {/* Health Tags */}
+        <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
           {animal.vaccinated && (
-            <span
-              style={{
-                fontSize: "0.6rem",
-                fontWeight: 700,
-                color: T.accent,
-                background: T.accentPale,
-                border: `1px solid ${T.accentGlow}`,
-                padding: "0.15rem 0.5rem",
-                borderRadius: 20,
-              }}
-            >
-              ✓ Vaccinated
-            </span>
+            <div style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "0.35rem",
+              fontSize: "0.68rem",
+              fontWeight: 700,
+              color: T.success,
+              background: `${T.success}12`,
+              border: `1px solid ${T.success}30`,
+              padding: "0.25rem 0.65rem",
+              borderRadius: "var(--radius-full)",
+            }}>
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              Vaccinated
+            </div>
           )}
           {animal.neutered && (
-            <span
-              style={{
-                fontSize: "0.6rem",
-                fontWeight: 700,
-                color: T.accent,
-                background: T.accentPale,
-                border: `1px solid ${T.accentGlow}`,
-                padding: "0.15rem 0.5rem",
-                borderRadius: 20,
-              }}
-            >
-              ✓ Neutered
-            </span>
+            <div style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "0.35rem",
+              fontSize: "0.68rem",
+              fontWeight: 700,
+              color: T.info,
+              background: `${T.info}12`,
+              border: `1px solid ${T.info}30`,
+              padding: "0.25rem 0.65rem",
+              borderRadius: "var(--radius-full)",
+            }}>
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              Neutered
+            </div>
           )}
         </div>
 
-        {/* Rescue story */}
-        <p
-          style={{
-            fontSize: "0.72rem",
+        {/* Rescue Story */}
+        {animal.rescueStory && (
+          <p style={{
+            fontSize: "0.75rem",
             color: T.textMuted,
             lineHeight: 1.65,
             margin: 0,
             fontStyle: "italic",
-            borderLeft: `2px solid ${T.accentGlow}`,
-            paddingLeft: "0.6rem",
+            borderLeft: `2px solid ${T.accent}40`,
+            paddingLeft: "0.75rem",
+          }}>
+            {animal.rescueStory}
+          </p>
+        )}
+
+        {/* NGO Source */}
+        <div style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "0.5rem",
+          padding: "0.5rem 0.75rem",
+          borderRadius: "var(--radius-md)",
+          background: T.bgAlt,
+          border: `1px solid ${T.borderLight}`,
+        }}>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={T.accent} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+          <span style={{ fontSize: "0.72rem", color: T.textSub, fontWeight: 500 }}>
+            {animal.ngo} · {animal.city}
+          </span>
+        </div>
+
+        {/* Compatibility Tags */}
+        {animal.compatibility && animal.compatibility.length > 0 && (
+          <div style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap" }}>
+            {animal.compatibility.slice(0, 3).map((c, idx) => (
+              <span
+                key={idx}
+                style={{
+                  fontSize: "0.68rem",
+                  color: T.textSub,
+                  background: T.bgAlt,
+                  border: `1px solid ${T.borderLight}`,
+                  padding: "0.2rem 0.55rem",
+                  borderRadius: "var(--radius-full)",
+                  fontWeight: 500,
+                }}
+              >
+                {c}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {/* CTA Button */}
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          onClick={(e) => {
+            e.stopPropagation();
+            onAdopt(animal);
+          }}
+          style={{
+            marginTop: "auto",
+            padding: "0.75rem",
+            borderRadius: "var(--radius-md)",
+            border: "none",
+            background: T.accent,
+            color: "#fff",
+            fontWeight: 700,
+            fontSize: "0.85rem",
+            cursor: "pointer",
+            fontFamily: "inherit",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "0.5rem",
+            boxShadow: `0 2px 8px ${T.accent}30`,
           }}
         >
-          {animal.rescueStory}
-        </p>
-
-        {/* NGO source */}
-        <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
-          <div style={{ width: 6, height: 6, borderRadius: "50%", background: T.accent, flexShrink: 0 }} />
-          <span style={{ fontSize: "0.65rem", color: T.textSub }}>{animal.ngo} · {animal.city}</span>
-        </div>
-
-        {/* Compatibility tags */}
-        <div style={{ display: "flex", gap: "0.3rem", flexWrap: "wrap" }}>
-          {animal.compatibility.map((c) => (
-            <span
-              key={c}
-              style={{
-                fontSize: "0.58rem",
-                color: T.textSub,
-                background: T.bgAlt,
-                border: `1px solid ${T.border}`,
-                padding: "0.12rem 0.45rem",
-                borderRadius: 20,
-              }}
-            >
-              {c}
-            </span>
-          ))}
-        </div>
-
-        {/* CTA row */}
-        <div style={{ marginTop: "auto", paddingTop: "0.5rem", display: "flex", gap: "0.5rem" }}>
-          <Button
-            variant="primary"
-            size="sm"
-            style={{ flex: 1 }}
-            onClick={() => onAdopt(animal)}
-          >
-            Meet {animal.name}
-          </Button>
-
-          {/* Favorite heart */}
-          <motion.button
-            whileHover={{ scale: 1.08 }}
-            whileTap={{ scale: 0.9 }}
-            animate={heartPop ? { scale: [1, 1.45, 1] } : {}}
-            onClick={handleFavorite}
-            style={{
-              width: 34,
-              height: 34,
-              borderRadius: 9,
-              border: `1px solid ${favorited ? T.accent : T.border}`,
-              background: favorited ? T.accentPale : T.bgCard,
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              flexShrink: 0,
-              transition: "background 0.25s, border-color 0.25s",
-            }}
-            title={favorited ? "Remove from favorites" : "Add to favorites"}
-          >
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill={favorited ? T.accent : "none"}
-              stroke={favorited ? T.accent : T.textSub}
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-            </svg>
-          </motion.button>
-        </div>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+          </svg>
+          Meet {animal.name}
+        </motion.button>
       </div>
     </motion.div>
   );

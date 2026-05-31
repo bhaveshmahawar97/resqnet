@@ -48,11 +48,11 @@ export default function LocationPicker({ value = {}, onChange, label = "Rescue L
       setPosition({ lat: value.latitude, lng: value.longitude });
     }
     if (value.address) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
+       
       setAddress(value.address);
     }
     if (value.city) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
+       
       setCity(value.city);
     }
   }, [value.latitude, value.longitude, value.address, value.city]);

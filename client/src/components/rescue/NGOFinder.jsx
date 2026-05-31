@@ -25,7 +25,19 @@ export default function NGOFinder({ id, onAssign, addressHint = "" }) {
   const loadNgos = async ({ city, latitude, longitude } = {}) => {
     const result = await fetchNgos({ city, address: addressHint, latitude, longitude });
     if (result.success) {
-      setNgos(result.data.ngos || []);
+      const fetched = result.data.ngos || [];
+      const unique = [];
+      const seenNames = new Set();
+      
+      for (const ngo of fetched) {
+        if (!ngo) continue;
+        const name = (ngo.organizationName || ngo.name || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+        if (name && seenNames.has(name)) continue;
+        if (name) seenNames.add(name);
+        unique.push(ngo);
+      }
+      
+      setNgos(unique);
       setLocationLabel(result.data.city || city || "your area");
       setError("");
     } else {

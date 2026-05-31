@@ -9,6 +9,7 @@ import NGORegister from "../pages/NGORegister";
 import Scanner from "../pages/Scanner";
 import Login from "../pages/auth/Login";
 import Register from "../pages/auth/Register";
+import GoogleCallback from "../pages/auth/GoogleCallback";
 import UserDashboard from "../pages/dashboard/UserDashboard";
 import NGODashboard from "../pages/dashboard/NGODashboard";
 import VolunteerDashboard from "../pages/dashboard/VolunteerDashboard";
@@ -31,11 +32,10 @@ function DashboardRedirect() {
 }
 
 export const ROUTE_LINKS = [
-  { label: "Home", to: "/" },
-  { label: "NGOs", to: "/ngos" },
-  { label: "Adopt", to: "/adoption" },
-  { label: "AI Health", to: "/ai-health" },
-  { label: "Emergency", to: "/rescue" },
+  { label: "Emergency Rescue", to: "/rescue"    },
+  { label: "Rescue Partners",  to: "/ngos"      },
+  { label: "Adoption",         to: "/adoption"  },
+  { label: "AI Scanner",       to: "/ai-health" },
 ];
 
 export const APP_ROUTES = [
@@ -49,6 +49,7 @@ export const APP_ROUTES = [
   { path: "login", element: <Login />, guestOnly: true },
   { path: "register", element: <Register />, guestOnly: true },
   { path: "signup", element: <Navigate to="/register" replace /> },
+  { path: "auth/callback", element: <GoogleCallback /> },
   
   // Protected Routes
   { path: "scanner", element: <Scanner />, protected: true },

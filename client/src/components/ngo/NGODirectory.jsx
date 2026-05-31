@@ -2,191 +2,509 @@ import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useT } from "../../context/ThemeContext";
 import useViewport from "../../hooks/useViewport";
-import { vFadeUp } from "../../animations/variants";
-import Btn from "../ui/Button";
 import { fetchNgos } from "../../services/userService";
+import { fetchMapFacilities } from "../../services/mapService";
+import { getCurrentPosition, geocodeAddress } from "../../services/geocodingService";
 import NgoCard from "./NgoCard";
 import SkeletonCard from "../system/SkeletonCard";
 import EmptyState from "../system/EmptyState";
 
-const ALL_STATUS = ["All", "Verified"];
-function FilterBar({ typeOptions, typeFilter, setTypeFilter, statusFilter, setStatusFilter, search, setSearch }) {
-  const { T } = useT();
-  const vp = useViewport();
+const ALL_STATUS = ["All", "Verified", "Map Results"];
+
+function SearchBar({ search, setSearch, onLocationSearch, isLocating, T, vp }) {
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      onLocationSearch(search);
+    }
+  };
 
   return (
-    <motion.div initial="hidden" whileInView="show" viewport={{ once: true }} variants={vFadeUp}
-      style={{ display: "flex", gap: "clamp(0.6rem, 1.5vw, 1rem)", flexWrap: "wrap", alignItems: "center", marginBottom: "clamp(1.5rem, 4vw, 2.5rem)" }}>
-
-      {/* Search */}
-      <div style={{ position: "relative", flex: vp.mobile ? "1 1 100%" : "1 1 240px", minWidth: vp.mobile ? "100%" : 200 }}>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={T.textMuted} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-          style={{ position: "absolute", left: "0.85rem", top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }}>
-          <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+    <div style={{
+      display: "flex",
+      gap: "0.65rem",
+      flex: vp.mobile ? "1 1 100%" : "1 1 auto",
+      maxWidth: vp.mobile ? "100%" : 480,
+    }}>
+      <div style={{ position: "relative", flex: 1 }}>
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke={T.textMuted}
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          style={{
+            position: "absolute",
+            left: "1rem",
+            top: "50%",
+            transform: "translateY(-50%)",
+            pointerEvents: "none",
+          }}
+        >
+          <circle cx="11" cy="11" r="8" />
+          <line x1="21" y1="21" x2="16.65" y2="16.65" />
         </svg>
         <input
           type="text"
-          placeholder="Search NGOs, cities…"
+          placeholder="Search by city, name, or service..."
           value={search}
           onChange={e => setSearch(e.target.value)}
+          onKeyDown={handleKeyDown}
           style={{
-            width: "100%", padding: "0.6rem 0.9rem 0.6rem 2.3rem", borderRadius: 10,
-            border: `1px solid ${T.border}`, background: T.bgCard, color: T.text,
-            fontSize: "0.82rem", fontFamily: "inherit", outline: "none",
-            boxShadow: `0 2px 8px ${T.shadow}`, transition: "border-color 0.2s",
+            width: "100%",
+            padding: "0.75rem 1rem 0.75rem 2.75rem",
+            borderRadius: "var(--radius-md)",
+            border: `1px solid ${T.border}`,
+            background: T.bgCard,
+            color: T.text,
+            fontSize: "0.85rem",
+            fontFamily: "inherit",
+            outline: "none",
+            boxShadow: T.shadowSm,
+            transition: "all 0.2s ease",
           }}
-          onFocus={e => e.target.style.borderColor = T.accent}
-          onBlur={e => e.target.style.borderColor = T.border}
+          onFocus={e => {
+            e.target.style.borderColor = T.accent;
+            e.target.style.boxShadow = `0 0 0 3px ${T.ring}`;
+          }}
+          onBlur={e => {
+            e.target.style.borderColor = T.border;
+            e.target.style.boxShadow = T.shadowSm;
+          }}
         />
       </div>
 
-      {/* Type chips */}
-      <div style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap" }}>
-        {typeOptions.map((t) => {
-          const active = typeFilter === t;
-          return (
-            <motion.button key={t} whileTap={{ scale: 0.95 }} onClick={() => setTypeFilter(t)}
-              style={{
-                padding: "0.42rem 0.9rem", borderRadius: 8, border: `1px solid ${active ? T.accent : T.border}`,
-                background: active ? T.accentPale : T.bgCard,
-                color: active ? T.accent : T.textSub,
-                fontSize: "0.78rem", fontWeight: 600, cursor: "pointer", fontFamily: "inherit",
-                transition: "all 0.2s",
-              }}>
-              {t}
-            </motion.button>
-          );
-        })}
-      </div>
+      <motion.button
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+        onClick={() => onLocationSearch(search)}
+        disabled={isLocating}
+        style={{
+          padding: "0 1.25rem",
+          borderRadius: "var(--radius-md)",
+          border: "none",
+          background: T.accent,
+          color: "#fff",
+          fontWeight: 700,
+          fontSize: "0.85rem",
+          cursor: isLocating ? "not-allowed" : "pointer",
+          fontFamily: "inherit",
+          whiteSpace: "nowrap",
+          opacity: isLocating ? 0.6 : 1,
+        }}
+      >
+        {isLocating ? "Searching..." : "Search"}
+      </motion.button>
 
-      {/* Status chips */}
-      <div style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap" }}>
-        {ALL_STATUS.map((s) => {
-          const active = statusFilter === s;
-          return (
-            <motion.button key={s} whileTap={{ scale: 0.95 }} onClick={() => setStatusFilter(s)}
-              style={{
-                padding: "0.42rem 0.9rem", borderRadius: 8, border: `1px solid ${active ? T.accent : T.border}`,
-                background: active ? T.accentPale : T.bgCard,
-                color: active ? T.accent : T.textSub,
-                fontSize: "0.78rem", fontWeight: 600, cursor: "pointer", fontFamily: "inherit",
-                transition: "all 0.2s",
-              }}>
-              {s}
-            </motion.button>
-          );
-        })}
-      </div>
-    </motion.div>
+      <motion.button
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        onClick={() => onLocationSearch(null)}
+        disabled={isLocating}
+        title="Use My Location"
+        style={{
+          width: 44,
+          height: 44,
+          borderRadius: "var(--radius-md)",
+          border: `1px solid ${T.border}`,
+          background: T.bgCard,
+          color: T.text,
+          cursor: isLocating ? "not-allowed" : "pointer",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontSize: "1.1rem",
+          opacity: isLocating ? 0.6 : 1,
+        }}
+      >
+        {isLocating ? "..." : "📍"}
+      </motion.button>
+    </div>
   );
 }
 
-// NGOCard moved to NgoCard.jsx
+function FilterChips({ options, activeFilter, setFilter, T }) {
+  return (
+    <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+      {options.map((option) => {
+        const active = activeFilter === option;
+        return (
+          <motion.button
+            key={option}
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+            onClick={() => setFilter(option)}
+            style={{
+              padding: "0.5rem 1rem",
+              borderRadius: "var(--radius-full)",
+              border: `1.5px solid ${active ? T.accent : T.border}`,
+              background: active ? T.accentPale : T.bgCard,
+              color: active ? T.accent : T.textSub,
+              fontSize: "0.8rem",
+              fontWeight: active ? 700 : 600,
+              cursor: "pointer",
+              fontFamily: "inherit",
+              transition: "all 0.2s ease",
+              boxShadow: active ? `0 2px 8px ${T.accent}20` : "none",
+            }}
+          >
+            {option}
+          </motion.button>
+        );
+      })}
+    </div>
+  );
+}
 
 export default function NGODirectory() {
   const { T } = useT();
-  const [ngos, setNgos] = useState([]);
+  const vp = useViewport();
+  const [dbNgos, setDbNgos] = useState([]);
+  const [mapNgos, setMapNgos] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isLocating, setIsLocating] = useState(false);
   const [error, setError] = useState("");
+
   const [typeFilter, setTypeFilter] = useState("All");
   const [statusFilter, setStatusFilter] = useState("All");
   const [search, setSearch] = useState("");
   const [showAll, setShowAll] = useState(false);
 
+  // Initial Load
   useEffect(() => {
     let mounted = true;
-    const loadNgos = async () => {
+    const init = async () => {
       setLoading(true);
-      const result = await fetchNgos({ limit: 50 });
+      const dbRes = await fetchNgos({ limit: 100 });
       if (!mounted) return;
-      if (result.success) {
-        setNgos(result.data.ngos || []);
+      if (dbRes.success) {
+        setDbNgos(dbRes.data.ngos || []);
       } else {
-        setError(result.message || "Unable to load NGOs");
+        setError(dbRes.message || "Unable to load NGOs");
       }
       setLoading(false);
+
+      // Attempt geolocation
+      try {
+        setIsLocating(true);
+        const loc = await getCurrentPosition();
+        if (mounted && loc) {
+          const mapResults = await fetchMapFacilities(loc.latitude, loc.longitude);
+          if (mounted) setMapNgos(mapResults);
+        }
+      } catch (err) {
+        console.warn("Geolocation permission denied or failed.");
+      } finally {
+        if (mounted) setIsLocating(false);
+      }
     };
-    loadNgos();
-    return () => {
-      mounted = false;
-    };
+    init();
+    return () => { mounted = false; };
   }, []);
+
+  // Handle Location Search
+  const handleLocationSearch = async (query) => {
+    setError("");
+    if (!query) {
+      // Use My Location
+      try {
+        setIsLocating(true);
+        const loc = await getCurrentPosition();
+        const mapResults = await fetchMapFacilities(loc.latitude, loc.longitude);
+        if (mapResults.length === 0) {
+          setError("No rescue partners found within 50km of your location.");
+        }
+        setMapNgos(mapResults);
+      } catch (err) {
+        setError("Could not access your location. Please check browser permissions.");
+      } finally {
+        setIsLocating(false);
+      }
+      return;
+    }
+
+    // Text search
+    try {
+      setIsLocating(true);
+      const geoResult = await geocodeAddress(query);
+      if (geoResult) {
+        const mapResults = await fetchMapFacilities(geoResult.latitude, geoResult.longitude);
+        if (mapResults.length === 0) {
+          setError(`No rescue partners found near "${geoResult.displayName}".`);
+        }
+        setMapNgos(mapResults);
+      } else {
+        setError("Location not found. Please try a different city name.");
+      }
+    } catch (err) {
+      console.error("Geocoding search failed", err);
+      setError("Search failed. Please try again.");
+    } finally {
+      setIsLocating(false);
+    }
+  };
+
+  // Strong deduplication for all combined NGOs to prevent any double listings
+  const getUniqueNgos = (dbList, mapList) => {
+    const combined = [...dbList, ...mapList];
+    const unique = [];
+    const seenIds = new Set();
+    const seenNames = new Set();
+
+    for (const ngo of combined) {
+      if (!ngo) continue;
+
+      const id = ngo._id || ngo.id;
+      const name = (ngo.organizationName || ngo.name || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+
+      if (id && seenIds.has(id)) continue;
+      if (name && seenNames.has(name)) continue;
+
+      if (id) seenIds.add(id);
+      if (name) seenNames.add(name);
+
+      unique.push(ngo);
+    }
+    return unique;
+  };
+
+  const allCombinedNgos = getUniqueNgos(dbNgos, mapNgos);
 
   const typeOptions = [
     "All",
-    ...Array.from(new Set(ngos.flatMap((ngo) => ngo.specialties || []))).filter(Boolean),
+    "Rescue",
+    "Shelter",
+    "Medical",
+    "Wildlife",
+    "Adoption",
+    "Welfare"
   ];
 
-  const filtered = ngos.filter((n) => {
-    const matchType =
-      typeFilter === "All" || (n.specialties || []).includes(typeFilter);
-    const matchStatus =
-      statusFilter === "All" ||
-      (statusFilter === "Verified" ? n.verified : false);
+  const filtered = allCombinedNgos.filter((n) => {
+    const matchType = typeFilter === "All" || (n.specialties || []).includes(typeFilter);
+
+    let matchStatus = true;
+    if (statusFilter === "Verified") {
+      matchStatus = n.verified === true;
+    } else if (statusFilter === "Map Results") {
+      matchStatus = n.isMapResult === true;
+    }
+
     const q = search.toLowerCase();
     const matchSearch =
       !q ||
       n.name?.toLowerCase().includes(q) ||
+      n.organizationName?.toLowerCase().includes(q) ||
       n.city?.toLowerCase().includes(q) ||
       (n.specialties || []).join(" ").toLowerCase().includes(q);
-    return matchType && matchStatus && matchSearch && n.verified;
+
+    return matchType && matchStatus && matchSearch;
   });
 
-  const visible = showAll ? filtered : filtered.slice(0, 6);
+  const visible = showAll ? filtered : filtered.slice(0, 9);
 
   return (
-    <section id="for-ngos" style={{ width: "100%", padding: "clamp(3.5rem, 8vw, 6rem) 0", background: T.bg, position: "relative" }}>
-      <div style={{ width: "100%", maxWidth: 1200, margin: "0 auto", padding: "0 clamp(1.25rem, 4vw, 3rem)" }}>
-        <motion.div initial="hidden" whileInView="show" viewport={{ once: true }} variants={vFadeUp}
-          style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexWrap: "wrap", gap: "1rem", marginBottom: "clamp(1.5rem, 4vw, 2.5rem)" }}>
-          <div>
-            <div style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem", background: T.accentSurface || T.accentPale, border: `1px solid ${T.accentGlow}`, borderRadius: 9999, padding: "0.28rem 0.85rem", marginBottom: "0.85rem" }}>
-              <span style={{ width: 5, height: 5, borderRadius: "50%", background: T.accent, display: "inline-block" }} />
-              <span style={{ fontSize: "0.68rem", fontWeight: 700, color: T.accent, letterSpacing: "0.1em", textTransform: "uppercase" }}>NGO Directory</span>
-            </div>
-            <h2 style={{ fontSize: "clamp(1.5rem, 3.5vw, 2.2rem)", fontWeight: 800, letterSpacing: "-0.035em", color: T.textHeading, margin: 0, lineHeight: 1.2 }}>
-              Verified organizations, real-world impact
-            </h2>
-          </div>
-          <span style={{ fontSize: "0.76rem", color: T.textMuted }}>{filtered.length} results</span>
-        </motion.div>
-
-        <FilterBar
-          typeOptions={typeOptions}
-          typeFilter={typeFilter} setTypeFilter={setTypeFilter}
-          statusFilter={statusFilter} setStatusFilter={setStatusFilter}
-          search={search} setSearch={setSearch}
+    <div style={{ width: "100%" }}>
+      {/* Search & Filters */}
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "1rem",
+          marginBottom: "2rem",
+        }}
+      >
+        {/* Search Bar */}
+        <SearchBar
+          search={search}
+          setSearch={setSearch}
+          onLocationSearch={handleLocationSearch}
+          isLocating={isLocating}
+          T={T}
+          vp={vp}
         />
 
-        <AnimatePresence mode="popLayout">
-          {loading ? (
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "clamp(0.65rem, 1.5vw, 1rem)", marginBottom: "2rem" }}>
-              {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} height={240} />)}
-            </div>
-          ) : error ? (
-            <motion.div key="error" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              style={{ textAlign: "center", padding: "4rem 0", color: T.textMuted }}>
-              <div style={{ fontSize: "2.5rem", marginBottom: "0.75rem" }}>⚠️</div>
-              <div style={{ fontSize: "0.9rem" }}>{error}</div>
-            </motion.div>
-          ) : filtered.length === 0 ? (
-            <EmptyState icon="🔍" title="No NGOs Found" message="No NGOs match your filters. Try a different search." minHeight="250px" />
-          ) : (
-            <motion.div key="grid" layout style={{ display: "flex", gap: "clamp(0.65rem, 1.5vw, 1rem)", flexWrap: "wrap" }}>
-              {visible.map((n, i) => <NgoCard key={`${n.id || n._id || n.name || 'ngo'}-${i}`} ngo={n} i={i % 6} />)}
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {/* Filter Chips */}
+        <div style={{
+          display: "flex",
+          flexDirection: vp.mobile ? "column" : "row",
+          gap: "1rem",
+          alignItems: vp.mobile ? "flex-start" : "center",
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.65rem" }}>
+            <span style={{
+              fontSize: "0.75rem",
+              fontWeight: 700,
+              color: T.textMuted,
+              letterSpacing: "0.05em",
+              textTransform: "uppercase",
+            }}>
+              Services:
+            </span>
+            <FilterChips
+              options={typeOptions}
+              activeFilter={typeFilter}
+              setFilter={setTypeFilter}
+              T={T}
+            />
+          </div>
 
-        {filtered.length > 6 && (
-          <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}
-            style={{ textAlign: "center", marginTop: "clamp(1.8rem, 4vw, 2.8rem)" }}>
-            <Btn variant="ghost" onClick={() => setShowAll(o => !o)}>
-              {showAll ? "Show Less" : `Show All ${filtered.length} NGOs`}
-            </Btn>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.65rem" }}>
+            <span style={{
+              fontSize: "0.75rem",
+              fontWeight: 700,
+              color: T.textMuted,
+              letterSpacing: "0.05em",
+              textTransform: "uppercase",
+            }}>
+              Status:
+            </span>
+            <FilterChips
+              options={ALL_STATUS}
+              activeFilter={statusFilter}
+              setFilter={setStatusFilter}
+              T={T}
+            />
+          </div>
+        </div>
+
+        {/* Results Count */}
+        <div style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: "0.65rem 1rem",
+          borderRadius: "var(--radius-md)",
+          background: T.bgAlt,
+          border: `1px solid ${T.borderLight}`,
+        }}>
+          <span style={{ fontSize: "0.82rem", color: T.textSub }}>
+            Showing <strong style={{ fontWeight: 700, color: T.text }}>{visible.length}</strong> of <strong style={{ fontWeight: 700, color: T.text }}>{filtered.length}</strong> rescue partners
+          </span>
+          {filtered.length > 0 && (
+            <span style={{ fontSize: "0.75rem", color: T.textMuted }}>
+              {statusFilter === "Verified" ? "✓ Verified only" : statusFilter === "Map Results" ? "📍 Map results" : "All partners"}
+            </span>
+          )}
+        </div>
+      </motion.div>
+
+      {/* Results Grid */}
+      <AnimatePresence mode="wait">
+        {loading ? (
+          <motion.div
+            key="loading"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
+              gap: "1rem",
+            }}
+          >
+            {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} height={280} />)}
+          </motion.div>
+        ) : error ? (
+          <motion.div
+            key="error"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{
+              textAlign: "center",
+              padding: "4rem 2rem",
+            }}
+          >
+            <div style={{
+              width: 64,
+              height: 64,
+              borderRadius: "var(--radius-lg)",
+              background: T.dangerPale,
+              border: `2px solid ${T.dangerBorder}`,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              margin: "0 auto 1rem",
+              fontSize: "1.75rem",
+            }}>
+              ⚠️
+            </div>
+            <div style={{ fontSize: "1rem", fontWeight: 700, color: T.text, marginBottom: "0.5rem" }}>
+              Search Error
+            </div>
+            <div style={{ fontSize: "0.85rem", color: T.textMuted, maxWidth: 400, margin: "0 auto" }}>
+              {error}
+            </div>
+          </motion.div>
+        ) : filtered.length === 0 ? (
+          <EmptyState
+            icon="🔍"
+            title="No Rescue Partners Found"
+            message="Try adjusting your search criteria or filters to find rescue organizations."
+            minHeight="300px"
+          />
+        ) : (
+          <motion.div
+            key="grid"
+            layout
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
+              gap: "1rem",
+            }}
+          >
+            {visible.map((n, i) => (
+              <NgoCard key={n._id || n.id || i} ngo={n} i={i} />
+            ))}
           </motion.div>
         )}
-      </div>
-    </section>
+      </AnimatePresence>
+
+      {/* Show More Button */}
+      {filtered.length > 9 && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          style={{
+            textAlign: "center",
+            marginTop: "2.5rem",
+          }}
+        >
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => setShowAll(o => !o)}
+            style={{
+              padding: "0.75rem 2rem",
+              borderRadius: "var(--radius-md)",
+              border: `1px solid ${T.border}`,
+              background: T.bgCard,
+              color: T.text,
+              fontWeight: 600,
+              fontSize: "0.85rem",
+              cursor: "pointer",
+              fontFamily: "inherit",
+              transition: "all 0.2s ease",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = T.bgAlt;
+              e.currentTarget.style.borderColor = T.accent;
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = T.bgCard;
+              e.currentTarget.style.borderColor = T.border;
+            }}
+          >
+            {showAll ? "Show Less" : `Show All ${filtered.length} Partners`}
+          </motion.button>
+        </motion.div>
+      )}
+    </div>
   );
 }

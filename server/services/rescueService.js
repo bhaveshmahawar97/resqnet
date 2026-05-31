@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { RescueRequest, User } from "../models/index.js";
+import { RescueRequest, User, NGO } from "../models/index.js";
 import {
   RESCUE_STATUSES,
   SEVERITY_LEVELS,
@@ -131,9 +131,29 @@ export const applyStatusUpdate = async (request, { status, note, user }) => {
 
   if (status === "completed") {
     request.completedAt = new Date();
-    await User.findByIdAndUpdate(user._id, {
-      $inc: { "missionStats.missionsCompleted": 1 },
-    });
+    
+    const getIdStr = (val) => (val && val._id ? val._id.toString() : val.toString());
+
+    // Update all involved users (the actor, the volunteer, and the NGO)
+    const userIdsToUpdate = new Set([getIdStr(user)]);
+    if (request.assignedNgo) userIdsToUpdate.add(getIdStr(request.assignedNgo));
+    if (request.assignedVolunteer) userIdsToUpdate.add(getIdStr(request.assignedVolunteer));
+    
+    await User.updateMany(
+      { _id: { $in: Array.from(userIdsToUpdate) } },
+      { $inc: { "missionStats.missionsCompleted": 1 } }
+    );
+
+    // Update the public NGO collection stats
+    if (request.assignedNgo) {
+      const ngoUser = await User.findById(getIdStr(request.assignedNgo)).select("email");
+      if (ngoUser && ngoUser.email) {
+        await NGO.findOneAndUpdate(
+          { email: ngoUser.email },
+          { $inc: { missionsCompleted: 1 } }
+        );
+      }
+    }
   }
 
   const entry = buildTimelineEntry(

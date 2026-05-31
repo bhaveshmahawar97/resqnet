@@ -4,6 +4,8 @@ import {
   register,
   login,
   me,
+  googleAuth,
+  googleCallback,
 } from "../controllers/authController.js";
 
 import authMiddleware from "../middleware/authMiddleware.js";
@@ -13,9 +15,11 @@ import { registerSchema, loginSchema } from "../validators/authValidator.js";
 const router = express.Router();
 
 router.post("/register", validateRequest(registerSchema), register);
-
 router.post("/login", validateRequest(loginSchema), login);
-
 router.get("/me", authMiddleware, me);
+
+// Google OAuth — manual flow, no passport
+router.get("/google", googleAuth);
+router.get("/google/callback", googleCallback);
 
 export default router;

@@ -9,6 +9,7 @@ import {
 } from "../validators/adoptionValidator.js";
 import {
   getAdoptionListings,
+  getAdoptionDetail,
   getAdoptionStatsOverview,
   postAdoptionListing,
   postAdoptionApplication,
@@ -21,6 +22,7 @@ const router = express.Router();
 
 router.get("/", getAdoptionListings);
 router.get("/stats", getAdoptionStatsOverview);
+router.get("/:id", getAdoptionDetail);
 
 router.post(
   "/listings",

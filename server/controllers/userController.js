@@ -6,6 +6,7 @@ import {
 import { sendSuccess, sendError } from "../utils/apiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { User } from "../models/index.js";
+import { formatAuthUser } from "../services/authService.js";
 
 export const getNgoDirectory = asyncHandler(async (req, res) => {
   const city = resolveCityFromQuery({
@@ -119,11 +120,11 @@ export const toggleAvailability = asyncHandler(async (req, res) => {
   const user = req.user;
   
   if (!user.volunteerProfile) {
-    user.volunteerProfile = { availability: "active" };
+    user.volunteerProfile = { availability: "available" };
   }
 
-  // Toggle between active and busy
-  const newStatus = user.volunteerProfile.availability === "active" ? "busy" : "active";
+  // Toggle between available and unavailable
+  const newStatus = user.volunteerProfile.availability === "available" ? "unavailable" : "available";
   user.volunteerProfile.availability = newStatus;
   
   await user.save();
@@ -134,3 +135,25 @@ export const toggleAvailability = asyncHandler(async (req, res) => {
   });
 });
 
+export const updateProfile = asyncHandler(async (req, res) => {
+  const user = req.user;
+  
+  if (req.body.fullName) user.fullName = req.body.fullName;
+  if (req.body.phone !== undefined) user.phone = req.body.phone;
+  if (req.body.age !== undefined) {
+    const parsedAge = parseInt(req.body.age, 10);
+    user.age = isNaN(parsedAge) ? null : parsedAge;
+  }
+
+  if (req.file) {
+    user.avatar = req.file.path;
+    user.avatarPublicId = req.file.filename;
+  }
+
+  await user.save();
+
+  return sendSuccess(res, {
+    message: "Profile updated successfully",
+    data: { user: formatAuthUser(user) }
+  });
+});

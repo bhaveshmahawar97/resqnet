@@ -8,6 +8,13 @@ export const createNgo = async (data) => {
     throw { status: 409, message: "An NGO with this email already exists" };
   }
 
+  if (data.organizationName) {
+    const existingOrg = await NGO.findOne({ organizationName: data.organizationName });
+    if (existingOrg) {
+      throw { status: 409, message: "An NGO with this organization name already exists" };
+    }
+  }
+
   if (registrationNumber) {
     const existingReg = await NGO.findOne({ registrationNumber });
     if (existingReg) {

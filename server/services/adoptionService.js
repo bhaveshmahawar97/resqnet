@@ -13,7 +13,7 @@ const getAdoptionApplicationModel = () => {
 const populateListing = { path: "listedBy", select: "fullName email ngoProfile" };
 
 export const listPublicAdoptions = async ({ animalType, city, limit = 50 } = {}) => {
-  const query = { status: "listed" };
+  const query = { status: { $in: ["available", "listed"] } };
   if (animalType) query.animalType = new RegExp(animalType, "i");
   if (city) query.location = new RegExp(city, "i");
 
@@ -23,6 +23,23 @@ export const listPublicAdoptions = async ({ animalType, city, limit = 50 } = {})
     .sort({ createdAt: -1 })
     .limit(limit)
     .lean();
+};
+
+export const getAdoptionById = async (adoptionId) => {
+  if (!mongoose.Types.ObjectId.isValid(adoptionId)) {
+    throw new Error("Invalid adoption ID");
+  }
+
+  const adoption = await Adoption.findById(adoptionId)
+    .populate(populateListing)
+    .populate("sourceRescue", "status severity condition")
+    .lean();
+
+  if (!adoption) {
+    throw new Error("Adoption listing not found");
+  }
+
+  return adoption;
 };
 
 export const createAdoptionListing = async ({ userId, payload }) => {

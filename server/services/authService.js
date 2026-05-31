@@ -1,5 +1,6 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import crypto from "crypto";
 import { User } from "../models/index.js";
 import { USER_ROLES } from "../constants/enums.js";
 
@@ -13,6 +14,7 @@ export const formatAuthUser = (user) => ({
   role: user.role,
   avatar: user.avatar || "",
   phone: user.phone || "",
+  age: user.age || null,
   ngoProfile: user.ngoProfile,
   volunteerProfile: user.volunteerProfile,
   missionStats: user.missionStats,
@@ -73,9 +75,53 @@ export const loginUser = async ({ email, password }) => {
   };
 };
 
+// Find-or-create a user from a Google OAuth profile.
+// Looks up by googleId first, then by email for existing email/password accounts.
+export const googleAuthUser = async (profile, requestedRole = "user") => {
+  const { id: googleId, email, name, picture } = profile;
+
+  if (!email) {
+    const error = new Error("Google account did not provide an email address");
+    error.status = 400;
+    throw error;
+  }
+
+  const normalizedEmail = email.trim().toLowerCase();
+
+  let user = await User.findOne({ googleId });
+  if (!user) user = await User.findOne({ email: normalizedEmail });
+
+  if (user) {
+    if (!user.googleId) user.googleId = googleId;
+    if (!user.avatar && picture) user.avatar = picture;
+    user.lastLoginAt = new Date();
+    await user.save({ validateBeforeSave: false });
+  } else {
+    const randomPassword = crypto.randomBytes(32).toString("hex");
+    const hashedPassword = await bcrypt.hash(randomPassword, 10);
+    const safeRole = USER_ROLES.includes(requestedRole) ? requestedRole : "user";
+
+    user = await User.create({
+      fullName: name || normalizedEmail.split("@")[0],
+      email: normalizedEmail,
+      password: hashedPassword,
+      role: safeRole,
+      googleId,
+      avatar: picture || "",
+      lastLoginAt: new Date(),
+    });
+  }
+
+  return {
+    token: generateToken(user._id),
+    user: formatAuthUser(user),
+  };
+};
+
 export default {
   registerUser,
   loginUser,
   generateToken,
   formatAuthUser,
+  googleAuthUser,
 };

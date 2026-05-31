@@ -8,33 +8,154 @@ export function DashboardStats({ stats = [] }) {
   if (safeStats.length === 0) return null;
 
   return (
-    <div className="rq-dashboard-stats-grid">
-      {safeStats.map((stat, i) => (
-        <div key={i} className="rq-section-card" style={{ padding: "var(--space-5)", marginBottom: 0, position: "relative", border: stat.highlight ? `1px solid ${T.accent}` : undefined }}>
-          {stat.highlight && (
-            <div style={{ position: "absolute", top: 0, left: 0, bottom: 0, width: 4, background: T.accent }} />
-          )}
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "var(--space-3)" }}>
-            <div style={{ fontSize: "var(--text-xs)", fontWeight: 700, color: T.textMuted, textTransform: "uppercase", letterSpacing: "0.05em" }}>
-              {stat.label}
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
+        gap: "0.875rem",
+      }}
+    >
+      {safeStats.map((stat, i) => {
+        const trendUp = stat.trend === "up";
+        const trendDown = stat.trend === "down";
+        const trendColor = trendUp ? T.success : trendDown ? T.danger : T.textMuted;
+        const trendBg = trendUp ? T.successPale : trendDown ? T.dangerPale : "transparent";
+
+        return (
+          <div
+            key={i}
+            style={{
+              position: "relative",
+              padding: "1.1rem 1.25rem 1.1rem 1.5rem",
+              background: T.bgCard,
+              border: `1px solid ${stat.highlight ? T.accentGlow : T.border}`,
+              borderRadius: 14,
+              boxShadow: T.shadowCard,
+              overflow: "hidden",
+              transition: "transform 0.18s ease, box-shadow 0.18s ease",
+              cursor: "default",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = "translateY(-2px)";
+              e.currentTarget.style.boxShadow = T.shadowMd;
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = "translateY(0)";
+              e.currentTarget.style.boxShadow = T.shadowCard;
+            }}
+          >
+            {/* Colored left border accent */}
+            <div
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                bottom: 0,
+                width: 4,
+                borderRadius: "14px 0 0 14px",
+                background: stat.highlight
+                  ? T.gradAccent
+                  : `linear-gradient(180deg, ${T.border} 0%, ${T.borderLight} 100%)`,
+              }}
+            />
+
+            {/* Top row: label + icon */}
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "flex-start",
+                marginBottom: "0.55rem",
+              }}
+            >
+              <span
+                style={{
+                  fontSize: "0.68rem",
+                  fontWeight: 700,
+                  color: T.textMuted,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.07em",
+                }}
+              >
+                {stat.label}
+              </span>
+              {stat.icon && (
+                <span
+                  style={{
+                    fontSize: "1rem",
+                    color: stat.highlight ? T.accent : T.textMuted,
+                    opacity: 0.75,
+                    lineHeight: 1,
+                  }}
+                >
+                  {stat.icon}
+                </span>
+              )}
             </div>
-            {stat.icon && (
-              <div style={{ fontSize: "1.2rem", color: stat.highlight ? T.accent : T.textMuted, opacity: 0.8 }}>
-                {stat.icon}
+
+            {/* Large value */}
+            <div
+              style={{
+                fontSize: "clamp(1.6rem, 3vw, 2.1rem)",
+                fontWeight: 800,
+                color: stat.highlight ? T.accent : T.textHeading,
+                letterSpacing: "-0.04em",
+                lineHeight: 1,
+                marginBottom: stat.sub ? "0.55rem" : 0,
+              }}
+            >
+              {stat.value}
+            </div>
+
+            {/* Trend badge + sub label */}
+            {stat.sub && (
+              <div
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "0.25rem",
+                  padding: "0.15rem 0.45rem",
+                  borderRadius: 999,
+                  background: trendBg,
+                  fontSize: "0.7rem",
+                  fontWeight: 700,
+                  color: trendColor,
+                }}
+              >
+                {trendUp && (
+                  <svg
+                    width="10"
+                    height="10"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <polyline points="18 15 12 9 6 15" />
+                  </svg>
+                )}
+                {trendDown && (
+                  <svg
+                    width="10"
+                    height="10"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <polyline points="6 9 12 15 18 9" />
+                  </svg>
+                )}
+                {stat.sub}
               </div>
             )}
           </div>
-          <div style={{ fontSize: "clamp(1.5rem, 3vw, 2rem)", fontWeight: 800, color: stat.highlight ? T.accent : T.textHeading || T.text, lineHeight: 1 }}>
-            {stat.value}
-          </div>
-          {stat.sub && (
-            <div style={{ fontSize: "var(--text-xs)", marginTop: "var(--space-2)", fontWeight: 600, color: stat.trend === "up" ? T.success : stat.trend === "down" ? T.danger : T.textMuted }}>
-              {stat.trend === "up" ? "↑ " : stat.trend === "down" ? "↓ " : ""}{stat.sub}
-            </div>
-          )}
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
-

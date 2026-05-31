@@ -1,16 +1,19 @@
 import express from "express";
 import authMiddleware, { roleMiddleware } from "../middleware/authMiddleware.js";
+import upload from "../middleware/uploadMiddleware.js";
 import { 
   getNgoDirectory, 
   getVolunteerDirectory,
   getAllUsers,
   updateUserRole,
   toggleUserStatus,
-  toggleAvailability
+  toggleAvailability,
+  updateProfile
 } from "../controllers/userController.js";
 
 const router = express.Router();
 
+router.put("/me", authMiddleware, upload.single("avatar"), updateProfile);
 router.put("/me/availability", authMiddleware, roleMiddleware("volunteer"), toggleAvailability);
 
 router.get("/ngos", getNgoDirectory);

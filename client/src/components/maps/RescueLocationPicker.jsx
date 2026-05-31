@@ -34,11 +34,11 @@ export default function RescueLocationPicker({ value = {}, onChange, label = "Re
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setPosition({ lat: value.latitude, lng: value.longitude });
     }
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+     
     if (value.address) setAddress(value.address);
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+     
     if (value.city) setCity(value.city);
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+     
     if (value.state) setStateName(value.state);
   }, [value.latitude, value.longitude, value.address, value.city, value.state]);
 

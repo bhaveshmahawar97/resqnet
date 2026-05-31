@@ -5,10 +5,10 @@ import { useAuth } from "../../context/AuthContext";
 import api from "../../services/api";
 import Button from "../ui/Button";
 
-export default function FeedbackModal({ onClose }) {
+export default function FeedbackModal({ onClose, isOpen }) {
   const { T } = useT();
   const { user } = useAuth();
-  
+
   const [formData, setFormData] = useState({
     name: user?.fullName || user?.name || "",
     email: user?.email || "",
@@ -19,13 +19,29 @@ export default function FeedbackModal({ onClose }) {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
 
+  if (!isOpen) return null;
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
     setError("");
 
+    // When logged in, the name/email fields are hidden — pull from auth context
+    // so the server never receives an empty required field.
+    const payload = {
+      ...formData,
+      name: formData.name || user?.fullName || user?.name || "Anonymous",
+      email: formData.email || user?.email || "",
+    };
+
+    if (!payload.name || !payload.email) {
+      setError("Name and email are required.");
+      setSubmitting(false);
+      return;
+    }
+
     try {
-      const res = await api.post("/feedback", formData);
+      const res = await api.post("/feedback", payload);
       if (res.data.success) {
         setSuccess(true);
         setTimeout(onClose, 2500);
@@ -33,7 +49,12 @@ export default function FeedbackModal({ onClose }) {
         setError(res.data.message || "Failed to submit feedback.");
       }
     } catch (err) {
-      setError(err.response?.data?.message || "An error occurred while submitting feedback.");
+      // Global interceptor already shows a toast; show inline error too.
+      setError(
+        err.response?.data?.message ||
+        err.message ||
+        "An error occurred. Please try again."
+      );
     } finally {
       setSubmitting(false);
     }
@@ -84,7 +105,11 @@ export default function FeedbackModal({ onClose }) {
                 <span style={{ fontSize: "0.75rem", color: T.textMuted }}>Help us improve ResQNet</span>
               </div>
             </div>
-            <button onClick={onClose} style={{ width: 32, height: 32, borderRadius: "50%", background: T.bgCard, border: `1px solid ${T.border}`, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: T.text }}>
+            <button
+              type="button"
+              onClick={onClose}
+              style={{ width: 32, height: 32, borderRadius: "50%", background: T.bgCard, border: `1px solid ${T.border}`, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: T.text }}
+            >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
           </div>
@@ -96,26 +121,54 @@ export default function FeedbackModal({ onClose }) {
                   <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
                 </div>
                 <h3 style={{ fontSize: "1.2rem", fontWeight: 700, color: T.textHeading, marginBottom: "0.5rem" }}>Thank you!</h3>
-                <p style={{ fontSize: "0.9rem", color: T.textSub, lineHeight: 1.5 }}>Your feedback has been submitted successfully and will help us improve the platform.</p>
+                <p style={{ fontSize: "0.9rem", color: T.textSub, lineHeight: 1.5 }}>Your feedback has been received and will help us improve ResQNet.</p>
               </motion.div>
             ) : (
               <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+
+                {/* Show name/email fields only for guests */}
                 {!user && (
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
                     <div>
                       <label style={{ fontSize: "0.75rem", fontWeight: 600, color: T.text, marginBottom: 4, display: "block" }}>Name</label>
-                      <input type="text" required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="rq-input" style={{ width: "100%" }} />
+                      <input
+                        type="text"
+                        required
+                        value={formData.name}
+                        onChange={e => setFormData({ ...formData, name: e.target.value })}
+                        className="rq-input"
+                        style={{ width: "100%" }}
+                      />
                     </div>
                     <div>
                       <label style={{ fontSize: "0.75rem", fontWeight: 600, color: T.text, marginBottom: 4, display: "block" }}>Email</label>
-                      <input type="email" required value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} className="rq-input" style={{ width: "100%" }} />
+                      <input
+                        type="email"
+                        required
+                        value={formData.email}
+                        onChange={e => setFormData({ ...formData, email: e.target.value })}
+                        className="rq-input"
+                        style={{ width: "100%" }}
+                      />
                     </div>
                   </div>
                 )}
-                
+
+                {/* Show the logged-in user's identity as read-only */}
+                {user && (
+                  <div style={{ padding: "0.6rem 0.8rem", borderRadius: 10, background: T.bgAlt, border: `1px solid ${T.border}`, fontSize: "0.8rem", color: T.textSub }}>
+                    Submitting as <strong style={{ color: T.text }}>{user.fullName || user.name || user.email}</strong>
+                  </div>
+                )}
+
                 <div>
                   <label style={{ fontSize: "0.75rem", fontWeight: 600, color: T.text, marginBottom: 4, display: "block" }}>Feedback Type</label>
-                  <select value={formData.type} onChange={e => setFormData({...formData, type: e.target.value})} className="rq-input" style={{ width: "100%", padding: "0.6rem" }}>
+                  <select
+                    value={formData.type}
+                    onChange={e => setFormData({ ...formData, type: e.target.value })}
+                    className="rq-input"
+                    style={{ width: "100%", padding: "0.6rem" }}
+                  >
                     <option value="suggestion">Suggestion / Idea</option>
                     <option value="bug">Bug Report / Issue</option>
                     <option value="praise">Compliment</option>
@@ -125,24 +178,31 @@ export default function FeedbackModal({ onClose }) {
 
                 <div>
                   <label style={{ fontSize: "0.75rem", fontWeight: 600, color: T.text, marginBottom: 4, display: "block" }}>Message</label>
-                  <textarea 
-                    required 
-                    rows={4} 
-                    value={formData.message} 
-                    onChange={e => setFormData({...formData, message: e.target.value})} 
+                  <textarea
+                    required
+                    rows={4}
+                    value={formData.message}
+                    onChange={e => setFormData({ ...formData, message: e.target.value })}
                     placeholder="Tell us what's on your mind..."
-                    className="rq-textarea" 
-                    style={{ width: "100%" }} 
+                    className="rq-textarea"
+                    style={{ width: "100%" }}
                   />
                 </div>
 
-                {error && <div style={{ fontSize: "0.8rem", color: T.danger, background: `${T.danger}15`, padding: "0.6rem", borderRadius: 8 }}>{error}</div>}
+                {error && (
+                  <div style={{ fontSize: "0.8rem", color: T.danger, background: `${T.danger}15`, padding: "0.7rem 0.9rem", borderRadius: 8, border: `1px solid ${T.danger}30` }}>
+                    {error}
+                  </div>
+                )}
 
-                <div style={{ display: "flex", gap: "0.8rem", marginTop: "0.5rem" }}>
-                  <Button variant="primary" style={{ flex: 1 }} disabled={submitting}>
+                <div style={{ display: "flex", gap: "0.8rem", marginTop: "0.25rem" }}>
+                  {/* type="submit" is required — without it clicking does nothing */}
+                  <Button type="submit" variant="primary" style={{ flex: 1 }} disabled={submitting}>
                     {submitting ? "Submitting..." : "Submit Feedback"}
                   </Button>
-                  <Button variant="ghost" type="button" onClick={onClose}>Cancel</Button>
+                  <Button type="button" variant="ghost" onClick={onClose}>
+                    Cancel
+                  </Button>
                 </div>
               </form>
             )}

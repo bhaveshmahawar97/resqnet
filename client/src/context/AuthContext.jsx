@@ -80,6 +80,39 @@ export const AuthProvider = ({ children }) => {
 
 
   // =========================
+  // GOOGLE SIGN-IN
+  // =========================
+  const googleSignIn = ({ token, user: googleUser }) => {
+    if (!token) return { success: false, message: "No token provided" };
+    localStorage.setItem("token", token);
+    setAuthToken(token);
+    setUser(googleUser || null);
+    return { success: true, user: googleUser };
+  };
+
+
+
+  // =========================
+  // UPDATE PROFILE
+  // =========================
+  const updateProfile = async (formData) => {
+    try {
+      // Assuming formData is FormData (for multipart) or regular JSON.
+      // Axios handles FormData boundary automatically.
+      const { data } = await api.put("/users/me", formData);
+      setUser(data.data.user);
+      return { success: true, user: data.data.user };
+    } catch (err) {
+      return {
+        success: false,
+        message: err.response?.data?.message || "Profile update failed",
+      };
+    }
+  };
+
+
+
+  // =========================
   // LOAD USER
   // =========================
   const loadUser = async () => {
@@ -129,6 +162,8 @@ export const AuthProvider = ({ children }) => {
         register,
         login,
         logout,
+        googleSignIn,
+        updateProfile,
         // compatibility with existing UI
         signIn: login,
         signOut: logout,
@@ -137,6 +172,9 @@ export const AuthProvider = ({ children }) => {
         email: user?.email || null,
         name: user?.name || user?.fullName || null,
         role: user?.role || null,
+        avatar: user?.avatar || null,
+        age: user?.age || null,
+        phone: user?.phone || null,
         isAdmin: user?.role === ROLES.admin,
       }}
     >

@@ -1036,15 +1036,33 @@ html[data-theme="dark"] ::-webkit-scrollbar-thumb {
   }
 }
 
-/* ── Footer Responsive ────────────────────────────────────────────────────── */
-@media (max-width: 768px) {
+
+/* ── Footer Grid — responsive breakpoints ────────────────────────────────── */
+/*   Desktop  : 5 cols (brand 1.3fr + 4 × 1fr)                              */
+/*   Tablet   : 3 cols                                                        */
+/*   Small    : 2 cols                                                        */
+/*   Mobile   : 1 col                                                         */
+.rq-footer-grid {
+  display: grid;
+  grid-template-columns: minmax(200px, 1.3fr) repeat(4, 1fr);
+  gap: clamp(1.5rem, 3vw, 3rem);
+  align-items: start;
+}
+
+@media (max-width: 1023px) {
   .rq-footer-grid {
-    grid-template-columns: 1fr 1fr !important;
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 767px) {
   .rq-footer-grid {
-    grid-template-columns: 1fr !important;
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 479px) {
+  .rq-footer-grid {
+    grid-template-columns: 1fr;
   }
 }

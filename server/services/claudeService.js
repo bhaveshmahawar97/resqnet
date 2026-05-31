@@ -19,42 +19,31 @@ const openai = new OpenAI({
   timeout: AI_TIMEOUT_MS,
 });
 
-const SYSTEM_PROMPT = `You are an animal rescue triage assistant.
+const EXPLANATION_PROMPT = `You are an animal rescue triage assistant providing detailed analysis.
 
-Analyze the uploaded animal image.
+An animal has been detected in an image. Your task is to analyze the image and provide:
 
-Provide:
-
-Animal Type
-Visible Condition
-Injury Severity
-Rescue Priority
-Immediate Actions
-Veterinary Attention Recommendation
-Confidence Level
+1. Visible Condition - describe what you observe about the animal's physical state
+2. Injury Severity - assess as Low, Medium, High, or Critical
+3. Rescue Priority - determine urgency level
+4. Immediate Actions - list specific steps rescuers should take
+5. Veterinary Attention - recommend level of veterinary care needed
 
 Important:
-
-You are NOT a veterinarian.
-
-Do not claim medical certainty.
-
-Only describe visible symptoms.
-
-If uncertain, clearly say so.
+- You are NOT a veterinarian
+- Do not claim medical certainty
+- Only describe visible symptoms
+- If uncertain, clearly say so
 
 Respond ONLY with valid JSON.
 
 Format:
-
 {
-"animalType": "",
 "condition": "",
 "severity": "Low|Medium|High|Critical",
 "priority": "",
 "actions": [],
-"veterinaryAttention": "",
-"confidence": ""
+"veterinaryAttention": ""
 }`;
 
 const buildImageInput = async (imageUrl) => {
@@ -150,6 +139,7 @@ const sendClaudeRequest = async (payload) => {
       if (attempt >= MAX_RETRIES || !shouldRetry(err)) {
         throw err;
       }
+      console.warn(`[ClaudeService] Attempt ${attempt} failed: ${err?.message || "Unknown error"}. Retrying...`);
       await new Promise((resolve) => setTimeout(resolve, 500 * attempt));
     }
   }
@@ -178,38 +168,40 @@ const getResponseText = (response) => {
   return "";
 };
 
-const getFileExtension = (value) => {
-  if (!value) return null;
-  const match = String(value).toLowerCase().match(/\.(jpg|jpeg|png|webp)(?:[?#].*)?$/);
-  return match ? `.${match[1]}` : null;
-};
-
 const validateImageFormat = (imageUrl) => {
-  const extension = getFileExtension(imageUrl);
-  if (!extension || !SUPPORTED_IMAGE_EXTENSIONS.includes(extension)) {
-    throw new Error("Unsupported image format. Use JPG, JPEG, PNG, or WebP.");
+  // Relaxed validation: simply ensure it's a valid HTTP URL.
+  // Cloudinary often omits file extensions, making regex validation fragile.
+  if (!/^https?:\/\//i.test(String(imageUrl).trim())) {
+    throw new Error("Unsupported image format. Must provide a valid HTTP/HTTPS image URL.");
   }
 };
 
-export const analyzeAnimalImage = async ({ imageUrl, imageName } = {}) => {
+export const explainAnalysis = async ({ animal, confidence, imageUrl } = {}) => {
   ensureConfiguration();
 
   if (!imageUrl || typeof imageUrl !== "string") {
-    throw new Error("Invalid image input provided to analyzeAnimalImage");
+    throw new Error("Invalid image input provided to explainAnalysis");
+  }
+
+  if (!animal) {
+    throw new Error("Animal type is required for explanation");
   }
 
   validateImageFormat(imageUrl);
 
   const requestId = Math.random().toString(36).slice(2, 10);
   const startTime = Date.now();
-  console.info(`[ClaudeService][${requestId}] Starting image analysis for: ${imageName || imageUrl}`);
+  console.info(`[ClaudeService][${requestId}] Getting explanation for detected ${animal} (${confidence}% confidence)`);
 
   const prompt = [
-    { role: "system", content: SYSTEM_PROMPT },
+    { role: "system", content: EXPLANATION_PROMPT },
     {
       role: "user",
       content: [
-        { type: "input_text", text: "Analyze this uploaded animal image and return only valid JSON following the requested schema." },
+        {
+          type: "input_text",
+          text: `A ${animal} has been detected in this image with ${confidence}% confidence. Analyze the image and provide detailed triage information. Return only valid JSON following the requested schema.`
+        },
         await buildImageInput(imageUrl),
       ],
     },
@@ -227,30 +219,28 @@ export const analyzeAnimalImage = async ({ imageUrl, imageName } = {}) => {
     response = await sendClaudeRequest(payload);
   } catch (error) {
     const elapsed = Date.now() - startTime;
-    console.error(`[ClaudeService][${requestId}] Claude request failed after ${elapsed}ms:`, error?.message || error);
-    throw new Error(error?.message || "AI analysis request failed");
+    console.error(`[ClaudeService][${requestId}] Claude explanation failed after ${elapsed}ms:`, error?.message || error);
+    throw new Error(error?.message || "AI explanation request failed");
   }
 
   const elapsed = Date.now() - startTime;
-  console.info(`[ClaudeService][${requestId}] Claude request succeeded in ${elapsed}ms`);
+  console.info(`[ClaudeService][${requestId}] Claude explanation succeeded in ${elapsed}ms`);
 
   const rawText = getResponseText(response);
   const parsed = parseClaudeJson(rawText);
 
   const normalized = {
-    animal: String(parsed.animalType || parsed.animal || parsed.species || "unknown").trim(),
     condition: String(parsed.condition || parsed.visibleCondition || "").trim(),
     severity: normalizeSeverity(parsed.severity),
     priority: normalizePriority(parsed.priority, parsed.severity),
     recommendation: String(parsed.actions?.[0] || parsed.recommendation || "").trim(),
     recommendations: normalizeActions(parsed.actions),
     veterinaryAttention: String(parsed.veterinaryAttention || parsed.veterinaryAttentionRecommendation || "").trim(),
-    confidence: parseConfidence(parsed.confidence),
     providerModel: FREEMODEL_MODEL,
   };
 
-  if (!normalized.animal) {
-    throw new Error("AI returned invalid analysis structure");
+  if (!normalized.condition) {
+    throw new Error("Claude returned invalid explanation structure");
   }
 
   return normalized;

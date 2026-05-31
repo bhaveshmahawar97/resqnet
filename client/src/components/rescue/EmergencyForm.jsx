@@ -12,10 +12,10 @@ import { getCurrentPosition, reverseGeocode } from "../../utils/geo";
 
 const ANIMAL_TYPES = ["Dog", "Cat", "Bird", "Cow", "Horse", "Monkey", "Rabbit", "Snake", "Deer", "Other"];
 const SEVERITY_LEVELS = [
-  { value: "critical", label: "Critical", getColor: (T) => T.danger },
-  { value: "high",     label: "High",     getColor: (T) => T.warning },
-  { value: "medium",   label: "Medium",   getColor: (T) => T.info },
-  { value: "low",      label: "Low",      getColor: (T) => T.success },
+  { value: "critical", label: "Critical", desc: "Life-threatening", getColor: (T) => T.danger },
+  { value: "high",     label: "High",     desc: "Urgent care needed", getColor: (T) => T.warning },
+  { value: "medium",   label: "Medium",   desc: "Stable but injured", getColor: (T) => T.info },
+  { value: "low",      label: "Low",      desc: "Observation needed", getColor: (T) => T.success },
 ];
 
 const LOADING_STEPS = [
@@ -25,23 +25,50 @@ const LOADING_STEPS = [
   "Notifying NGOs & volunteers…",
 ];
 
-function FieldLabel({ children, required }) {
+function FieldLabel({ children, required, optional }) {
   const { T } = useT();
   return (
     <label
       style={{
-        display: "block",
+        display: "flex",
+        alignItems: "center",
+        gap: "0.35rem",
         fontSize: "0.7rem",
         fontWeight: 700,
         color: T.textMuted,
-        marginBottom: "0.35rem",
+        marginBottom: "0.4rem",
         letterSpacing: "0.06em",
         textTransform: "uppercase",
       }}
     >
-      {children}
-      {required && <span style={{ color: T.danger, marginLeft: 3 }}>*</span>}
+      <span>{children}</span>
+      {required && <span style={{ color: T.danger, fontSize: "0.8rem" }}>*</span>}
+      {optional && <span style={{ color: T.textMuted, fontSize: "0.65rem", fontWeight: 500, textTransform: "none", letterSpacing: "0" }}>(Optional)</span>}
     </label>
+  );
+}
+
+function SectionDivider({ label, icon, T }) {
+  return (
+    <div style={{
+      display: "flex",
+      alignItems: "center",
+      gap: "0.5rem",
+      padding: "0.85rem 0 0.65rem",
+      borderBottom: `1px solid ${T.borderLight}`,
+      marginBottom: "0.85rem",
+    }}>
+      {icon}
+      <span style={{
+        fontSize: "0.72rem",
+        fontWeight: 700,
+        color: T.textSub,
+        letterSpacing: "0.08em",
+        textTransform: "uppercase",
+      }}>
+        {label}
+      </span>
+    </div>
   );
 }
 
@@ -64,16 +91,79 @@ export default function EmergencyForm({ onSuccess }) {
     },
   });
 
-  // eslint-disable-next-line react-hooks/incompatible-library
+   
   const severity = watch("severity");
 
   const [imagePreview, setImagePreview] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [locLoading, setLocLoading] = useState(false);
+  const [aiScanning, setAiScanning] = useState(false);
   const [step, setStep] = useState(0);
   const [successMsg, setSuccessMsg] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
+  const [dragActive, setDragActive] = useState(false);
+  const [scanResult, setScanResult] = useState(null);
+
+  const scanImageWithAI = async (file) => {
+    if (!user) return;
+
+    setAiScanning(true);
+    setErrorMsg("");
+    setScanResult(null);
+
+    try {
+      const formData = new FormData();
+      formData.append("image", file);
+
+      const response = await fetch("/api/ai/scan", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "AI scan failed");
+      }
+
+      setScanResult(data.data);
+
+      // Auto-fill form fields
+      if (data.data?.animal) {
+        const animalType = ANIMAL_TYPES.find(
+          (t) => t.toLowerCase() === data.data.animal.toLowerCase()
+        ) || "Other";
+        setValue("animalType", animalType, { shouldValidate: true });
+      }
+
+      if (data.data?.severity) {
+        setValue("severity", data.data.severity, { shouldValidate: true });
+      }
+
+      if (data.data?.condition) {
+        setValue("condition", data.data.condition, { shouldValidate: true });
+      }
+
+      if (data.data?.recommendation) {
+        const currentNotes = watch("notes") || "";
+        const aiNote = `AI Analysis: ${data.data.recommendation}`;
+        setValue("notes", currentNotes ? `${currentNotes}\n\n${aiNote}` : aiNote);
+      }
+
+      // Auto-fetch location after successful scan
+      fetchLocation();
+
+    } catch (err) {
+      console.error("AI scan error:", err);
+      setErrorMsg(err.message || "Failed to analyze image. Please fill the form manually.");
+    } finally {
+      setAiScanning(false);
+    }
+  };
 
   const handleImage = (e) => {
     const file = e.target.files?.[0];
@@ -91,6 +181,47 @@ export default function EmergencyForm({ onSuccess }) {
     reader.onload = (ev) => setImagePreview(ev.target.result);
     reader.readAsDataURL(file);
     setSelectedFile(file);
+
+    // Trigger AI scan automatically
+    scanImageWithAI(file);
+  };
+
+  const handleDrag = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true);
+    } else if (e.type === "dragleave") {
+      setDragActive(false);
+    }
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+
+    if (loading || aiScanning) return;
+
+    const file = e.dataTransfer.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      setErrorMsg("Image too large. Max 5MB.");
+      return;
+    }
+    if (!["image/jpeg", "image/jpg", "image/png", "image/webp"].includes(file.type)) {
+      setErrorMsg("Unsupported image type.");
+      return;
+    }
+    setErrorMsg("");
+    const reader = new FileReader();
+    reader.onload = (ev) => setImagePreview(ev.target.result);
+    reader.readAsDataURL(file);
+    setSelectedFile(file);
+
+    // Trigger AI scan automatically
+    scanImageWithAI(file);
   };
 
   const fetchLocation = async () => {
@@ -171,6 +302,7 @@ export default function EmergencyForm({ onSuccess }) {
         reset();
         setImagePreview(null);
         setSelectedFile(null);
+        setScanResult(null);
         onSuccess?.(result.data);
       }, 1000);
     } else {
@@ -182,36 +314,21 @@ export default function EmergencyForm({ onSuccess }) {
   const fieldErr = (k) => errors[k]?.message;
 
   return (
-    <section
-      id="emergency-form"
-      style={{ width: "100%", padding: vp.mobile ? "1.25rem 0 2rem" : "1.75rem 0 2.5rem", background: T.bg }}
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+      style={{
+        background: T.bgCard,
+        border: `1px solid ${T.border}`,
+        borderRadius: "var(--radius-lg)",
+        boxShadow: T.shadowCard,
+        overflow: "hidden",
+      }}
     >
-      <div style={{ width: "100%", maxWidth: 1120, margin: "0 auto", padding: vp.mobile ? "0 1rem" : "0 clamp(1.25rem, 3vw, 2.5rem)" }}>
-        {/* Slim header — single row, no decorative copy */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "0.5rem", marginBottom: "0.85rem" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
-            <motion.span
-              animate={{ opacity: [1, 0.3, 1] }}
-              transition={{ duration: 1.5, repeat: Infinity }}
-              style={{ width: 8, height: 8, borderRadius: "50%", background: T.danger, flexShrink: 0 }}
-            />
-            <h2 style={{ fontSize: "1.05rem", fontWeight: 700, color: T.text, margin: 0, letterSpacing: "-0.01em" }}>
-              Emergency Intake
-            </h2>
-            <span style={{ fontSize: "0.72rem", color: T.textMuted, fontWeight: 500 }}>
-              · Submits to nearest NGO & volunteer network
-            </span>
-          </div>
-        </div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.35 }}
-          className="rq-form-card"
-          style={{ padding: vp.mobile ? "1rem" : "1.25rem 1.5rem" }}
-        >
+      <div style={{
+        padding: vp.mobile ? "1.25rem 1rem" : "1.5rem 1.75rem",
+      }}>
           {errorMsg && (
             <div
               role="alert"
@@ -297,16 +414,16 @@ export default function EmergencyForm({ onSuccess }) {
 
                 {/* Severity pills */}
                 <div>
-                  <FieldLabel required>Severity</FieldLabel>
+                  <FieldLabel required>Severity Level</FieldLabel>
                   <div
                     role="radiogroup"
                     style={{
                       display: "grid",
-                      gridTemplateColumns: "repeat(4, 1fr)",
-                      gap: "0.4rem",
+                      gridTemplateColumns: vp.mobile ? "repeat(2, 1fr)" : "repeat(4, 1fr)",
+                      gap: "0.5rem",
                     }}
                   >
-                    {SEVERITY_LEVELS.map(({ value, label, getColor }) => {
+                    {SEVERITY_LEVELS.map(({ value, label, desc, getColor }) => {
                       const active = severity === value;
                       const color = getColor(T);
                       return (
@@ -319,23 +436,58 @@ export default function EmergencyForm({ onSuccess }) {
                           onClick={() => setValue("severity", value, { shouldValidate: true })}
                           style={{
                             display: "flex",
+                            flexDirection: "column",
                             alignItems: "center",
                             justifyContent: "center",
-                            gap: 6,
-                            padding: "0.55rem 0.5rem",
-                            borderRadius: 8,
-                            border: `1.5px solid ${active ? color : T.border}`,
-                            background: active ? `${color}14` : T.bgCard,
-                            color: active ? color : T.text,
+                            gap: 4,
+                            padding: "0.65rem 0.5rem",
+                            borderRadius: "var(--radius-md)",
+                            border: `2px solid ${active ? color : T.border}`,
+                            background: active ? `${color}12` : T.bgCard,
                             cursor: loading ? "default" : "pointer",
-                            fontSize: "0.8rem",
-                            fontWeight: 700,
-                            transition: "all 0.15s ease",
+                            transition: "all 0.18s ease",
                             fontFamily: "inherit",
+                            position: "relative",
+                            overflow: "hidden",
+                          }}
+                          onMouseEnter={(e) => {
+                            if (!loading && !active) {
+                              e.currentTarget.style.borderColor = `${color}60`;
+                              e.currentTarget.style.background = `${color}08`;
+                            }
+                          }}
+                          onMouseLeave={(e) => {
+                            if (!loading && !active) {
+                              e.currentTarget.style.borderColor = T.border;
+                              e.currentTarget.style.background = T.bgCard;
+                            }
                           }}
                         >
-                          <span style={{ width: 8, height: 8, borderRadius: "50%", background: color }} />
-                          {label}
+                          <div style={{
+                            width: 10,
+                            height: 10,
+                            borderRadius: "50%",
+                            background: color,
+                            boxShadow: active ? `0 0 0 3px ${color}28` : "none",
+                            transition: "box-shadow 0.18s ease",
+                          }} />
+                          <span style={{
+                            fontSize: "0.8rem",
+                            fontWeight: 700,
+                            color: active ? color : T.text,
+                            transition: "color 0.18s ease",
+                          }}>
+                            {label}
+                          </span>
+                          <span style={{
+                            fontSize: "0.62rem",
+                            color: active ? color : T.textMuted,
+                            textAlign: "center",
+                            lineHeight: 1.3,
+                            transition: "color 0.18s ease",
+                          }}>
+                            {desc}
+                          </span>
                         </button>
                       );
                     })}
@@ -429,19 +581,27 @@ export default function EmergencyForm({ onSuccess }) {
 
               {/* ── RIGHT: photo upload ── */}
               <div style={{ minWidth: 0 }}>
-                <FieldLabel>Photo</FieldLabel>
+                <FieldLabel optional>Evidence Photo</FieldLabel>
                 <div
-                  onClick={() => !loading && fileRef.current?.click()}
-                  className="rq-upload-zone"
+                  onClick={() => !loading && !aiScanning && fileRef.current?.click()}
+                  onDragEnter={handleDrag}
+                  onDragLeave={handleDrag}
+                  onDragOver={handleDrag}
+                  onDrop={handleDrop}
                   style={{
-                    cursor: loading ? "default" : "pointer",
+                    cursor: loading || aiScanning ? "default" : "pointer",
                     padding: imagePreview ? "0.5rem" : "1.25rem 0.75rem",
-                    opacity: loading ? 0.6 : 1,
+                    opacity: loading || aiScanning ? 0.6 : 1,
                     minHeight: vp.mobile ? 140 : 200,
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
                     flexDirection: "column",
+                    borderRadius: "var(--radius-md)",
+                    border: `2px dashed ${dragActive ? T.accent : imagePreview ? T.border : T.borderLight}`,
+                    background: dragActive ? T.accentPale : imagePreview ? T.bgCard : T.bgAlt,
+                    transition: "all 0.2s ease",
+                    position: "relative",
                   }}
                 >
                   <input
@@ -450,7 +610,7 @@ export default function EmergencyForm({ onSuccess }) {
                     accept="image/*"
                     onChange={handleImage}
                     style={{ display: "none" }}
-                    disabled={loading}
+                    disabled={loading || aiScanning}
                   />
                   {imagePreview ? (
                     <div style={{ position: "relative", width: "100%", display: "flex", justifyContent: "center" }}>
@@ -459,38 +619,115 @@ export default function EmergencyForm({ onSuccess }) {
                         alt="Preview"
                         style={{ maxHeight: vp.mobile ? 120 : 180, maxWidth: "100%", borderRadius: 6, objectFit: "contain" }}
                       />
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setImagePreview(null);
-                          setSelectedFile(null);
-                        }}
-                        disabled={loading}
-                        aria-label="Remove photo"
-                        style={{
-                          position: "absolute", top: 4, right: 4,
-                          background: "rgba(0,0,0,0.65)", color: "#fff",
-                          border: "none", borderRadius: "50%",
-                          width: 22, height: 22, cursor: "pointer",
-                          fontSize: "0.7rem", display: "flex",
-                          alignItems: "center", justifyContent: "center",
-                        }}
-                      >✕</button>
+                      {!aiScanning && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setImagePreview(null);
+                            setSelectedFile(null);
+                            setScanResult(null);
+                          }}
+                          disabled={loading}
+                          aria-label="Remove photo"
+                          style={{
+                            position: "absolute", top: 4, right: 4,
+                            background: "rgba(0,0,0,0.7)", color: "#fff",
+                            border: "none", borderRadius: "50%",
+                            width: 24, height: 24, cursor: "pointer",
+                            fontSize: "0.75rem", display: "flex",
+                            alignItems: "center", justifyContent: "center",
+                            transition: "background 0.15s ease",
+                          }}
+                          onMouseEnter={(e) => e.currentTarget.style.background = "rgba(0,0,0,0.85)"}
+                          onMouseLeave={(e) => e.currentTarget.style.background = "rgba(0,0,0,0.7)"}
+                        >✕</button>
+                      )}
                     </div>
                   ) : (
                     <>
-                      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={T.textMuted} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: 6 }}>
+                      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke={dragActive ? T.accent : T.textMuted} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: 8, transition: "stroke 0.2s ease" }}>
                         <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z" />
                         <circle cx="12" cy="13" r="3.5" />
                       </svg>
-                      <div style={{ fontSize: "0.82rem", color: T.text, fontWeight: 600 }}>Upload photo</div>
-                      <div style={{ fontSize: "0.7rem", color: T.textMuted, marginTop: 3, textAlign: "center", lineHeight: 1.35 }}>
-                        Optional · JPG/PNG · max 5MB
+                      <div style={{ fontSize: "0.82rem", color: dragActive ? T.accent : T.text, fontWeight: 600, transition: "color 0.2s ease" }}>
+                        {dragActive ? "Drop photo here" : "Click or drag photo"}
+                      </div>
+                      <div style={{ fontSize: "0.68rem", color: T.textMuted, marginTop: 4, textAlign: "center", lineHeight: 1.4 }}>
+                        JPG, PNG, WebP · Max 5MB
                       </div>
                     </>
                   )}
                 </div>
+
+                {/* AI Scanning Status */}
+                {aiScanning && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    style={{
+                      marginTop: "0.75rem",
+                      padding: "0.65rem 0.85rem",
+                      borderRadius: 8,
+                      background: T.accentPale,
+                      border: `1px solid ${T.accentBorder || T.border}`,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "0.65rem",
+                    }}
+                  >
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                      style={{
+                        width: 14, height: 14,
+                        border: `2px solid ${T.border}`,
+                        borderTop: `2px solid ${T.accent}`,
+                        borderRadius: "50%",
+                        flexShrink: 0,
+                      }}
+                    />
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: "0.75rem", fontWeight: 700, color: T.text }}>
+                        AI analyzing animal…
+                      </div>
+                      <div style={{ fontSize: "0.68rem", color: T.textMuted, marginTop: 2 }}>
+                        Auto-filling form & fetching location
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* AI Scan Success */}
+                {scanResult && !aiScanning && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    style={{
+                      marginTop: "0.75rem",
+                      padding: "0.65rem 0.85rem",
+                      borderRadius: 8,
+                      background: T.successPale,
+                      border: `1px solid ${T.successBorder}`,
+                      display: "flex",
+                      alignItems: "flex-start",
+                      gap: "0.65rem",
+                    }}
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={T.success} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 2 }}>
+                      <path d="M9 12l2 2 4-4"/>
+                      <circle cx="12" cy="12" r="10"/>
+                    </svg>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: "0.75rem", fontWeight: 700, color: T.success }}>
+                        AI scan complete
+                      </div>
+                      <div style={{ fontSize: "0.68rem", color: T.textSub, marginTop: 2 }}>
+                        Form auto-filled · Confidence: {scanResult.confidence}%
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
               </div>
             </div>
 
@@ -566,14 +803,13 @@ export default function EmergencyForm({ onSuccess }) {
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
                     </svg>
-                    Submit Rescue Request
+                    Dispatch Rescue Request
                   </motion.button>
                 )}
               </AnimatePresence>
             </div>
           </form>
-        </motion.div>
       </div>
-    </section>
+    </motion.div>
   );
 }
