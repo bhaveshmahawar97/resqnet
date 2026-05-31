@@ -9,6 +9,7 @@ import { useAuth } from "../../context/AuthContext";
 import { useRescue } from "../../context/RescueContext";
 import useViewport from "../../hooks/useViewport";
 import { getCurrentPosition, reverseGeocode } from "../../utils/geo";
+import { API_URL } from "../../services/api";
 
 const ANIMAL_TYPES = ["Dog", "Cat", "Bird", "Cow", "Horse", "Monkey", "Rabbit", "Snake", "Deer", "Other"];
 const SEVERITY_LEVELS = [
@@ -116,7 +117,7 @@ export default function EmergencyForm({ onSuccess }) {
       const formData = new FormData();
       formData.append("image", file);
 
-      const response = await fetch("/api/ai/scan", {
+      const response = await fetch(`${API_URL}/ai/scan`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,

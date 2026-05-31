@@ -1,5 +1,12 @@
 export async function fetchJSON(path, opts = {}) {
-  const res = await fetch(path, { credentials: 'include', headers: { 'Content-Type': 'application/json' }, ...opts });
+  // Use API_URL if path is relative
+  const url = path.startsWith("/") && !path.startsWith("/api") 
+    ? `${API_URL}${path}` 
+    : path.startsWith("/api")
+      ? `${API_URL}${path.replace("/api", "")}`
+      : path;
+      
+  const res = await fetch(url, { credentials: 'include', headers: { 'Content-Type': 'application/json' }, ...opts });
   if (!res.ok) {
     const text = await res.text();
     throw new Error(`${res.status} ${res.statusText} - ${text}`);
